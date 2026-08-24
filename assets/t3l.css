@@ -497,7 +497,67 @@
 #t3l-ghl section[id],
 #t3l-ghl #t3l-main-content { scroll-margin-top: 88px; }
 
+/* --- Card movement --------------------------------------------------- */
+/* Hover lift on the repeating cards. */
+#t3l-ghl .service-card,
+#t3l-ghl .mission-card,
+#t3l-ghl .give-card,
+#t3l-ghl .contact-card,
+#t3l-ghl .access-steps li,
+#t3l-ghl .fact-box {
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+  will-change: transform;
+}
+#t3l-ghl .service-card:hover,
+#t3l-ghl .contact-card:hover,
+#t3l-ghl .fact-box:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 26px 50px -26px rgba(42, 18, 63, 0.55);
+}
+#t3l-ghl .access-steps li:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -26px rgba(42, 18, 63, 0.45);
+}
+/* Cards on dark grounds: lift + brighten their translucent surface. */
+#t3l-ghl .mission-card:hover,
+#t3l-ghl .give-card:hover {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(224, 178, 60, 0.55);
+}
+/* Nudge the arrow on card links. */
+#t3l-ghl .service-card > a span,
+#t3l-ghl .give-card a span {
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+#t3l-ghl .service-card:hover > a span,
+#t3l-ghl .give-card:hover a span { transform: translateX(5px); }
+
+/* Scroll-reveal: cards rise + fade as they enter the viewport.
+   CSS scroll-driven animation — no JS. Browsers without support simply
+   show the cards in their normal state (no hidden fallback). */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    #t3l-ghl .service-card,
+    #t3l-ghl .mission-card,
+    #t3l-ghl .give-card,
+    #t3l-ghl .contact-card,
+    #t3l-ghl .access-steps li {
+      animation: t3l-card-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 42%;
+    }
+  }
+}
+@keyframes t3l-card-rise {
+  from { opacity: 0; transform: translateY(34px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  #t3l-ghl * { transition: none !important; }
+  #t3l-ghl * { transition: none !important; animation: none !important; }
   html { scroll-behavior: auto !important; }
 }
