@@ -25,26 +25,35 @@ Each portal resolves its enabled state on load, first decisive source wins:
 When a portal is off, its app is hidden and a branded "This portal is currently
 offline" notice shows instead, with the T3L phone number and a link home.
 
-### Flip it from CORA
+### Flip it from CORA (live Supabase — instant, no deploy)
 
-`REMOTE_FLAGS_URL` is already wired to this site's own **`/portals/flags.json`**
-(same origin — no CORS setup needed). To take a portal offline, have CORA edit
-that file and set the key to `false`:
+`REMOTE_FLAGS_URL` is wired to a live Supabase edge function that returns the
+current flags with open CORS and `Cache-Control: no-store`:
 
-```json
-{ "client": true, "admin": false }
+```
+https://mgtmqucaldkaxvxglguw.supabase.co/functions/v1/t3l-portal-flags
+   ->  { "client": true, "admin": true }
 ```
 
-Viewers loading the portal next get the offline notice; set it back to `true` to
-restore. Because the file is served by the site, a change takes effect on the
-**next deploy** (CORA commits `flags.json` → the host rebuilds). A missing key
-or fetch error falls back to `DEFAULT_ENABLED` (on).
+- **Project:** 28 Foot Systems (`mgtmqucaldkaxvxglguw`)
+- **Function:** `t3l-portal-flags` (public, `verify_jwt=false`) — reads the table
+  with the service role and returns `{ client, admin }`. It **fails open**
+  (both `true`) on any error, so a flags outage never hard-breaks a portal.
+- **Table:** `public.t3l_portal_flags (key, enabled, updated_at)` — RLS on with
+  no policies (only the service role can read/write it).
 
-Want instant flips with no deploy? Point `REMOTE_FLAGS_URL` (in both
-`client.html` and `admin.html`, and in the GoHighLevel embed copy if you embed
-there) at a live endpoint CORA updates directly — a Supabase Storage object,
-an edge function, or a Vercel route — returning the same JSON shape with
-permissive CORS for the site origin.
+**To take a portal offline, CORA flips the row** — takes effect on the next
+portal load, no deploy:
+
+```sql
+update public.t3l_portal_flags set enabled = false, updated_at = now() where key = 'admin';
+-- restore
+update public.t3l_portal_flags set enabled = true,  updated_at = now() where key = 'client';
+```
+
+`portals/flags.json` in this repo is just a static reference of the shape (and a
+manual fallback you could point `REMOTE_FLAGS_URL` at); the live source of truth
+is the edge function above.
 
 A missing key or a fetch error falls back to `DEFAULT_ENABLED` (on), so a flags
 outage never hard-breaks the portal.
