@@ -1,0 +1,728 @@
+<title>T3L Outreach Ministries</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   Teach Them To Love Outreach Ministries — T3L site styles
+   Scoped to #t3l-ghl so the block can be embedded in GoHighLevel (or any CMS)
+   without colliding with host/theme styles.
+   Palette: deep purple (brand) + warm gold (accent), reflecting the
+   "Shades of Purple" identity.
+   ========================================================================== */
+
+#t3l-ghl {
+  --t3l-purple-900: #2a123f;
+  --t3l-purple-800: #3b1a5c;
+  --t3l-purple-700: #4c2278;
+  --t3l-purple-600: #5f2e91;
+  --t3l-purple-100: #efe7f6;
+  --t3l-gold: #e0b23c;
+  --t3l-gold-dark: #c6952a;
+  --t3l-ink: #221530;
+  --t3l-body: #46394f;
+  --t3l-muted: #6f6478;
+  --t3l-line: #e5dced;
+  --t3l-bg: #ffffff;
+  --t3l-bg-soft: #f7f3fb;
+  --t3l-danger: #a3231f;
+  --t3l-danger-bg: #fbeaea;
+
+  --t3l-radius: 16px;
+  --t3l-shadow: 0 18px 40px -24px rgba(42, 18, 63, 0.45);
+  --t3l-max: 1140px;
+
+  color: var(--t3l-body);
+  background: var(--t3l-bg);
+  font-family: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.65;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+}
+
+#t3l-ghl *,
+#t3l-ghl *::before,
+#t3l-ghl *::after { box-sizing: border-box; }
+
+#t3l-ghl img { max-width: 100%; height: auto; display: block; }
+
+#t3l-ghl h1,
+#t3l-ghl h2,
+#t3l-ghl h3 {
+  font-family: "Playfair Display", "Poppins", Georgia, serif;
+  color: var(--t3l-ink);
+  line-height: 1.15;
+  margin: 0 0 0.5em;
+  font-weight: 700;
+}
+
+#t3l-ghl h2 { font-size: clamp(1.7rem, 3.4vw, 2.6rem); }
+#t3l-ghl h3 { font-size: 1.25rem; font-family: "Poppins", sans-serif; }
+#t3l-ghl p { margin: 0 0 1rem; }
+#t3l-ghl a { color: var(--t3l-purple-600); text-decoration: none; }
+#t3l-ghl a:hover { text-decoration: underline; }
+
+#t3l-ghl .container {
+  width: 100%;
+  max-width: var(--t3l-max);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+#t3l-ghl .section { padding: clamp(48px, 7vw, 88px) 0; }
+
+#t3l-ghl .eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--t3l-gold);
+  margin: 0 0 0.75rem;
+}
+#t3l-ghl .eyebrow.dark { color: var(--t3l-purple-600); }
+#t3l-ghl .lead { font-size: 1.12rem; color: var(--t3l-body); }
+
+/* --- Skip link -------------------------------------------------------- */
+#t3l-ghl .skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--t3l-purple-800);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 0 0 8px 0;
+  z-index: 1000;
+}
+#t3l-ghl .skip-link:focus { left: 0; }
+
+/* --- Buttons ---------------------------------------------------------- */
+#t3l-ghl .button {
+  display: inline-block;
+  padding: 14px 26px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.98rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  text-decoration: none;
+}
+#t3l-ghl .button:hover { text-decoration: none; transform: translateY(-2px); }
+#t3l-ghl .button.gold {
+  background: var(--t3l-gold);
+  color: var(--t3l-ink);
+  box-shadow: 0 12px 24px -14px rgba(224, 178, 60, 0.9);
+}
+#t3l-ghl .button.gold:hover { background: var(--t3l-gold-dark); }
+#t3l-ghl .button.ghost {
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  color: #fff;
+}
+#t3l-ghl .button.ghost:hover { background: rgba(255, 255, 255, 0.12); }
+#t3l-ghl .button-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; }
+
+/* --- Header ----------------------------------------------------------- */
+#t3l-ghl .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--t3l-line);
+}
+#t3l-ghl .header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-block: 12px;
+}
+#t3l-ghl .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--t3l-ink);
+  font-weight: 600;
+  line-height: 1.2;
+}
+#t3l-ghl .brand:hover { text-decoration: none; }
+#t3l-ghl .brand img { width: 48px; height: 48px; object-fit: contain; }
+#t3l-ghl .brand span { display: flex; flex-direction: column; font-size: 0.95rem; }
+#t3l-ghl .brand strong { color: var(--t3l-purple-600); font-weight: 700; }
+
+#t3l-ghl .nav { display: flex; align-items: center; gap: 22px; }
+#t3l-ghl .nav a { color: var(--t3l-ink); font-weight: 500; font-size: 0.96rem; }
+#t3l-ghl .nav a:hover { color: var(--t3l-purple-600); text-decoration: none; }
+#t3l-ghl .nav .nav-give {
+  background: var(--t3l-purple-700);
+  color: #fff;
+  padding: 9px 18px;
+  border-radius: 999px;
+}
+#t3l-ghl .nav .nav-give:hover { background: var(--t3l-purple-800); }
+
+#t3l-ghl .menu-toggle {
+  display: none;
+  border: 1px solid var(--t3l-line);
+  background: #fff;
+  color: var(--t3l-ink);
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* --- Hero ------------------------------------------------------------- */
+#t3l-ghl .hero {
+  background:
+    linear-gradient(150deg, rgba(42, 18, 63, 0.92), rgba(76, 34, 120, 0.82)),
+    radial-gradient(circle at 80% 20%, rgba(224, 178, 60, 0.28), transparent 55%);
+  color: #fff;
+  padding: clamp(64px, 10vw, 120px) 0;
+}
+#t3l-ghl .hero .eyebrow { color: var(--t3l-gold); }
+#t3l-ghl .hero h1 { color: #fff; }
+#t3l-ghl .hero-copy {
+  font-size: 1.2rem;
+  max-width: 640px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 24px;
+}
+
+/* --- Safety notice ---------------------------------------------------- */
+#t3l-ghl .safety-notice { background: var(--t3l-danger-bg); border-block: 1px solid #f0cfce; }
+#t3l-ghl .safety-notice .container {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding-block: 18px;
+}
+#t3l-ghl .safety-notice p { margin: 0; color: #5c1a18; font-size: 0.98rem; }
+#t3l-ghl .safety-notice a { color: var(--t3l-danger); font-weight: 600; }
+#t3l-ghl .notice-mark {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--t3l-danger);
+  color: #fff;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+/* --- Intro ------------------------------------------------------------ */
+#t3l-ghl .intro-grid,
+#t3l-ghl .facts-grid,
+#t3l-ghl .access-grid,
+#t3l-ghl .founder-grid,
+#t3l-ghl .faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(28px, 5vw, 60px);
+  align-items: start;
+}
+#t3l-ghl .belief {
+  border-left: 4px solid var(--t3l-gold);
+  padding-left: 18px;
+  font-style: italic;
+  color: var(--t3l-purple-700);
+  font-size: 1.1rem;
+}
+
+/* --- Mission ---------------------------------------------------------- */
+#t3l-ghl .mission { background: var(--t3l-purple-900); color: #fff; }
+#t3l-ghl .mission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+#t3l-ghl .mission-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--t3l-radius);
+  padding: 32px;
+}
+#t3l-ghl .mission-card p:last-child { margin: 0; font-size: 1.08rem; }
+#t3l-ghl .mission-card .eyebrow { color: var(--t3l-gold); }
+
+/* --- Facts ------------------------------------------------------------ */
+#t3l-ghl .facts { background: var(--t3l-bg-soft); }
+#t3l-ghl .fact-box {
+  background: #fff;
+  border: 1px solid var(--t3l-line);
+  border-radius: var(--t3l-radius);
+  box-shadow: var(--t3l-shadow);
+  padding: 12px 28px 20px;
+}
+#t3l-ghl .fact-box table { width: 100%; border-collapse: collapse; }
+#t3l-ghl .fact-box caption {
+  caption-side: top;
+  text-align: left;
+  padding: 16px 0 8px;
+  font-size: 0.82rem;
+  color: var(--t3l-muted);
+}
+#t3l-ghl .fact-box th,
+#t3l-ghl .fact-box td {
+  text-align: left;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--t3l-line);
+  vertical-align: top;
+}
+#t3l-ghl .fact-box th { width: 34%; color: var(--t3l-ink); font-weight: 600; }
+#t3l-ghl .fact-box tr:last-child th,
+#t3l-ghl .fact-box tr:last-child td { border-bottom: 0; }
+
+/* --- Services --------------------------------------------------------- */
+#t3l-ghl .services-heading { max-width: 760px; margin-bottom: 44px; }
+#t3l-ghl .service-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+}
+#t3l-ghl .service-card {
+  background: #fff;
+  border: 1px solid var(--t3l-line);
+  border-radius: var(--t3l-radius);
+  padding: 32px 28px;
+  box-shadow: var(--t3l-shadow);
+  display: flex;
+  flex-direction: column;
+}
+#t3l-ghl .service-number {
+  font-family: "Playfair Display", serif;
+  font-size: 2rem;
+  color: var(--t3l-gold);
+  margin: 0 0 8px;
+}
+#t3l-ghl .service-card h3 { color: var(--t3l-purple-700); }
+#t3l-ghl .service-card > a {
+  margin-top: auto;
+  font-weight: 600;
+  padding-top: 14px;
+}
+
+/* --- Access steps ----------------------------------------------------- */
+#t3l-ghl .access { background: var(--t3l-bg-soft); }
+#t3l-ghl .access-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+#t3l-ghl .access-steps li {
+  display: flex;
+  gap: 18px;
+  background: #fff;
+  border: 1px solid var(--t3l-line);
+  border-radius: var(--t3l-radius);
+  padding: 22px 24px;
+}
+#t3l-ghl .access-steps li > span {
+  flex: none;
+  font-family: "Playfair Display", serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--t3l-gold);
+}
+#t3l-ghl .access-steps h3 { margin-bottom: 4px; color: var(--t3l-purple-700); }
+#t3l-ghl .access-steps p { margin: 0; }
+
+/* --- Founder ---------------------------------------------------------- */
+#t3l-ghl .founder-grid { align-items: center; }
+#t3l-ghl .founder-image img {
+  border-radius: var(--t3l-radius);
+  box-shadow: var(--t3l-shadow);
+  width: 100%;
+  object-fit: cover;
+}
+#t3l-ghl .founder-copy .eyebrow { color: var(--t3l-gold); }
+#t3l-ghl .founder-copy blockquote {
+  margin: 24px 0 0;
+  padding: 20px 24px;
+  background: var(--t3l-purple-100);
+  border-radius: var(--t3l-radius);
+  border-left: 4px solid var(--t3l-purple-600);
+  font-style: italic;
+  color: var(--t3l-purple-800);
+  font-size: 1.1rem;
+}
+
+/* --- Event ------------------------------------------------------------ */
+#t3l-ghl .event { background: var(--t3l-purple-900); color: #fff; }
+#t3l-ghl .event-panel {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(28px, 5vw, 56px);
+  align-items: center;
+}
+#t3l-ghl .event-art img { border-radius: var(--t3l-radius); box-shadow: var(--t3l-shadow); }
+#t3l-ghl .event-copy h2 { color: #fff; }
+#t3l-ghl .event-copy .eyebrow { color: var(--t3l-gold); }
+#t3l-ghl .date-chip {
+  display: inline-block;
+  background: rgba(224, 178, 60, 0.16);
+  border: 1px solid rgba(224, 178, 60, 0.5);
+  border-radius: 12px;
+  padding: 12px 18px;
+  color: #fff;
+}
+#t3l-ghl .event-note { color: rgba(255, 255, 255, 0.75); font-size: 0.95rem; }
+
+/* --- Giving ----------------------------------------------------------- */
+#t3l-ghl .giving { background: var(--t3l-purple-800); color: #fff; text-align: center; }
+#t3l-ghl .giving h2 { color: #fff; }
+#t3l-ghl .giving .eyebrow { color: var(--t3l-gold); }
+#t3l-ghl .giving .lead { color: rgba(255, 255, 255, 0.85); max-width: 620px; margin-inline: auto; }
+#t3l-ghl .giving-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 36px;
+  text-align: left;
+}
+#t3l-ghl .give-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--t3l-radius);
+  padding: 28px;
+}
+#t3l-ghl .give-card h3 { color: #fff; }
+#t3l-ghl .give-card p { color: rgba(255, 255, 255, 0.82); }
+#t3l-ghl .give-card a { color: var(--t3l-gold); font-weight: 600; }
+
+/* --- FAQ -------------------------------------------------------------- */
+#t3l-ghl .faq-list { display: grid; gap: 12px; }
+#t3l-ghl .faq-list details {
+  background: #fff;
+  border: 1px solid var(--t3l-line);
+  border-radius: 12px;
+  padding: 6px 20px;
+}
+#t3l-ghl .faq-list summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--t3l-ink);
+  padding: 14px 0;
+  list-style: none;
+}
+#t3l-ghl .faq-list summary::-webkit-details-marker { display: none; }
+#t3l-ghl .faq-list summary::after { content: "+"; float: right; color: var(--t3l-gold); font-size: 1.3rem; line-height: 1; }
+#t3l-ghl .faq-list details[open] summary::after { content: "–"; }
+#t3l-ghl .faq-list details p { padding-bottom: 14px; margin: 0; }
+
+/* --- Contact ---------------------------------------------------------- */
+#t3l-ghl .contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 36px;
+}
+#t3l-ghl .contact-card {
+  background: var(--t3l-bg-soft);
+  border: 1px solid var(--t3l-line);
+  border-radius: var(--t3l-radius);
+  padding: 26px;
+}
+#t3l-ghl .contact-card h3 { color: var(--t3l-purple-700); }
+#t3l-ghl .contact-card .social { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; }
+#t3l-ghl .contact-card .social a { font-weight: 600; }
+#t3l-ghl .hours { width: 100%; border-collapse: collapse; }
+#t3l-ghl .hours th, #t3l-ghl .hours td { text-align: left; padding: 6px 0; font-size: 0.95rem; }
+#t3l-ghl .hours th { font-weight: 600; color: var(--t3l-ink); }
+
+/* --- Footer ----------------------------------------------------------- */
+#t3l-ghl .footer { background: var(--t3l-purple-900); color: rgba(255, 255, 255, 0.85); padding-top: 64px; }
+#t3l-ghl .footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 40px;
+  padding-bottom: 44px;
+}
+#t3l-ghl .footer img { width: 64px; margin-bottom: 12px; }
+#t3l-ghl .footer h2 { color: #fff; font-size: 1.5rem; }
+#t3l-ghl .footer .eyebrow { color: var(--t3l-gold); }
+#t3l-ghl .footer-links { display: flex; flex-direction: column; gap: 8px; }
+#t3l-ghl .footer-links a { color: rgba(255, 255, 255, 0.85); }
+#t3l-ghl .footer-links a:hover { color: #fff; }
+#t3l-ghl .footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  padding-block: 24px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* --- Responsive ------------------------------------------------------- */
+@media (max-width: 900px) {
+  #t3l-ghl .menu-toggle { display: inline-block; }
+  #t3l-ghl .nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    background: #fff;
+    border-bottom: 1px solid var(--t3l-line);
+    padding: 14px 24px 20px;
+    display: none;
+  }
+  #t3l-ghl .nav.is-open { display: flex; }
+  #t3l-ghl .header-inner { position: relative; flex-wrap: wrap; }
+  #t3l-ghl .intro-grid,
+  #t3l-ghl .facts-grid,
+  #t3l-ghl .access-grid,
+  #t3l-ghl .founder-grid,
+  #t3l-ghl .faq-grid,
+  #t3l-ghl .mission-grid,
+  #t3l-ghl .event-panel,
+  #t3l-ghl .giving-grid { grid-template-columns: 1fr; }
+  #t3l-ghl .service-grid,
+  #t3l-ghl .contact-grid { grid-template-columns: 1fr; }
+  #t3l-ghl .footer-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 620px) {
+  #t3l-ghl h1 span { white-space: normal !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #t3l-ghl * { transition: none !important; }
+}
+
+</style>
+
+<div id="t3l-ghl" class="t3l-ghl-embed">
+<a class="skip-link" href="#t3l-main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#t3l-home" aria-label="Teach Them To Love Outreach Ministries home">
+        <img src="https://static.wixstatic.com/media/b51077_2c999958df504ccf9cdb5e2761623d39~mv2.png/v1/crop/x_133,y_137,w_241,h_233/fill/w_154,h_150,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/T3L%20Logo.png" alt="Teach Them To Love Outreach Ministries logo">
+        <span>Teach Them To Love<strong>Outreach Ministries</strong></span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation">Menu</button>
+      <nav class="nav" id="site-navigation" aria-label="Primary navigation">
+        <a href="#t3l-home">Home</a>
+        <a href="#t3l-services">Services</a>
+        <a href="#t3l-about">Our Story</a>
+        <a href="#t3l-events">Events</a>
+        <a href="#t3l-contact">Contact</a>
+        <a class="nav-give" href="#t3l-give">Donate</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="t3l-main-content">
+    <section class="hero" id="t3l-home" aria-labelledby="hero-heading">
+      <div class="container hero-inner">
+        <p class="eyebrow">Teach Them To Love Outreach Ministries</p>
+        <h1 id="hero-heading" style="display:flex;flex-direction:column;gap:48px;font-size:clamp(1rem,4.8vw,4rem);"><span style="white-space:nowrap;">From pain to purpose.</span><span style="white-space:nowrap;">From trauma to transformation.</span><span style="white-space:nowrap;">From survival to thriving.</span></h1>
+        <p class="hero-copy">Faith-rooted, trauma-informed community wellness support for individuals and families ready to heal, rebuild, and thrive.</p>
+        <div class="button-row">
+          <a class="button gold" href="#t3l-services">Explore our services</a>
+          <a class="button ghost" href="#t3l-contact">Connect with T3L</a>
+        </div>
+      </div>
+    </section>
+
+    <aside class="safety-notice" aria-label="Immediate safety information">
+      <div class="container">
+        <span class="notice-mark" aria-hidden="true">!</span>
+        <p><strong>If you are in immediate danger, call 911.</strong> For immediate domestic violence support, call the National Domestic Violence Hotline at <a href="tel:18007997233">800-799-7233</a> or text <strong>START</strong> to 88788. T3L is not an emergency response service.</p>
+      </div>
+    </aside>
+
+    <section class="section" aria-labelledby="welcome-heading">
+      <div class="container intro-grid">
+        <div>
+          <p class="eyebrow dark">Welcome to T3L Outreach</p>
+          <h2 id="welcome-heading">Healing lives. Restoring families. Transforming communities.</h2>
+        </div>
+        <div class="intro-copy">
+          <p class="lead">Teach Them To Love Outreach Ministries is a faith-rooted, trauma-informed community wellness organization dedicated to helping individuals and families navigate trauma, domestic violence, mental-health challenges, and significant life transitions.</p>
+          <p>Founded by Dr. Lolita R. Gilmore-Randall, T3L brings together advocacy, education, compassionate support, and community connection so people can move toward lasting transformation. Call us to confirm the support that is currently available and the next step that fits your needs.</p>
+          <p class="belief">Every person deserves hope, every family deserves healing, and every community deserves the opportunity to thrive.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section mission" aria-label="Mission and vision">
+      <div class="container mission-grid">
+        <article class="mission-card">
+          <p class="eyebrow">Our mission</p>
+          <p>To heal the broken, restore the forgotten, and transform generations through trauma-informed care, faith-rooted advocacy, education, and community engagement.</p>
+        </article>
+        <article class="mission-card">
+          <p class="eyebrow">Our vision</p>
+          <p>Thriving communities where survivors become leaders, families are restored, and healing becomes a catalyst for transformation.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section facts" aria-labelledby="facts-heading">
+      <div class="container facts-grid">
+        <div>
+          <p class="eyebrow dark">Organization details</p>
+          <h2 id="facts-heading">T3L at a glance</h2>
+          <p class="lead">Practical information for individuals, families, partners, and community supporters seeking to connect with T3L Outreach.</p>
+        </div>
+        <div class="fact-box">
+          <table>
+            <caption>Teach Them To Love Outreach Ministries — verified public details</caption>
+            <tbody>
+              <tr><th scope="row">Founder</th><td>Dr. Lolita R. Gilmore-Randall</td></tr>
+              <tr><th scope="row">Organization</th><td>Registered 501(c)(3) nonprofit; EIN 46-4850870</td></tr>
+              <tr><th scope="row">Address</th><td>601 Quail Valley Drive, Georgetown, TX 78626</td></tr>
+              <tr><th scope="row">Phone</th><td><a href="tel:+15126492693">512-649-2693</a></td></tr>
+              <tr><th scope="row">Hours</th><td>Monday–Friday, 8:00 a.m.–8:00 p.m.; Saturday, 9:00 a.m.–12:00 p.m.; Sunday, closed</td></tr>
+              <tr><th scope="row">Support areas</th><td>Family reunification, counseling support, pastoral care, advocacy, education, and community connection.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section services" id="t3l-services" aria-labelledby="services-heading">
+      <div class="container">
+        <div class="services-heading">
+          <p class="eyebrow dark">Programs and support</p>
+          <h2 id="services-heading">How we serve</h2>
+          <p class="lead">T3L offers compassionate pathways to healing through trauma-informed support, education, advocacy, and community connection. Contact us directly to discuss current availability and appropriate next steps.</p>
+        </div>
+        <div class="service-grid">
+          <article class="service-card">
+            <p class="service-number" aria-hidden="true">01</p>
+            <h3>Family Reunification</h3>
+            <p>Support for families seeking to rebuild foundations of safety, respect, understanding, and individuality through family-centered care and connection.</p>
+            <a href="#t3l-contact">Ask about family reunification support <span aria-hidden="true">&nbsp;→</span></a>
+          </article>
+          <article class="service-card">
+            <p class="service-number" aria-hidden="true">02</p>
+            <h3>Counseling Support</h3>
+            <p>A trauma-informed approach to helping individuals and families navigate mental-health challenges, relationships, domestic violence, and substance-use concerns.</p>
+            <a href="#t3l-contact">Ask about counseling support <span aria-hidden="true">&nbsp;→</span></a>
+          </article>
+          <article class="service-card">
+            <p class="service-number" aria-hidden="true">03</p>
+            <h3>Pastoral Care</h3>
+            <p>Faith-rooted support for significant life moments, including grief, spiritual direction, family transitions, and community connection.</p>
+            <a href="#t3l-contact">Ask about pastoral care <span aria-hidden="true">&nbsp;→</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section access" aria-labelledby="access-heading">
+      <div class="container access-grid">
+        <div>
+          <p class="eyebrow dark">Start here</p>
+          <h2 id="access-heading">A clear next step matters.</h2>
+          <p class="lead">We want people to know what to expect. Call T3L to discuss your needs, confirm availability, and identify the most appropriate path forward.</p>
+        </div>
+        <ol class="access-steps">
+          <li><span aria-hidden="true">01</span><div><h3>Call T3L</h3><p>Start with a conversation at <a href="tel:+15126492693">512-649-2693</a>. We will help clarify the available next step.</p></div></li>
+          <li><span aria-hidden="true">02</span><div><h3>Share what support you are seeking</h3><p>Let us know whether you are seeking family reunification, counseling support, pastoral care, advocacy, education, or community connection.</p></div></li>
+          <li><span aria-hidden="true">03</span><div><h3>Confirm the right pathway</h3><p>T3L will confirm current availability and, where needed, help identify an appropriate community or emergency referral pathway.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section founder" id="t3l-about" aria-labelledby="founder-heading">
+      <div class="container founder-grid">
+        <div class="founder-image">
+          <img src="https://teachthemtolove.com/wp-content/uploads/2026/06/6f067a_c6922700f56f4e2b84d568aacecdbdaemv2.avif" alt="Dr. Lolita R. Gilmore-Randall">
+        </div>
+        <div class="founder-copy">
+          <p class="eyebrow">Leadership</p>
+          <h2 id="founder-heading">Meet Dr. Lolita R. Gilmore-Randall</h2>
+          <p>Doctor of Ministry, Licensed Clinical Social Worker, Licensed Chemical Dependency Counselor, retired U.S. Army Veteran, speaker, researcher, and community advocate.</p>
+          <p>Her life’s work has focused on helping individuals and families heal from trauma, overcome adversity, and discover purpose. Through her leadership, T3L Outreach brings education, advocacy, and compassionate support to communities across Texas and beyond.</p>
+          <blockquote>“Healing individuals is important. Healing families is transformational. Healing communities changes generations.”</blockquote>
+        </div>
+      </div>
+    </section>
+
+    <section class="section event" id="t3l-events" aria-labelledby="event-heading">
+      <div class="container event-panel">
+        <div class="event-art">
+          <img src="https://static.wixstatic.com/media/6f067a_78c40253391a4de290c02829d549776b~mv2.png" alt="Shades of Purple: An Urban Night Affair event artwork">
+        </div>
+        <div class="event-copy">
+          <p class="eyebrow">Upcoming event</p>
+          <h2 id="event-heading">Shades of Purple:<br>An Urban Night Affair</h2>
+          <p>Join T3L for an evening of awareness, community, and support for the mission to move from pain to purpose.</p>
+          <p class="date-chip"><strong>October 24, 2026</strong><br>4:00 p.m. Central Time</p>
+          <p class="event-note">Please confirm the current venue, ticket details, and accessibility information before making plans.</p>
+          <div class="button-row"><a class="button gold" href="https://www.zeffy.com/en-US/ticketing/the-shades-of-purple-dv-awareness-ball-from-pain-to-power-an-urban-night-affair" target="_blank" rel="noopener noreferrer">View ticket details</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section giving" id="t3l-give" aria-labelledby="give-heading">
+      <div class="container">
+        <p class="eyebrow">Make an impact</p>
+        <h2 id="give-heading">Give in the way that works for you.</h2>
+        <p class="lead">Your generosity helps T3L sustain compassionate, community-centered support for individuals and families.</p>
+        <div class="giving-grid">
+          <article class="give-card"><p class="eyebrow">01</p><h3>Give with PayPal</h3><p>Make a secure PayPal donation to Teach Them To Love Outreach.</p><a href="https://www.paypal.com/donate?business=teachthemtolove%40gmail.com&amp;currency_code=USD" target="_blank" rel="noopener noreferrer">Give with PayPal <span aria-hidden="true">&nbsp;→</span></a></article>
+          <article class="give-card"><p class="eyebrow">02</p><h3>Give with Cash App</h3><p>Make a secure Cash App contribution to T3L Outreach.</p><a href="https://cash.app/$T3L022014" target="_blank" rel="noopener noreferrer">Give with Cash App <span aria-hidden="true">&nbsp;→</span></a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section faq" aria-labelledby="faq-heading">
+      <div class="container faq-grid">
+        <div>
+          <p class="eyebrow dark">Helpful information</p>
+          <h2 id="faq-heading">Before you connect</h2>
+          <p class="lead">Answers to common questions about contacting T3L and finding the right support pathway.</p>
+        </div>
+        <div class="faq-list">
+          <details><summary>What types of support does T3L Outreach provide?</summary><p>T3L provides family reunification support, trauma-informed counseling support, pastoral care, advocacy, education, and community connection. Call T3L to confirm current availability and the right next step.</p></details>
+          <details><summary>Where is T3L Outreach located?</summary><p>T3L is located at 601 Quail Valley Drive, Georgetown, TX 78626. Call <a href="tel:+15126492693">512-649-2693</a> to confirm current hours and access information before visiting.</p></details>
+          <details><summary>What should I do if I am in immediate danger?</summary><p>Call 911 if you are in immediate danger. For immediate domestic violence support, call the National Domestic Violence Hotline at <a href="tel:18007997233">800-799-7233</a> or text <strong>START</strong> to 88788.</p></details>
+          <details><summary>How can I support T3L Outreach?</summary><p>You can support T3L through a secure online donation, by attending a current event, or by connecting with the organization about partnership and community opportunities.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section contact" id="t3l-contact" aria-labelledby="contact-heading">
+      <div class="container">
+        <p class="eyebrow dark">Visit and connect</p>
+        <h2 id="contact-heading">Connect with T3L Outreach</h2>
+        <p class="lead">Call to discuss current service availability, community partnership opportunities, or the appropriate next step for your needs.</p>
+        <div class="contact-grid">
+          <article class="contact-card"><h3>Visit</h3><p>601 Quail Valley Drive<br>Georgetown, TX 78626</p></article>
+          <article class="contact-card"><h3>Contact</h3><p><a href="tel:+15126492693">512-649-2693</a></p><div class="social"><a href="https://www.facebook.com/profile.php?id=100066552908617" target="_blank" rel="noopener noreferrer">Facebook</a><a href="https://www.linkedin.com/company/teach-them-to-love-outreach-ministries-corp" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="https://www.instagram.com/teachthemtolove" target="_blank" rel="noopener noreferrer">Instagram</a></div></article>
+          <article class="contact-card"><h3>Hours</h3><table class="hours"><tbody><tr><th>Monday–Friday</th><td>8:00 a.m.–8:00 p.m.</td></tr><tr><th>Saturday</th><td>9:00 a.m.–12:00 p.m.</td></tr><tr><th>Sunday</th><td>Closed</td></tr></tbody></table></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <img src="https://static.wixstatic.com/media/b51077_2c999958df504ccf9cdb5e2761623d39~mv2.png/v1/crop/x_133,y_137,w_241,h_233/fill/w_154,h_150,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/T3L%20Logo.png" alt="T3L Outreach logo">
+        <p class="eyebrow">Teach Them To Love Outreach Ministries</p>
+        <h2>Healing is a pathway we walk together.</h2>
+        <p>A faith-rooted, trauma-informed community wellness organization supporting individuals, families, and communities.</p>
+      </div>
+      <nav class="footer-links" aria-label="Footer navigation"><p class="eyebrow">Explore</p><a href="#t3l-home">Home</a><a href="#t3l-services">Services</a><a href="#t3l-about">Our Story</a><a href="#t3l-events">Events</a><a href="#t3l-contact">Contact</a><a href="#t3l-give">Donate</a></nav>
+      <div><p class="eyebrow">Visit and connect</p><p>601 Quail Valley Drive<br>Georgetown, TX 78626</p><p><a href="tel:+15126492693">512-649-2693</a><br>Monday–Friday, 8:00 a.m.–8:00 p.m.<br>Saturday, 9:00 a.m.–12:00 p.m.</p></div>
+    </div>
+    <div class="container footer-bottom"><p>Teach Them To Love Outreach Ministries is a registered 501(c)(3) nonprofit organization. Contributions may be tax-deductible to the extent permitted by law. EIN: 46-4850870.</p><p class="last-reviewed"></p></div>
+  </footer>
+
+  <script>
+    (function () {
+      var toggle = document.querySelector('#t3l-ghl .menu-toggle');
+      var nav = document.querySelector('#t3l-ghl .nav');
+      if (!toggle || !nav) return;
+      toggle.addEventListener('click', function () {
+        var open = nav.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.textContent = open ? 'Close' : 'Menu';
+      });
+      nav.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+          nav.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.textContent = 'Menu';
+        });
+      });
+    }());
+  </script>
+</div>
