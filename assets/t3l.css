@@ -511,14 +511,19 @@
   will-change: transform;
 }
 #t3l-ghl .service-card:hover,
+#t3l-ghl .service-card:focus-within,
 #t3l-ghl .contact-card:hover,
+#t3l-ghl .contact-card:focus-within,
 #t3l-ghl .fact-box:hover {
   transform: translateY(-8px);
   box-shadow: 0 26px 50px -26px rgba(42, 18, 63, 0.55);
+  border-color: var(--t3l-purple-600);
 }
-#t3l-ghl .access-steps li:hover {
+#t3l-ghl .access-steps li:hover,
+#t3l-ghl .access-steps li:focus-within {
   transform: translateY(-4px);
   box-shadow: 0 20px 40px -26px rgba(42, 18, 63, 0.45);
+  border-color: var(--t3l-purple-600);
 }
 /* Cards on dark grounds: lift + brighten their translucent surface. */
 #t3l-ghl .mission-card:hover,
