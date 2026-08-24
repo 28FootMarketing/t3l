@@ -1,8 +1,10 @@
-<title>T3L Outreach Ministries</title>
+<title>Teach Them To Love Outreach Ministries</title>
+<link rel="icon" href="assets/img/t3l-logo.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/t3l-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
+<style>html{scroll-behavior:smooth}
 /* ==========================================================================
    Teach Them To Love Outreach Ministries — T3L site styles
    Scoped to #t3l-ghl so the block can be embedded in GoHighLevel (or any CMS)
@@ -477,8 +479,14 @@
   #t3l-ghl h1 span { white-space: normal !important; }
 }
 
+/* In-page anchor targets: offset for the sticky header so headings aren't
+   hidden underneath when a nav link jumps to a section. */
+#t3l-ghl section[id],
+#t3l-ghl #t3l-main-content { scroll-margin-top: 88px; }
+
 @media (prefers-reduced-motion: reduce) {
   #t3l-ghl * { transition: none !important; }
+  html { scroll-behavior: auto !important; }
 }
 
 </style>

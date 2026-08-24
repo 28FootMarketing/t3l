@@ -13,6 +13,25 @@ Georgetown, TX.
 | `embed/t3l-ghl-embed.html` | The raw markup block only (no `<head>`, no styles) intended to be pasted into a GoHighLevel (GHL) custom-code / HTML element. Requires the CSS and images to be provided separately. |
 | `embed/t3l-ghl-embed.selfcontained.html` | **Drop-in GHL block.** Same markup with the CSS inlined and all images embedded as data URIs — paste the whole file into one GHL Custom Code element, no separate CSS paste and no image hosting required. ~674 KB. |
 | `assets/img/` | Self-hosted images (logo, founder photo, event artwork) so the site does not depend on external CDNs. |
+| `404.html` | Themed "page not found" page (served automatically by static hosts such as Vercel). |
+| `robots.txt` | Allows all crawlers and points to the sitemap. |
+| `sitemap.xml` | Single-page sitemap for search engines. |
+
+## Standalone hosting (off GoHighLevel)
+
+The site now runs as a standalone static site (e.g. Vercel) rather than a GHL
+embed, so it includes the pieces GHL used to provide:
+
+- **Favicon / app icon** — the T3L medallion (`assets/img/t3l-logo.png`).
+- **Smooth in-page scrolling** with a sticky-header offset (`scroll-margin-top`)
+  so nav links land below the fixed header (disabled under
+  `prefers-reduced-motion`).
+- **`robots.txt` + `sitemap.xml`** for search engines.
+- **`404.html`** for unknown paths.
+
+Conversion is currently **call-only** (phone CTAs); there is no lead-capture
+form. Add one later if the org wants online inquiries — it would need a form
+endpoint (serverless function, or a service like Formspree).
 
 ## Images
 
