@@ -25,6 +25,22 @@ Each portal resolves its enabled state on load, first decisive source wins:
 When a portal is off, its app is hidden and a branded "This portal is currently
 offline" notice shows instead, with the T3L phone number and a link home.
 
+### Flip it from CORA (Telegram command)
+
+Text CORA (the Telegram bot) — handled by the `cora-telegram` edge function as a
+deterministic command, so it flips instantly and doesn't burn an LLM turn:
+
+```
+portal admin off        portal admin on
+portal client off       portal client on
+portal all off          portal all on        (both at once)
+portal status           (report current on/off state)
+```
+
+CORA replies e.g. "Done — T3L admin portal taken offline." and writes an audit
+row to `cora_action_log` (`action:set_portal`). Under the hood it's the same
+`t3l_portal_flags` update as the SQL below.
+
 ### Flip it from CORA (live Supabase — instant, no deploy)
 
 `REMOTE_FLAGS_URL` is wired to a live Supabase edge function that returns the
