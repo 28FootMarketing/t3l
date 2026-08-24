@@ -11,6 +11,25 @@ Georgetown, TX.
 | `index.html` | Complete, self-contained landing page. Open directly in a browser to preview. |
 | `assets/t3l.css` | Stylesheet for the site. All rules are scoped to `#t3l-ghl` so the markup can be embedded without style collisions. |
 | `embed/t3l-ghl-embed.html` | The raw markup block only (no `<head>`, no styles) intended to be pasted into a GoHighLevel (GHL) custom-code / HTML element. |
+| `assets/img/` | Self-hosted images (logo, founder photo, event artwork) so the site does not depend on external CDNs. |
+
+## Images
+
+All images are self-hosted in `assets/img/` — the site no longer hot-links any
+external CDN:
+
+| File | Used in | Notes |
+| --- | --- | --- |
+| `t3l-logo.png` | Header + footer | Round gold T3L medallion (121×121). |
+| `founder.png` | Our Story section | Dr. Lolita R. Gilmore-Randall (432×532). |
+| `event-shades-of-purple.webp` | Events section | "Shades of Purple: An Urban Night Affair" flyer. |
+
+Paths are **relative** (`assets/img/…`). This works for `index.html` /
+`preview.html` served from the repo root or any host. For the **GoHighLevel
+embed**, relative paths only resolve if the `assets/img/` files are hosted at a
+matching path on the GHL domain — otherwise replace the `src` values in
+`embed/t3l-ghl-embed.html` with the absolute URLs where you host the images
+(e.g. `https://teachthemtolove.com/assets/img/t3l-logo.png`).
 
 ## Previewing locally
 
@@ -39,7 +58,7 @@ and its inline `<script>`. To use it inside GoHighLevel:
 
 ## Notes
 
-- Images are hot-linked from the organization's existing Wix/WordPress CDN URLs.
+- Images are self-hosted in `assets/img/` (no external CDN dependency).
 - Donation, ticketing, and social links point to the organization's live
   external services (PayPal, Cash App, Zeffy, Facebook, LinkedIn, Instagram).
 - The page includes a domestic-violence safety notice, `NGO` schema.org
