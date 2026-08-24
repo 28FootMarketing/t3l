@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#35183a">
+  <title>Teach Them to Love | Client Portal</title>
+  <!--
+    GOHIGHLEVEL INSTALLATION
+    1. In a GHL Funnel or Website page, add a Custom HTML element.
+    2. Paste this entire file's BODY contents, then include the STYLE and SCRIPT blocks.
+    3. Create a GHL Workflow with an Incoming Webhook trigger for prayer requests.
+    4. Paste that webhook URL into GHL_PORTAL_CONFIG.prayerWebhookUrl below.
+    5. Map the posted fields in your workflow: contactName, contactEmail,
+       ministryRole, prayerRequest, submittedAt, and source.
+
+    This template intentionally does not contain credentials or a hard-coded webhook URL.
+  -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:opsz,wght@5..120,500;5..120,600;5..120,700&display=swap');
+    :root{--ink:#2b2030;--plum:#4a214f;--plum-deep:#311536;--cream:#f8f5ef;--paper:#fffdfa;--gold:#d8ad5b;--gold-deep:#967027;--muted:#746a72;--line:#e9ded2;--shadow:0 18px 45px rgba(53,24,58,.11)}
+    *{box-sizing:border-box} html{background:var(--cream);scroll-behavior:smooth} body{margin:0;background:var(--cream);color:var(--ink);font-family:'DM Sans',Arial,sans-serif;line-height:1.5}.ghl-portal{min-height:100vh;background-image:radial-gradient(rgba(74,33,79,.05) .7px,transparent .7px);background-size:8px 8px}.ghl-portal button,.ghl-portal input,.ghl-portal textarea{font:inherit}.ghl-portal button{cursor:pointer}.portal-shell{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh}.portal-sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:linear-gradient(165deg,#311536 0%,#4e2452 60%,#241128 100%);color:#fff}.brand{display:flex;align-items:center;gap:12px;padding:28px 22px 24px;border-bottom:1px solid rgba(255,255,255,.12)}.brand-mark{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 34% 32%,#fff9de 0,#d8ad5b 34%,#875c2a 68%,#422346 100%);box-shadow:0 7px 16px rgba(0,0,0,.25);color:#35183a;font-family:'Playfair Display',serif;font-weight:700;font-size:20px}.brand-title{font-family:'Playfair Display',serif;font-size:18px;line-height:1.1}.brand-subtitle{margin-top:4px;color:#ecd69d;font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}.nav-wrap{padding:22px 12px;flex:1}.nav-label{padding:0 12px 8px;color:rgba(255,255,255,.44);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}.portal-nav{display:grid;gap:4px}.nav-item{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:12px;padding:12px;color:rgba(255,255,255,.68);background:transparent;text-align:left;font-size:14px;font-weight:600;transition:background .18s,color .18s,transform .18s}.nav-item:hover,.nav-item:focus-visible{background:rgba(255,255,255,.09);color:#fff;outline:0}.nav-item:active{transform:scale(.98)}.nav-item.active{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}.nav-icon{width:18px;text-align:center;color:#ebcc7e;font-size:16px}.sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,.12)}.secure-note{display:flex;gap:9px;align-items:flex-start;color:rgba(255,255,255,.65);font-size:11px;line-height:1.55}.secure-note strong{display:block;color:#ecd69d;font-size:11px}.portal-main{min-width:0}.topbar{height:70px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(248,245,239,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}.topbar-kicker{color:var(--gold-deep);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.profile-chip{display:flex;align-items:center;gap:10px;padding:5px 12px 5px 5px;border:1px solid #e7dcd0;background:var(--paper);border-radius:999px;color:var(--plum);font-size:12px;font-weight:700;box-shadow:0 2px 8px rgba(53,24,58,.04)}.profile-avatar{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#ead7ad;font-size:11px}.mobile-menu{display:none;border:1px solid var(--line);background:var(--paper);color:var(--plum);border-radius:10px;width:40px;height:40px;font-size:18px}.content{max-width:1280px;margin:0 auto;padding:38px 36px 60px}.view{display:none;animation:enter .25s ease-out}.view.active{display:block}@keyframes enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}.eyebrow{margin:0;color:var(--gold-deep);font-size:11px;font-weight:700;letter-spacing:.19em;text-transform:uppercase}.page-title{margin:6px 0 0;font-family:'Playfair Display',Georgia,serif;color:#3b1b40;font-size:40px;line-height:1.15}.page-description{max-width:700px;margin:12px 0 28px;color:var(--muted);font-size:15px;line-height:1.65}.hero{position:relative;overflow:hidden;padding:42px 44px;background:linear-gradient(135deg,#3a1a40,#55265a);border-radius:22px;color:white;box-shadow:var(--shadow)}.hero:after{content:'';position:absolute;width:440px;height:440px;right:-170px;top:-250px;border-radius:50%;background:radial-gradient(circle,rgba(216,173,91,.32),transparent 66%)}.hero>*{position:relative;z-index:1}.hero-rule{width:34px;height:1px;background:var(--gold);display:inline-block;margin-right:9px;vertical-align:middle}.hero-label{color:#ecd69d;font-size:11px;font-weight:700;letter-spacing:.17em;text-transform:uppercase}.hero h2{max-width:760px;margin:15px 0 0;font-family:'Playfair Display',Georgia,serif;font-size:34px;line-height:1.25}.hero p{max-width:650px;margin:16px 0 0;color:rgba(255,255,255,.75);font-size:15px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:34px 0 16px}.section-head h2{margin:0;color:#3b1b40;font:600 25px/1.2 'Playfair Display',Georgia,serif}.section-head p{margin:3px 0 0;color:var(--muted);font-size:13px}.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}.quick-card{position:relative;border:1px solid var(--line);border-radius:17px;padding:21px;background:rgba(255,253,250,.95);text-align:left;color:var(--ink);box-shadow:0 7px 23px rgba(53,24,58,.035);transition:transform .18s,box-shadow .18s}.quick-card:hover,.quick-card:focus-visible{transform:translateY(-4px);box-shadow:0 15px 33px rgba(53,24,58,.09);outline:2px solid rgba(183,137,58,.55);outline-offset:2px}.quick-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;font-size:19px}.quick-icon.purple{background:#f0e6ec;color:#713879}.quick-icon.gold{background:#f6eedb;color:#936a21}.quick-icon.green{background:#e2efeb;color:#286d63}.quick-icon.rose{background:#f5e9e2;color:#9a5f40}.quick-card h3{margin:17px 0 0;color:#3b1b40;font-size:15px}.quick-card p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.55}.arrow{position:absolute;right:18px;bottom:18px;color:var(--gold-deep);font-size:16px}.dashboard-grid{display:grid;grid-template-columns:1.45fr .9fr;gap:16px;margin-top:16px}.card{border:1px solid var(--line);border-radius:17px;background:rgba(255,253,250,.93);box-shadow:0 7px 23px rgba(53,24,58,.035)}.card-pad{padding:25px}.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);margin-top:21px}.metric{padding:0 15px;border-right:1px solid #eee4da}.metric:first-child{padding-left:0}.metric:last-child{border-right:0}.metric-number{font:600 31px/1 'Playfair Display',Georgia,serif;color:var(--plum)}.metric-label{margin-top:7px;color:var(--muted);font-size:12px}.care-card{background:#f6eddf}.care-card h3{margin:5px 0 0;font:600 25px/1.2 'Playfair Display',Georgia,serif;color:#513152}.care-card p{color:#75666d;font-size:13px;line-height:1.6}.text-link{border:0;background:transparent;padding:0;color:#65366c;font-size:13px;font-weight:700}.text-link:hover{color:#3b1b40;text-decoration:underline}.empty{display:flex;min-height:260px;flex-direction:column;align-items:center;justify-content:center;padding:34px;text-align:center}.empty-icon{display:grid;place-items:center;width:54px;height:54px;border-radius:50%;background:#f1e7ec;color:#713879;font-size:22px}.empty h3{margin:18px 0 0;color:#3b1b40;font:600 25px/1.2 'Playfair Display',Georgia,serif}.empty p{max-width:460px;margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.65}.calendar-card{overflow:hidden}.calendar-toolbar{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}.calendar-month{text-align:center}.calendar-month h3{margin:0;color:#3b1b40;font:600 24px/1.2 'Playfair Display',Georgia,serif}.calendar-month p{margin:2px 0 0;color:var(--gold-deep);font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase}.icon-btn{width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:#5d2b62;font-size:24px;line-height:1}.icon-btn:hover,.icon-btn:focus-visible{background:#f3e9ee;outline:2px solid rgba(183,137,58,.5)}.calendar-weekdays,.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr)}.calendar-weekdays{background:#fbf8f2;border-bottom:1px solid var(--line)}.calendar-weekdays div{text-align:center;padding:9px 4px;color:#9c8c84;font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.calendar-cell{min-height:108px;padding:8px;border-right:1px solid #f0e7dc;border-bottom:1px solid #f0e7dc;background:white}.calendar-cell:nth-child(7n){border-right:0}.calendar-cell.muted{background:#fcfaf7}.day{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;color:#766a72;font-size:12px;font-weight:700}.today .day{background:var(--plum);color:white}.no-events{margin:18px 0 0;color:var(--muted);font-size:13px}.form-layout{display:grid;grid-template-columns:.85fr 1.15fr;gap:16px}.privacy-panel{padding:30px;background:#3b1b40;color:white}.privacy-panel h2{margin:17px 0 0;font:600 29px/1.2 'Playfair Display',Georgia,serif}.privacy-panel p{margin:13px 0 0;color:rgba(255,255,255,.7);font-size:14px;line-height:1.7}.privacy-box{display:flex;gap:10px;margin-top:24px;padding:14px;border-radius:12px;background:rgba(255,255,255,.09);color:rgba(255,255,255,.78);font-size:12px;line-height:1.5}.form-card{padding:28px}.form-card h2{margin:0;color:#3b1b40;font:600 26px/1.2 'Playfair Display',Georgia,serif}.form-card p{margin:7px 0 20px;color:var(--muted);font-size:13px}.fields{display:grid;gap:15px}.field label{display:block;margin-bottom:7px;color:var(--plum);font-size:13px;font-weight:700}.field input,.field textarea{width:100%;border:1px solid #dfd3c6;border-radius:10px;padding:11px 12px;background:#fffdfa;color:var(--ink);outline:0;font-size:14px}.field textarea{min-height:145px;resize:vertical;line-height:1.6}.field input:focus,.field textarea:focus{border-color:#b7893a;box-shadow:0 0 0 3px rgba(183,137,58,.17)}.consent{display:flex;gap:9px;align-items:flex-start;color:#776b73;font-size:12px;line-height:1.45}.consent input{margin-top:3px;accent-color:var(--plum)}.primary-btn{border:0;border-radius:999px;padding:12px 19px;background:var(--plum);color:white;font-size:13px;font-weight:700;box-shadow:0 7px 15px rgba(74,33,79,.16);transition:background .18s,transform .18s}.primary-btn:hover,.primary-btn:focus-visible{background:#35183a;outline:2px solid rgba(183,137,58,.6);outline-offset:2px}.primary-btn:active{transform:scale(.98)}.form-status{display:none;margin-top:14px;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.45}.form-status.success{background:#e4f1e8;color:#29613e;display:block}.form-status.error{background:#f7e5e1;color:#9b4538;display:block}.profile-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:16px}.identity-card{padding:29px;background:#3b1b40;color:white}.profile-mark{width:56px;height:56px;display:grid;place-items:center;border-radius:50%;background:#d8ad5b;color:#3b1b40;font:600 22px 'Playfair Display',Georgia,serif}.identity-card h2{margin:18px 0 0;font:600 28px/1.2 'Playfair Display',Georgia,serif}.identity-card p{margin:5px 0 0;color:rgba(255,255,255,.67);font-size:13px}.role-pill{display:inline-block;margin-top:21px;border-radius:999px;padding:5px 10px;background:rgba(255,255,255,.12);color:#ecd69d;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.profile-form{padding:28px}.profile-form h2{margin:0;color:#3b1b40;font:600 26px/1.2 'Playfair Display',Georgia,serif}.profile-form p{margin:7px 0 20px;color:var(--muted);font-size:13px}.locked{padding:11px 12px;border:1px solid #e6ddd2;border-radius:10px;background:#f8f5ef;color:#756a72;font-size:14px}.notice{margin-top:16px;color:#81757c;font-size:11px;line-height:1.5}.mobile-overlay{display:none}.mobile-overlay.open{display:block}.footer-line{margin-top:36px;color:#9a8c91;font-size:11px;text-align:center}
+    @media(max-width:980px){.portal-shell{grid-template-columns:1fr}.portal-sidebar{position:fixed;left:0;top:0;z-index:50;width:274px;transform:translateX(-105%);transition:transform .25s ease;box-shadow:22px 0 44px rgba(35,17,40,.22)}.portal-sidebar.open{transform:none}.mobile-overlay{position:fixed;inset:0;z-index:40;background:rgba(35,17,40,.46);backdrop-filter:blur(2px)}.mobile-menu{display:grid;place-items:center}.topbar{padding:0 18px}.topbar-kicker{display:none}.content{padding:28px 20px 48px}.grid-4{grid-template-columns:repeat(2,1fr)}.dashboard-grid,.form-layout,.profile-layout{grid-template-columns:1fr}}
+    @media(max-width:600px){.content{padding:23px 14px 40px}.page-title{font-size:33px}.page-description{font-size:14px}.hero{padding:29px 24px;border-radius:18px}.hero h2{font-size:28px}.grid-4{grid-template-columns:1fr}.dashboard-grid{gap:13px}.metric-grid{gap:0}.metric{padding:0 9px}.metric-number{font-size:27px}.calendar-cell{min-height:63px;padding:5px}.calendar-weekdays div{font-size:8px}.day{font-size:11px}.calendar-toolbar{padding:14px 10px}.calendar-month h3{font-size:20px}.form-card,.privacy-panel,.profile-form,.identity-card{padding:22px}.profile-chip span:last-child{display:none}.topbar{height:63px}.calendar-card{overflow-x:auto}.calendar-weekdays,.calendar-grid{min-width:560px}.calendar-card{border-radius:14px}.section-head{margin-top:27px}.section-head h2{font-size:23px}}
+  </style>
+</head>
+<body>
+  <div class="ghl-portal" id="t3l-client-portal">
+    <div class="mobile-overlay" id="mobileOverlay" aria-hidden="true"></div>
+    <div class="portal-shell">
+      <aside class="portal-sidebar" id="portalSidebar" aria-label="Client portal navigation">
+        <div class="brand"><div class="brand-mark" aria-hidden="true">T3L</div><div><div class="brand-title">Teach Them to Love</div><div class="brand-subtitle">Client portal</div></div></div>
+        <div class="nav-wrap"><div class="nav-label">Your space</div><nav class="portal-nav">
+          <button class="nav-item active" data-target="home"><span class="nav-icon">⌂</span>Home</button>
+          <button class="nav-item" data-target="updates"><span class="nav-icon">◈</span>Updates</button>
+          <button class="nav-item" data-target="events"><span class="nav-icon">◷</span>Events</button>
+          <button class="nav-item" data-target="resources"><span class="nav-icon">▤</span>Resources</button>
+          <button class="nav-item" data-target="prayer"><span class="nav-icon">♡</span>Prayer</button>
+          <button class="nav-item" data-target="profile"><span class="nav-icon">◉</span>My profile</button>
+        </nav></div>
+        <div class="sidebar-footer"><div class="secure-note"><span aria-hidden="true">⌑</span><span><strong>Private member space</strong>Prayer requests are intended for authorized ministry care teams only.</span></div></div>
+      </aside>
+      <main class="portal-main">
+        <header class="topbar"><button class="mobile-menu" id="menuButton" aria-label="Open navigation" aria-expanded="false">☰</button><p class="topbar-kicker">Community care · one step at a time</p><button class="profile-chip" data-target="profile"><span class="profile-avatar">M</span><span>My profile</span></button></header>
+        <div class="content">
+          <section class="view active" id="home">
+            <p class="eyebrow">Welcome to your portal</p><h1 class="page-title">A place to stay connected, supported, and informed.</h1><p class="page-description">Access ministry updates, outreach information, helpful resources, and a private space to submit prayer requests.</p>
+            <div class="hero"><div class="hero-label"><span class="hero-rule"></span>Our shared purpose</div><h2>A community mental wellness center dedicated to helping individuals and families get the help they need.</h2><p>Allow faith to lead you where fear refuses to go—one step at a time.</p></div>
+            <div class="section-head"><div><h2>Continue your journey</h2><p>Choose a portal area to continue.</p></div></div>
+            <div class="grid-4">
+              <button class="quick-card" data-target="updates"><span class="quick-icon purple">◈</span><h3>Ministry updates</h3><p>Read the latest ministry news and important notices.</p><span class="arrow">↗</span></button>
+              <button class="quick-card" data-target="events"><span class="quick-icon gold">◷</span><h3>Events & programs</h3><p>See upcoming outreach gatherings, services, and programs.</p><span class="arrow">↗</span></button>
+              <button class="quick-card" data-target="resources"><span class="quick-icon green">▤</span><h3>Resource library</h3><p>Access helpful guides and ministry materials.</p><span class="arrow">↗</span></button>
+              <button class="quick-card" data-target="prayer"><span class="quick-icon rose">♡</span><h3>Prayer support</h3><p>Share a private prayer request with the ministry team.</p><span class="arrow">↗</span></button>
+            </div>
+            <div class="dashboard-grid"><article class="card card-pad"><p class="eyebrow">At a glance</p><h2 style="margin:5px 0 0;font:600 26px/1.2 'Playfair Display',Georgia,serif;color:#3b1b40">Your ministry space</h2><div class="metric-grid"><div class="metric"><div class="metric-number">—</div><div class="metric-label">Updates shared</div></div><div class="metric"><div class="metric-number">—</div><div class="metric-label">Events listed</div></div><div class="metric"><div class="metric-number">—</div><div class="metric-label">Resources ready</div></div></div></article><article class="card card-pad care-card"><p class="eyebrow">Private & caring</p><h3>Need prayer?</h3><p>Share what is on your heart with a request for the authorized ministry care team.</p><button class="text-link" data-target="prayer">Submit a request&nbsp; →</button></article></div>
+          </section>
+          <section class="view" id="updates"><p class="eyebrow">Stay connected</p><h1 class="page-title">Announcements & updates</h1><p class="page-description">Important ministry news and notices are published here by the authorized ministry team.</p><article class="card empty"><div class="empty-icon">◈</div><h3>No announcements yet</h3><p>When the ministry shares a new notice or update, it will appear here for you.</p></article></section>
+          <section class="view" id="events"><p class="eyebrow">Gather together</p><h1 class="page-title">Events & programs</h1><p class="page-description">Browse outreach events, services, and programs on the ministry calendar.</p><article class="card calendar-card"><div class="calendar-toolbar"><button class="icon-btn" id="previousMonth" aria-label="Previous month">‹</button><div class="calendar-month"><h3 id="calendarMonth">Month</h3><p>Ministry calendar</p></div><button class="icon-btn" id="nextMonth" aria-label="Next month">›</button></div><div class="calendar-weekdays"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="calendar-grid" id="calendarGrid"></div></article><p class="no-events">Events are managed by your ministry’s authorized administrators and will appear here when scheduled.</p></section>
+          <section class="view" id="resources"><p class="eyebrow">Guides & materials</p><h1 class="page-title">Resource library</h1><p class="page-description">A thoughtfully organized collection of ministry materials available for your personal use.</p><article class="card empty"><div class="empty-icon" style="background:#e2efeb;color:#286d63">▤</div><h3>Resources are being prepared</h3><p>Guides, documents, and ministry materials will appear here as the team makes them available.</p></article></section>
+          <section class="view" id="prayer"><p class="eyebrow">Private prayer support</p><h1 class="page-title">Share what is on your heart</h1><p class="page-description">Your request is intended for the authorized ministry care team. Complete the form below and it will post to your configured GoHighLevel Workflow webhook.</p><div class="form-layout"><article class="card privacy-panel"><div class="empty-icon" style="background:rgba(255,255,255,.13);color:#ecd69d">♡</div><h2>A confidential space</h2><p>Share as much or as little as feels right. The ministry can receive requests through the GoHighLevel workflow configured for this portal.</p><div class="privacy-box"><span>⌑</span><span>Do not use this form for emergencies. If you are in immediate danger, call your local emergency number.</span></div></article><article class="card form-card"><h2>Prayer request</h2><p>Fields marked required are used to route your request appropriately.</p><form id="prayerRequestForm" novalidate><div class="fields"><div class="field"><label for="contactName">Your name</label><input id="contactName" name="contactName" type="text" autocomplete="name" placeholder="Enter your name" required></div><div class="field"><label for="contactEmail">Email address</label><input id="contactEmail" name="contactEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div><div class="field"><label for="ministryRole">Ministry role <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="ministryRole" name="ministryRole" type="text" placeholder="e.g., Member or Volunteer"></div><div class="field"><label for="prayerRequest">Your request</label><textarea id="prayerRequest" name="prayerRequest" maxlength="5000" placeholder="Write your prayer request here…" required></textarea></div><label class="consent"><input id="privacyConsent" type="checkbox" required><span>I understand that this request will be sent to Teach Them to Love through its configured ministry workflow.</span></label></div><button class="primary-btn" id="submitPrayerButton" type="submit">Send prayer request</button><div class="form-status" id="formStatus" role="status" aria-live="polite"></div></form></article></div></section>
+          <section class="view" id="profile"><p class="eyebrow">Your account</p><h1 class="page-title">Profile & contact details</h1><p class="page-description">This standalone GoHighLevel portal template is ready to connect to your membership and contact data sources.</p><div class="profile-layout"><article class="card identity-card"><div class="profile-mark">M</div><h2>Portal member</h2><p>Member contact details are connected through your GoHighLevel membership configuration.</p><span class="role-pill">Member access</span><p style="margin-top:23px">Administrative privileges are managed separately and are not exposed in this client template.</p></article><article class="card profile-form"><h2>Personal details</h2><p>These placeholders are designed for GHL custom values or form elements in your member-area implementation.</p><div class="fields"><div class="field"><label>Full name</label><div class="locked">{{contact.name}}</div></div><div class="field"><label>Email address</label><div class="locked">{{contact.email}}</div></div><div class="field"><label>Phone number</label><div class="locked">{{contact.phone}}</div></div><div class="field"><label>Ministry role</label><div class="locked">{{contact.ministry_role}}</div></div></div><p class="notice">Replace the placeholders above with the appropriate GoHighLevel contact custom values available in your account.</p></article></div></section>
+          <p class="footer-line">Teach Them to Love Outreach Ministries · Client portal</p>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script>
+    /* Set prayerWebhookUrl to the GHL Workflow Incoming Webhook URL before publishing. */
+    const GHL_PORTAL_CONFIG = {
+      prayerWebhookUrl: '',
+      portalSource: 'Teach Them to Love Client Portal'
+    };
+    (function () {
+      const sidebar = document.getElementById('portalSidebar');
+      const overlay = document.getElementById('mobileOverlay');
+      const menuButton = document.getElementById('menuButton');
+      const views = Array.from(document.querySelectorAll('.view'));
+      const navItems = Array.from(document.querySelectorAll('.nav-item'));
+      function showView(target) {
+        views.forEach(function (view) { view.classList.toggle('active', view.id === target); });
+        navItems.forEach(function (item) { item.classList.toggle('active', item.dataset.target === target); });
+        sidebar.classList.remove('open'); overlay.classList.remove('open'); menuButton.setAttribute('aria-expanded', 'false');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      document.querySelectorAll('[data-target]').forEach(function (button) { button.addEventListener('click', function () { showView(button.dataset.target); }); });
+      menuButton.addEventListener('click', function () { const open = sidebar.classList.toggle('open'); overlay.classList.toggle('open', open); menuButton.setAttribute('aria-expanded', String(open)); });
+      overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); menuButton.setAttribute('aria-expanded', 'false'); });
+
+      let calendarCursor = new Date(); calendarCursor.setDate(1);
+      const calendarGrid = document.getElementById('calendarGrid'); const calendarMonth = document.getElementById('calendarMonth');
+      function renderCalendar() {
+        const year = calendarCursor.getFullYear(), month = calendarCursor.getMonth();
+        const firstDay = new Date(year, month, 1).getDay(), dayCount = new Date(year, month + 1, 0).getDate();
+        const today = new Date(); calendarMonth.textContent = calendarCursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }); calendarGrid.innerHTML = '';
+        for (let i = 0; i < firstDay + dayCount; i += 1) { const cell = document.createElement('div'); cell.className = 'calendar-cell' + (i < firstDay ? ' muted' : ''); if (i >= firstDay) { const number = i - firstDay + 1; const day = document.createElement('span'); day.className = 'day'; day.textContent = number; if (today.getFullYear() === year && today.getMonth() === month && today.getDate() === number) cell.classList.add('today'); cell.appendChild(day); } calendarGrid.appendChild(cell); }
+      }
+      document.getElementById('previousMonth').addEventListener('click', function () { calendarCursor.setMonth(calendarCursor.getMonth() - 1); renderCalendar(); });
+      document.getElementById('nextMonth').addEventListener('click', function () { calendarCursor.setMonth(calendarCursor.getMonth() + 1); renderCalendar(); }); renderCalendar();
+
+      const prayerForm = document.getElementById('prayerRequestForm'); const formStatus = document.getElementById('formStatus'); const submitButton = document.getElementById('submitPrayerButton');
+      function status(message, type) { formStatus.textContent = message; formStatus.className = 'form-status ' + type; }
+      prayerForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        if (!prayerForm.checkValidity()) { prayerForm.reportValidity(); return; }
+        if (!GHL_PORTAL_CONFIG.prayerWebhookUrl) { status('Setup needed: paste the GHL Workflow Incoming Webhook URL into GHL_PORTAL_CONFIG.prayerWebhookUrl before publishing.', 'error'); return; }
+        const payload = { contactName: document.getElementById('contactName').value.trim(), contactEmail: document.getElementById('contactEmail').value.trim(), ministryRole: document.getElementById('ministryRole').value.trim(), prayerRequest: document.getElementById('prayerRequest').value.trim(), privacyConsent: document.getElementById('privacyConsent').checked, submittedAt: new Date().toISOString(), source: GHL_PORTAL_CONFIG.portalSource };
+        submitButton.disabled = true; submitButton.textContent = 'Sending…';
+        try { const response = await fetch(GHL_PORTAL_CONFIG.prayerWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error('Webhook request failed'); prayerForm.reset(); status('Your prayer request has been received with care. Thank you for sharing.', 'success'); } catch (error) { status('We could not send your request. Please try again or contact the ministry directly.', 'error'); } finally { submitButton.disabled = false; submitButton.textContent = 'Send prayer request'; }
+      });
+    }());
+  </script>
+
+<script>
+/* ============================================================================
+   T3L PORTAL ON/OFF TOGGLE
+   Flip this portal off/on without touching the app below.
+   Resolution order (first decisive source wins):
+     1. URL param       ?portal=off | ?portal=on         (quick manual test)
+     2. localStorage    't3l:portal:client' = 'off'|'on' (this browser only)
+     3. Remote flags    REMOTE_FLAGS_URL -> {"client": true|false}
+                        (point this at a JSON your platform / CORA controls
+                         to flip the portal live, no redeploy)
+     4. DEFAULT_ENABLED
+   ========================================================================== */
+(function () {
+  var KEY = 'client';
+  var DEFAULT_ENABLED = true;
+  var REMOTE_FLAGS_URL = '';   // e.g. 'https://your-platform.example/t3l-portal-flags.json'
+
+  var wrap = document.getElementById('t3l-client-portal')
+          || document.getElementById('t3l-admin-portal')
+          || document.querySelector('.admin-shell')
+          || document.querySelector('.ghl-portal')
+          || document.body;
+
+  function offline() {
+    if (wrap.__t3lOff) return; wrap.__t3lOff = true;
+    wrap.style.display = 'none';
+    var d = document.createElement('div');
+    d.setAttribute('role', 'status');
+    d.style.cssText = 'min-height:70vh;display:grid;place-items:center;text-align:center;'
+      + 'padding:48px 24px;font-family:Poppins,\"Segoe UI\",system-ui,sans-serif;background:#2a123f;color:#fff';
+    d.innerHTML = '<div style="max-width:40ch">'
+      + '<p style="text-transform:uppercase;letter-spacing:.14em;font-size:.75rem;color:#e0b23c;margin:0 0 10px">Teach Them To Love</p>'
+      + '<h1 style="font-family:Georgia,serif;font-weight:700;font-size:clamp(1.6rem,5vw,2.4rem);margin:0 0 10px">This portal is currently offline</h1>'
+      + '<p style="opacity:.85;margin:0 0 20px">Please check back soon. If you need support now, call '
+      + '<a href="tel:+15126492693" style="color:#e0b23c;font-weight:600">512-649-2693</a>.</p>'
+      + '<a href="/" style="display:inline-block;background:#e0b23c;color:#221530;font-weight:600;'
+      + 'padding:12px 22px;border-radius:999px;text-decoration:none">Return to main site</a></div>';
+    (wrap.parentNode || document.body).insertBefore(d, wrap);
+  }
+  function online() { wrap.style.display = ''; }
+  function apply(on) { on ? online() : offline(); }
+
+  try { var p = new URLSearchParams(location.search).get('portal');
+    if (p === 'off') { apply(false); return; }
+    if (p === 'on')  { apply(true);  return; }
+  } catch (e) {}
+
+  try { var ls = localStorage.getItem('t3l:portal:' + KEY);
+    if (ls === 'off') { apply(false); return; }
+    if (ls === 'on')  { apply(true);  return; }
+  } catch (e) {}
+
+  if (REMOTE_FLAGS_URL) {
+    wrap.style.visibility = 'hidden';
+    fetch(REMOTE_FLAGS_URL, { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (f) { wrap.style.visibility = ''; apply(!(f && f[KEY] === false)); })
+      .catch(function () { wrap.style.visibility = ''; apply(DEFAULT_ENABLED); });
+  } else {
+    apply(DEFAULT_ENABLED);
+  }
+})();
+</script>
+
+</body>
+</html>
