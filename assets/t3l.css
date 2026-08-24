@@ -147,12 +147,13 @@
 #t3l-ghl .nav a { color: var(--t3l-ink); font-weight: 500; font-size: 0.96rem; }
 #t3l-ghl .nav a:hover { color: var(--t3l-purple-600); text-decoration: none; }
 #t3l-ghl .nav .nav-give {
-  background: var(--t3l-purple-700);
-  color: #fff;
+  background: var(--t3l-gold);
+  color: var(--t3l-ink);
+  font-weight: 600;
   padding: 9px 18px;
   border-radius: 999px;
 }
-#t3l-ghl .nav .nav-give:hover { background: var(--t3l-purple-800); }
+#t3l-ghl .nav .nav-give:hover { background: var(--t3l-gold-dark); color: var(--t3l-ink); }
 
 #t3l-ghl .menu-toggle {
   display: none;
@@ -168,10 +169,29 @@
 /* --- Hero ------------------------------------------------------------- */
 #t3l-ghl .hero {
   background:
-    linear-gradient(150deg, rgba(42, 18, 63, 0.92), rgba(76, 34, 120, 0.82)),
-    radial-gradient(circle at 80% 20%, rgba(224, 178, 60, 0.28), transparent 55%);
+    linear-gradient(100deg,
+      rgba(42, 18, 63, 0.95) 0%,
+      rgba(50, 22, 74, 0.82) 32%,
+      rgba(59, 26, 92, 0.48) 60%,
+      rgba(76, 34, 120, 0.20) 100%),
+    url('img/hero-counseling.webp');
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
   color: #fff;
   padding: clamp(64px, 10vw, 120px) 0;
+}
+
+/* Narrow screens: darken the wash so the headline stays legible over the photo */
+@media (max-width: 720px) {
+  #t3l-ghl .hero {
+    background:
+      linear-gradient(180deg, rgba(42, 18, 63, 0.9), rgba(59, 26, 92, 0.86)),
+      url('img/hero-counseling.webp');
+    background-size: cover;
+    background-position: center right;
+    background-repeat: no-repeat;
+  }
 }
 #t3l-ghl .hero .eyebrow { color: var(--t3l-gold); }
 #t3l-ghl .hero h1 { color: #fff; }
