@@ -25,22 +25,26 @@ Each portal resolves its enabled state on load, first decisive source wins:
 When a portal is off, its app is hidden and a branded "This portal is currently
 offline" notice shows instead, with the T3L phone number and a link home.
 
-### Flip it from CORA (live, no redeploy)
+### Flip it from CORA
 
-1. Host a flags JSON where your platform can update it (Supabase Storage, an
-   edge function, a Vercel route, or this repo's `portals/flags.json` if CORA
-   commits to the repo). It must return, with permissive CORS for the site
-   origin:
-   ```json
-   { "client": true, "admin": false }
-   ```
-2. In **both** `client.html` and `admin.html`, set:
-   ```js
-   var REMOTE_FLAGS_URL = 'https://your-platform.example/t3l-portal-flags.json';
-   ```
-   (Set it in the GoHighLevel embed copy too, if you embed there.)
-3. To take a portal offline, have CORA set that key to `false`. Viewers loading
-   the portal next get the offline notice. Set it back to `true` to restore.
+`REMOTE_FLAGS_URL` is already wired to this site's own **`/portals/flags.json`**
+(same origin — no CORS setup needed). To take a portal offline, have CORA edit
+that file and set the key to `false`:
+
+```json
+{ "client": true, "admin": false }
+```
+
+Viewers loading the portal next get the offline notice; set it back to `true` to
+restore. Because the file is served by the site, a change takes effect on the
+**next deploy** (CORA commits `flags.json` → the host rebuilds). A missing key
+or fetch error falls back to `DEFAULT_ENABLED` (on).
+
+Want instant flips with no deploy? Point `REMOTE_FLAGS_URL` (in both
+`client.html` and `admin.html`, and in the GoHighLevel embed copy if you embed
+there) at a live endpoint CORA updates directly — a Supabase Storage object,
+an edge function, or a Vercel route — returning the same JSON shape with
+permissive CORS for the site origin.
 
 A missing key or a fetch error falls back to `DEFAULT_ENABLED` (on), so a flags
 outage never hard-breaks the portal.
