@@ -10,7 +10,8 @@ Georgetown, TX.
 | --- | --- |
 | `index.html` | Complete, self-contained landing page. Open directly in a browser to preview. |
 | `assets/t3l.css` | Stylesheet for the site. All rules are scoped to `#t3l-ghl` so the markup can be embedded without style collisions. |
-| `embed/t3l-ghl-embed.html` | The raw markup block only (no `<head>`, no styles) intended to be pasted into a GoHighLevel (GHL) custom-code / HTML element. |
+| `embed/t3l-ghl-embed.html` | The raw markup block only (no `<head>`, no styles) intended to be pasted into a GoHighLevel (GHL) custom-code / HTML element. Requires the CSS and images to be provided separately. |
+| `embed/t3l-ghl-embed.selfcontained.html` | **Drop-in GHL block.** Same markup with the CSS inlined and all images embedded as data URIs — paste the whole file into one GHL Custom Code element, no separate CSS paste and no image hosting required. ~674 KB. |
 | `assets/img/` | Self-hosted images (logo, founder photo, event artwork) so the site does not depend on external CDNs. |
 
 ## Images
@@ -21,7 +22,7 @@ external CDN:
 | File | Used in | Notes |
 | --- | --- | --- |
 | `t3l-logo.png` | Header + footer | Round gold T3L medallion (121×121). |
-| `founder.png` | Our Story section | Dr. Lolita R. Gilmore-Randall (432×532). |
+| `founder.webp` | Our Story section | Dr. Lolita R. Gilmore-Randall (432×532). |
 | `event-shades-of-purple.webp` | Events section | "Shades of Purple: An Urban Night Affair" flyer. |
 
 Paths are **relative** (`assets/img/…`). This works for `index.html` /
