@@ -472,6 +472,12 @@
   #t3l-ghl h1 span { white-space: normal !important; }
 }
 
+/* In-page anchor targets: offset for the sticky header so headings aren't
+   hidden underneath when a nav link jumps to a section. */
+#t3l-ghl section[id],
+#t3l-ghl #t3l-main-content { scroll-margin-top: 88px; }
+
 @media (prefers-reduced-motion: reduce) {
   #t3l-ghl * { transition: none !important; }
+  html { scroll-behavior: auto !important; }
 }
