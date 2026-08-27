@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://teachthemtolove.com/sitemap.xml
+Sitemap: https://t3loutreach.org/sitemap.xml
