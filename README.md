@@ -42,7 +42,8 @@ external CDN:
 | --- | --- | --- |
 | `t3l-logo.png` | Header + footer | Round gold T3L medallion (121×121). |
 | `founder.webp` | Our Story section | Dr. Lolita R. Gilmore-Randall (432×532). |
-| `event-shades-of-purple.webp` | Events section | "Shades of Purple: An Urban Night Affair" flyer (now shown with the post-event thank-you message). |
+| `event-shades-of-purple.webp` | (unused, kept for reference) | Full "Shades of Purple: An Urban Night Affair" flyer, including ticket QR. |
+| `event-shades-of-purple-thanks.webp` | Events section | Flyer cropped to title and speakers (ticket/RSVP area removed) for the post-event thank-you. |
 | `hero-counseling.webp` | Hero background | Counseling scene shown behind the purple wash (subject on the right). |
 
 Paths are **relative** (`assets/img/…`). This works for `index.html` /
