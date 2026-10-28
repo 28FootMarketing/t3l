@@ -16,6 +16,9 @@ Georgetown, TX.
 | `404.html` | Themed "page not found" page (served automatically by static hosts such as Vercel). |
 | `robots.txt` | Allows all crawlers and points to the sitemap. |
 | `sitemap.xml` | Single-page sitemap for search engines. |
+| `terms.html` | Terms of Service. **Draft pending attorney review** (noindex until approved; see comments at top of file). Linked from every page footer. |
+| `vercel.json` | Security headers (nosniff, Referrer-Policy, Permissions-Policy) for every path. |
+| `.well-known/security.txt` | RFC 9116 vulnerability-disclosure contact. Renew the `Expires` date before 2027-10-28. |
 
 ## Standalone hosting (off GoHighLevel)
 
