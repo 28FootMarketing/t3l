@@ -29,10 +29,22 @@ visitor without an admin session never receives it.
    `admin` in `public.t3l_portal_members`. Non-admins get `403` and never
    receive the markup.
 
-Roles live in `public.t3l_portal_members (user_id, email, role, status, …)` with
-RLS: a user can read only their own row; admins can read all. **All writes go
-through the edge function (service role) only** — the browser never holds a
-privileged key.
+### Role tiers
+
+`super_admin` > `admin` > `client`, stored in
+`public.t3l_portal_members (user_id, email, role, status, …)`:
+
+- **super_admin** — full control, including creating/promoting/removing admins
+  and other super admins (the last active super admin is protected and can't be
+  removed). Manages everyone from the admin portal's **People & access** screen.
+- **admin** — manages content and client members; can invite/revoke *clients*
+  only, and cannot touch admin or super-admin accounts.
+- **client** — member access to the client portal.
+
+RLS: a user can read only their own row; an admin or super admin can read all.
+**All writes go through the edge function (service role) only** — the browser
+never holds a privileged key, and role changes are enforced super-admin-only
+server-side.
 
 ## Backend (Supabase project `neptxzpueslyzfgaktez`)
 
@@ -51,7 +63,7 @@ Edge-function actions: `status`, `bootstrap`, `me`, `app`, `invite`,
 1. **Apply the migration** (`supabase/migrations/0001_t3l_portal_auth.sql`) and
    **deploy** `supabase/functions/t3l-portal` with `verify_jwt = false`.
 2. **Set the function secret** `T3L_FIRST_ADMIN_EMAIL` to the ministry’s
-   administrator email.
+   **super administrator** email (bootstraps the first super admin).
 3. **Auth → Providers → Email:** enable **Email** with **magic link** on.
 4. **Auth → URL Configuration:** set **Site URL** to `https://t3loutreach.org`
    and add **Redirect URLs**: `https://t3loutreach.org/portals/login.html`,
@@ -60,11 +72,12 @@ Edge-function actions: `status`, `bootstrap`, `me`, `app`, `invite`,
 5. **(Recommended) SMTP:** configure a custom SMTP sender (Auth → Emails) so
    invite / magic-link emails deliver reliably; the default sender is heavily
    rate-limited.
-6. **Create the first admin:** open `login.html` → **First-time setup** →
-   *Send administrator setup link*. Open the emailed link to finish. After that,
-   invite everyone else from inside the admin portal (or via the `invite`
-   action). Keep **“Allow new users to sign up” enabled** at the project level
-   (invite-only is enforced in the app), *or* pre-create users via invite.
+6. **Create the first super admin:** open `login.html` → **First-time setup** →
+   *Send administrator setup link* (goes to `T3L_FIRST_ADMIN_EMAIL`). Open the
+   emailed link to finish. After that, invite and manage everyone else from the
+   admin portal’s **People & access** screen. Keep **“Allow new users to sign
+   up” enabled** at the project level (invite-only is enforced in the app), *or*
+   pre-create users via invite.
 
 ## The CORA on/off toggle (unchanged)
 

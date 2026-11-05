@@ -38,7 +38,7 @@
             <button class="nav-item" data-target="resources"><span class="nav-icon">▤</span>Resource library</button>
             <button class="nav-item" data-target="prayer"><span class="nav-icon">♡</span>Prayer care</button>
           </nav>
-          <div class="nav-label">Portal controls</div><nav class="admin-nav"><button class="nav-item" data-target="settings"><span class="nav-icon">⌑</span>Configuration</button></nav>
+          <div class="nav-label">Portal controls</div><nav class="admin-nav"><button class="nav-item" data-target="people"><span class="nav-icon">◉</span>People &amp; access</button><button class="nav-item" data-target="settings"><span class="nav-icon">⌑</span>Configuration</button></nav>
         </div>
         <div class="sidebar-footer"><div class="secure-note"><span aria-hidden="true">⌑</span><span><strong>Restricted workspace</strong>Publish this page only behind GoHighLevel membership access for authorized administrators.</span></div></div>
       </aside>
@@ -56,7 +56,7 @@
           <section class="view" id="events"><p class="eyebrow">Plan ministry moments</p><h1 class="page-title">Events & programs</h1><p class="page-description">Add a calendar entry with the information clients need to participate. Submissions post an <code>event.create</code> action to GoHighLevel.</p><div class="workspace"><article class="card form-card"><h2>New event</h2><p>Dates and times should be reviewed carefully before publishing to the client portal.</p><form class="admin-action-form" data-action="event.create"><div class="fields"><div class="two-col"><div class="field"><label for="eventTitle">Event title</label><input id="eventTitle" name="title" maxlength="180" placeholder="Event or program name" required></div><div class="field"><label for="eventLocation">Location</label><input id="eventLocation" name="location" maxlength="240" placeholder="Address or meeting location" required></div></div><div class="two-col"><div class="field"><label for="eventStart">Start date & time</label><input id="eventStart" name="startAt" type="datetime-local" required></div><div class="field"><label for="eventEnd">End date & time <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="eventEnd" name="endAt" type="datetime-local"></div></div><div class="field"><label for="eventDescription">Description</label><textarea id="eventDescription" name="description" maxlength="10000" placeholder="Describe the event, service, or program…" required></textarea></div></div><button class="primary-btn" type="submit">Publish event</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card workflow-card"><p class="eyebrow">Workflow action</p><h3>event.create</h3><p>Use the incoming record to update your calendar source or alert the events team.</p></article><article class="card"><div class="table-header"><h3>Event schedule</h3></div><div class="zero-table"><strong>No events loaded</strong>Connect a GHL workflow or data integration to show published calendar records.</div></article></aside></div></section>
           <section class="view" id="resources"><p class="eyebrow">Curate helpful materials</p><h1 class="page-title">Resource library</h1><p class="page-description">Publish a resource link for the client portal. Host the file in GoHighLevel Media Storage or another approved secure location, then provide its URL.</p><div class="workspace"><article class="card form-card"><h2>Publish a resource</h2><p>Use direct, durable file URLs and descriptive titles so members can identify the material.</p><form class="admin-action-form" data-action="resource.create"><div class="fields"><div class="field"><label for="resourceTitle">Resource title</label><input id="resourceTitle" name="title" maxlength="180" placeholder="Guide or material title" required></div><div class="field"><label for="resourceUrl">Resource URL</label><input id="resourceUrl" name="resourceUrl" type="url" placeholder="https://…" required></div><div class="field"><label for="resourceDescription">Description <span style="font-weight:400;color:#8d8086">(optional)</span></label><textarea id="resourceDescription" name="description" maxlength="3000" placeholder="Explain how this resource supports members…"></textarea></div></div><button class="primary-btn" type="submit">Publish resource</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card workflow-card"><p class="eyebrow">Workflow action</p><h3>resource.create</h3><p>Store the item’s title, description, and approved URL in the source used by the client library.</p></article><article class="card"><div class="table-header"><h3>Library status</h3></div><div class="zero-table"><strong>No resources loaded</strong>Published library items can be listed here once a data source is connected.</div></article></aside></div></section>
           <section class="view" id="prayer"><p class="eyebrow">Private care workflow</p><h1 class="page-title">Prayer care</h1><p class="page-description">Update a prayer-request care status without placing private request text inside this static template. The workflow action is <code>prayer.status.update</code>.</p><div class="admin-alert"><span>⌑</span><span><strong>Handle private information with discretion.</strong> Restrict this page to authorized administrators, and keep request details inside the permission-controlled GoHighLevel records or notifications that your team uses.</span></div><div class="workspace" style="margin-top:16px"><article class="card form-card"><h2>Update care status</h2><p>Enter the GHL record, contact, or request identifier that your workflow uses to locate the request.</p><form class="admin-action-form" data-action="prayer.status.update"><div class="fields"><div class="field"><label for="prayerRequestId">Request or contact ID</label><input id="prayerRequestId" name="requestId" maxlength="180" placeholder="GHL record or contact identifier" required></div><div class="field"><label for="prayerStatus">Care status</label><select id="prayerStatus" name="status" required><option value="received">Received</option><option value="in_prayer">In prayer</option><option value="closed">Closed</option></select></div><div class="field"><label for="prayerNote">Internal note <span style="font-weight:400;color:#8d8086">(optional)</span></label><textarea id="prayerNote" name="internalNote" maxlength="2000" placeholder="Internal care-team note only…"></textarea></div></div><button class="primary-btn" type="submit">Update care status</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card security-card"><p class="eyebrow" style="color:#ecd69d">Required control</p><h3>Page-level access</h3><p>The static page provides no authentication by itself. GHL Membership access, an administrator-only offer, or an equivalent server-enforced control must protect this URL.</p><code>Client access ≠ administrator access</code></article><article class="card"><div class="table-header"><h3>Pending care queue</h3></div><div class="zero-table"><strong>No requests loaded</strong>Display sensitive records only from a restricted, authenticated GoHighLevel data source.</div></article></aside></div></section>
-          <section class="view" id="settings"><p class="eyebrow">Portal controls</p><h1 class="page-title">Configuration</h1><p class="page-description">Review the publishing and workflow controls required before making the administrator portal available to ministry staff.</p><div class="settings-grid"><article class="card security-card"><p class="eyebrow" style="color:#ecd69d">1. Protect the page</p><h3>Use GoHighLevel membership access.</h3><p>Publish the administrator portal in a distinct, private page path. Associate it only with an administrator offer or membership entitlement. Keep its URL out of public and client navigation.</p><code>Recommended: /ministry-admin</code></article><article class="card workflow-card"><p class="eyebrow">2. Connect the webhook</p><h3>Configure one administrative workflow endpoint.</h3><p>In the script below, set <code>GHL_ADMIN_CONFIG.adminWebhookUrl</code> to a GoHighLevel Workflow Incoming Webhook URL. The action property enables workflow branching.</p><code style="display:block;margin-top:14px;word-break:break-word">announcement.create · event.create · resource.create · prayer.status.update</code></article><article class="card form-card"><h2>Action payload</h2><p>Every management form sends the action type, form data, an ISO submission timestamp, and this portal’s source label.</p><div class="fields"><div class="field"><label>Source label</label><div style="padding:11px 12px;border:1px solid #e6ddd2;border-radius:10px;background:#f8f5ef;color:#756a72;font-size:14px">Teach Them to Love Administrator Portal</div></div><div class="field"><label>Webhook status</label><div style="padding:11px 12px;border:1px solid #e6ddd2;border-radius:10px;background:#f8f5ef;color:#756a72;font-size:14px">Not configured in this delivery</div></div></div></article><article class="card form-card"><h2>Before publishing</h2><p>Complete these checks in the GoHighLevel preview and workflow builder.</p><div class="workflow-list"><div class="workflow-step"><span class="step-number">1</span><span>Confirm that a non-admin account cannot visit this page.</span></div><div class="workflow-step"><span class="step-number">2</span><span>Set the webhook URL in the script and submit a non-sensitive test action.</span></div><div class="workflow-step"><span class="step-number">3</span><span>Verify that each action is routed to the intended workflow branch and protected data store.</span></div></div></article></div></section>
+          <section class="view" id="people"><p class="eyebrow">Accounts &amp; roles</p><h1 class="page-title">People &amp; access</h1><p class="page-description">Invite members and administrators, and manage who can sign in. Accounts are invitation-only &mdash; invited people receive a secure sign-in link by email (no passwords).</p><div class="workspace"><article class="card form-card"><h2>Invite someone</h2><p>They&rsquo;ll receive an email with a secure link to finish signing in.</p><form id="t3lInviteForm"><div class="fields"><div class="field"><label for="inviteEmail">Email address</label><input id="inviteEmail" type="email" autocomplete="off" placeholder="name@example.com" required></div><div class="field" id="inviteRoleField"><label for="inviteRole">Role</label><select id="inviteRole"><option value="client">Client (member)</option><option value="admin">Administrator</option><option value="super_admin">Super administrator</option></select></div></div><button class="primary-btn" type="submit">Send invitation</button><div class="form-status" id="inviteStatus" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card"><div class="table-header"><div><h3>Members &amp; administrators</h3><span id="peopleCount"></span></div><button id="peopleRefresh" type="button" class="secondary-btn" style="margin:0">Refresh</button></div><div id="peopleList"><div class="zero-table"><strong>Loading&hellip;</strong>Fetching the current roster.</div></div></article></aside></div></section><section class="view" id="settings"><p class="eyebrow">Portal controls</p><h1 class="page-title">Configuration</h1><p class="page-description">Review the publishing and workflow controls required before making the administrator portal available to ministry staff.</p><div class="settings-grid"><article class="card security-card"><p class="eyebrow" style="color:#ecd69d">1. Protect the page</p><h3>Use GoHighLevel membership access.</h3><p>Publish the administrator portal in a distinct, private page path. Associate it only with an administrator offer or membership entitlement. Keep its URL out of public and client navigation.</p><code>Recommended: /ministry-admin</code></article><article class="card workflow-card"><p class="eyebrow">2. Connect the webhook</p><h3>Configure one administrative workflow endpoint.</h3><p>In the script below, set <code>GHL_ADMIN_CONFIG.adminWebhookUrl</code> to a GoHighLevel Workflow Incoming Webhook URL. The action property enables workflow branching.</p><code style="display:block;margin-top:14px;word-break:break-word">announcement.create · event.create · resource.create · prayer.status.update</code></article><article class="card form-card"><h2>Action payload</h2><p>Every management form sends the action type, form data, an ISO submission timestamp, and this portal’s source label.</p><div class="fields"><div class="field"><label>Source label</label><div style="padding:11px 12px;border:1px solid #e6ddd2;border-radius:10px;background:#f8f5ef;color:#756a72;font-size:14px">Teach Them to Love Administrator Portal</div></div><div class="field"><label>Webhook status</label><div style="padding:11px 12px;border:1px solid #e6ddd2;border-radius:10px;background:#f8f5ef;color:#756a72;font-size:14px">Not configured in this delivery</div></div></div></article><article class="card form-card"><h2>Before publishing</h2><p>Complete these checks in the GoHighLevel preview and workflow builder.</p><div class="workflow-list"><div class="workflow-step"><span class="step-number">1</span><span>Confirm that a non-admin account cannot visit this page.</span></div><div class="workflow-step"><span class="step-number">2</span><span>Set the webhook URL in the script and submit a non-sensitive test action.</span></div><div class="workflow-step"><span class="step-number">3</span><span>Verify that each action is routed to the intended workflow branch and protected data store.</span></div></div></article></div></section>
           <p class="footer-line">Teach Them to Love Outreach Ministries · Administrator portal</p>
         </div>
       </main>
@@ -198,6 +198,87 @@
     if (btn) btn.addEventListener('click', function () { T3L_AUTH.signOut(); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+})();
+</script>
+<script>
+/* People & access — invite / list / role / revoke via the t3l-portal function. */
+(function () {
+  var viewer = null;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function isSuper(){ return !!(viewer && viewer.role === 'super_admin' && viewer.status === 'active'); }
+  function roleLabel(r){ return r === 'super_admin' ? 'Super admin' : r === 'admin' ? 'Administrator' : 'Client'; }
+  function rolePill(r){
+    var bg = r === 'super_admin' ? '#efe3f0;color:#5d2b62' : r === 'admin' ? '#f6eedb;color:#936a21' : '#e2efeb;color:#286d63';
+    return '<span style="display:inline-block;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;background:'+bg+'">'+roleLabel(r)+'</span>';
+  }
+  function setInviteRoles(){
+    var sel = document.getElementById('inviteRole'); if (!sel) return;
+    if (!isSuper()) sel.innerHTML = '<option value="client">Client (member)</option>';
+  }
+  function renderPeople(members){
+    var host = document.getElementById('peopleList');
+    var cnt = document.getElementById('peopleCount');
+    if (cnt) cnt.textContent = members.length + (members.length === 1 ? ' account' : ' accounts');
+    if (!members.length){ host.innerHTML = '<div class="zero-table"><strong>No one yet</strong>Invite your first member or administrator.</div>'; return; }
+    var rows = members.map(function (m){
+      var controls = '';
+      if (isSuper()){
+        var opts = ['client','admin','super_admin'].map(function(r){ return '<option value="'+r+'"'+(m.role===r?' selected':'')+'>'+roleLabel(r)+'</option>'; }).join('');
+        controls += '<select class="t3l-role-sel" data-uid="'+esc(m.user_id)+'" style="border:1px solid #dfd3c6;border-radius:8px;padding:6px 8px;font-size:12px">'+opts+'</select>';
+        if (m.status !== 'revoked') controls += ' <button class="t3l-revoke" data-uid="'+esc(m.user_id)+'" style="border:0;background:transparent;color:#a04c43;font-weight:700;font-size:12px;cursor:pointer">Revoke</button>';
+      } else if (m.role === 'client' && m.status !== 'revoked'){
+        controls += '<button class="t3l-revoke" data-uid="'+esc(m.user_id)+'" style="border:0;background:transparent;color:#a04c43;font-weight:700;font-size:12px;cursor:pointer">Revoke</button>';
+      }
+      var revoked = m.status === 'revoked' ? ' <span style="color:#a04c43;font-size:11px;font-weight:700">(revoked)</span>' : '';
+      return '<tr style="border-top:1px solid #efe6da"><td style="padding:11px 14px 11px 2px">'+esc(m.email)+revoked+'</td>'
+        + '<td style="padding:11px 10px;white-space:nowrap">'+rolePill(m.role)+'</td>'
+        + '<td style="padding:11px 2px 11px 10px;text-align:right;white-space:nowrap">'+controls+'</td></tr>';
+    }).join('');
+    host.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px"><tbody>'+rows+'</tbody></table>';
+    host.querySelectorAll('.t3l-role-sel').forEach(function(sel){
+      sel.addEventListener('change', async function(){
+        sel.disabled = true;
+        var r = await T3L_AUTH.callFn('set_role', { user_id: sel.dataset.uid, role: sel.value });
+        sel.disabled = false;
+        if (!r.ok) alert((r.data && r.data.error) || 'Could not change the role.');
+        refresh();
+      });
+    });
+    host.querySelectorAll('.t3l-revoke').forEach(function(b){
+      b.addEventListener('click', async function(){
+        if (!confirm('Revoke portal access for this account?')) return;
+        b.disabled = true;
+        var r = await T3L_AUTH.callFn('revoke', { user_id: b.dataset.uid });
+        if (!r.ok) alert((r.data && r.data.error) || 'Could not revoke access.');
+        refresh();
+      });
+    });
+  }
+  async function refresh(){
+    var r = await T3L_AUTH.callFn('list_members', {});
+    if (r.ok && r.data) renderPeople(r.data.members || []);
+    else document.getElementById('peopleList').innerHTML = '<div class="zero-table"><strong>Could not load</strong>Please refresh and try again.</div>';
+  }
+  function init(){
+    var form = document.getElementById('t3lInviteForm');
+    if (form) form.addEventListener('submit', async function(e){
+      e.preventDefault();
+      var email = document.getElementById('inviteEmail').value.trim();
+      var roleEl = document.getElementById('inviteRole');
+      var role = roleEl ? roleEl.value : 'client';
+      var st = document.getElementById('inviteStatus');
+      var btn = form.querySelector('button[type=submit]');
+      st.className = 'form-status'; btn.disabled = true;
+      var r = await T3L_AUTH.callFn('invite', { email: email, role: role, redirectTo: location.origin + T3L_AUTH.LOGIN_PATH });
+      btn.disabled = false;
+      if (r.ok && r.data && r.data.ok){ st.textContent = 'Invitation sent to ' + email + '.'; st.className = 'form-status success'; form.reset(); refresh(); }
+      else { st.textContent = (r.data && r.data.error) || 'Could not send the invitation.'; st.className = 'form-status error'; }
+    });
+    var rb = document.getElementById('peopleRefresh');
+    if (rb) rb.addEventListener('click', refresh);
+    (async function(){ try { viewer = await T3L_AUTH.me(); } catch (e) {} setInviteRoles(); refresh(); })();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 </script>
 </body>

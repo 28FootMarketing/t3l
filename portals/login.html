@@ -87,7 +87,7 @@
     function hide() { msg.className = 'msg'; }
 
     function routeByRole(member) {
-      if (member && member.status === 'active' && member.role === 'admin') { location.href = T3L_AUTH.ADMIN_PATH; return; }
+      if (member && member.status === 'active' && (member.role === 'admin' || member.role === 'super_admin')) { location.href = T3L_AUTH.ADMIN_PATH; return; }
       if (member && member.status === 'active') { location.href = T3L_AUTH.CLIENT_PATH; return; }
       // Signed in but not an authorized member.
       show('You’re signed in, but this email isn’t set up for portal access yet. Please contact the ministry to request access.', 'err');
