@@ -1,95 +1,83 @@
 # T3L Portals — Client & Admin
 
-Two self-contained GoHighLevel portal pages, each with a built-in **on/off
-toggle** so you can take a portal offline without editing the app or redeploying.
+Two member portals with **real sign-in** (Supabase Auth, passwordless magic
+link), **invite-only** accounts, and a **server-enforced admin gate**.
 
 | File | What it is |
 | --- | --- |
-| `client.html` | Member-facing client portal (home, events calendar, prayer request form). |
-| `admin.html` | **Admin-only** portal (announcements, events, resources, prayer-status). Keep it behind private access — never link it publicly. |
-| `flags.json` | The on/off switch your platform (CORA) controls: `{ "client": true, "admin": true }`. |
+| `login.html` | Passwordless sign-in. Emails a magic link, then routes by role. |
+| `client.html` | Member-facing client portal. Hidden until a valid member session is confirmed. |
+| `admin.html` | **Loader only.** Fetches the admin UI from the server; the markup is delivered **only** to a verified admin session. |
+| `auth.js` | Shared Supabase config + helpers (public anon key only). |
+| `flags.json` | The CORA on/off toggle reference `{ "client": true, "admin": true }`. |
 
-Each portal keeps its original GoHighLevel webhook wiring (prayer form, admin
-actions). See the notes at the top of each HTML file and the original vendor
-docs for webhook setup — this README only covers the toggle.
+The admin interface markup itself lives server-side in the `t3l-portal` edge
+function (`supabase/functions/t3l-portal/`), not in the deployed site, so a
+visitor without an admin session never receives it.
 
-## The on/off toggle
+## How authentication works
 
-Each portal resolves its enabled state on load, first decisive source wins:
+1. A member opens `client.html` (or `admin.html`). With no session they are sent
+   to `login.html`.
+2. They enter their email and receive a **magic link** (no password). Accounts
+   are **invite-only** — `login.html` uses `shouldCreateUser:false`, so unknown
+   emails cannot self-register.
+3. After the link, the session is established and they are routed by role:
+   `admin` → `admin.html`, member → `client.html`.
+4. `admin.html` asks the `t3l-portal` edge function (`action:"app"`) for the
+   admin UI. The function verifies the JWT **and** that the caller is an active
+   `admin` in `public.t3l_portal_members`. Non-admins get `403` and never
+   receive the markup.
 
-1. **URL param** — `?portal=off` or `?portal=on`. Quick manual test; nothing saved.
-2. **localStorage** — `t3l:portal:client` / `t3l:portal:admin` set to `'off'` or `'on'`. Per-browser.
-3. **Remote flags JSON** — the `REMOTE_FLAGS_URL` constant in each file, pointed at a JSON like `flags.json`. **This is the CORA hook.**
-4. **Default** — `DEFAULT_ENABLED = true` in each file.
+Roles live in `public.t3l_portal_members (user_id, email, role, status, …)` with
+RLS: a user can read only their own row; admins can read all. **All writes go
+through the edge function (service role) only** — the browser never holds a
+privileged key.
 
-When a portal is off, its app is hidden and a branded "This portal is currently
-offline" notice shows instead, with the T3L phone number and a link home.
+## Backend (Supabase project `neptxzpueslyzfgaktez`)
 
-### Flip it from CORA (Telegram command)
+- **Migration:** `supabase/migrations/0001_t3l_portal_auth.sql`
+- **Edge function:** `supabase/functions/t3l-portal/index.ts` (gate + member
+  management). Deploy with `verify_jwt = false` (it verifies JWTs itself so it
+  can also serve the public `status`/`bootstrap` actions).
+- **Server secret:** `T3L_FIRST_ADMIN_EMAIL` — the one email allowed to
+  bootstrap the first admin.
 
-Text CORA (the Telegram bot) — handled by the `cora-telegram` edge function as a
-deterministic command, so it flips instantly and doesn't burn an LLM turn:
+Edge-function actions: `status`, `bootstrap`, `me`, `app`, `invite`,
+`list_members`, `set_role`, `revoke`.
 
-```
-portal admin off        portal admin on
-portal client off       portal client on
-portal all off          portal all on        (both at once)
-portal status           (report current on/off state)
-```
+## One-time setup checklist (must be done in the Supabase dashboard)
 
-CORA replies e.g. "Done — T3L admin portal taken offline." and writes an audit
-row to `cora_action_log` (`action:set_portal`). Under the hood it's the same
-`t3l_portal_flags` update as the SQL below.
+1. **Apply the migration** (`supabase/migrations/0001_t3l_portal_auth.sql`) and
+   **deploy** `supabase/functions/t3l-portal` with `verify_jwt = false`.
+2. **Set the function secret** `T3L_FIRST_ADMIN_EMAIL` to the ministry’s
+   administrator email.
+3. **Auth → Providers → Email:** enable **Email** with **magic link** on.
+4. **Auth → URL Configuration:** set **Site URL** to `https://t3loutreach.org`
+   and add **Redirect URLs**: `https://t3loutreach.org/portals/login.html`,
+   `https://www.t3loutreach.org/portals/login.html`, and your
+   `*.vercel.app` preview URL if used.
+5. **(Recommended) SMTP:** configure a custom SMTP sender (Auth → Emails) so
+   invite / magic-link emails deliver reliably; the default sender is heavily
+   rate-limited.
+6. **Create the first admin:** open `login.html` → **First-time setup** →
+   *Send administrator setup link*. Open the emailed link to finish. After that,
+   invite everyone else from inside the admin portal (or via the `invite`
+   action). Keep **“Allow new users to sign up” enabled** at the project level
+   (invite-only is enforced in the app), *or* pre-create users via invite.
 
-### Flip it from CORA (live Supabase — instant, no deploy)
+## The CORA on/off toggle (unchanged)
 
-`REMOTE_FLAGS_URL` is wired to a live Supabase edge function that returns the
-current flags with open CORS and `Cache-Control: no-store`:
-
-```
-https://mgtmqucaldkaxvxglguw.supabase.co/functions/v1/t3l-portal-flags
-   ->  { "client": true, "admin": true }
-```
-
-- **Project:** 28 Foot Systems (`mgtmqucaldkaxvxglguw`)
-- **Function:** `t3l-portal-flags` (public, `verify_jwt=false`) — reads the table
-  with the service role and returns `{ client, admin }`. It **fails open**
-  (both `true`) on any error, so a flags outage never hard-breaks a portal.
-- **Table:** `public.t3l_portal_flags (key, enabled, updated_at)` — RLS on with
-  no policies (only the service role can read/write it).
-
-**To take a portal offline, CORA flips the row** — takes effect on the next
-portal load, no deploy:
+The client portal and the admin UI still carry the CORA on/off toggle, resolved
+on load (first decisive source wins): `?portal=off|on` → `localStorage`
+(`t3l:portal:client` / `t3l:portal:admin`) → remote flags
+(`https://mgtmqucaldkaxvxglguw.supabase.co/functions/v1/t3l-portal-flags`) →
+default on. Flip it from CORA by Telegram (`portal admin off`, `portal client on`,
+`portal all off`, `portal status`) or by SQL on the **28 Foot Systems** project:
 
 ```sql
 update public.t3l_portal_flags set enabled = false, updated_at = now() where key = 'admin';
--- restore
-update public.t3l_portal_flags set enabled = true,  updated_at = now() where key = 'client';
 ```
 
-`portals/flags.json` in this repo is just a static reference of the shape (and a
-manual fallback you could point `REMOTE_FLAGS_URL` at); the live source of truth
-is the edge function above.
-
-A missing key or a fetch error falls back to `DEFAULT_ENABLED` (on), so a flags
-outage never hard-breaks the portal.
-
-### Flip it without a backend
-
-- **This browser:** open the browser console on the portal and run
-  `localStorage.setItem('t3l:portal:client','off')` (or `'admin'`), reload.
-  `'on'` re-enables; `removeItem(...)` returns to default/remote.
-- **A shareable link:** `…/portals/client.html?portal=off` shows the offline
-  state for anyone who opens that link (not persisted).
-- **In code:** flip `DEFAULT_ENABLED` to `false` in the file and redeploy.
-
-## Using in GoHighLevel
-
-Same as the vendor instructions: paste the `<style>`, then the `<body>`
-contents, then the trailing `<script>` blocks into a Custom HTML element. The
-toggle lives in the final `<script>`, so it carries into the embed — `?portal=`
-won't apply inside GHL, but `localStorage` and `REMOTE_FLAGS_URL` both do.
-
-> The admin portal is a static interface, not authentication. Put it on a
-> private, membership-restricted GoHighLevel page and keep its URL out of public
-> and client navigation.
+The toggle takes a portal **offline** for everyone; authentication controls **who
+can sign in** when it is online. They are independent controls.

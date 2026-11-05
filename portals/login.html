@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#311536">
+  <title>Sign in · Teach Them to Love Portals</title>
+  <link rel="icon" href="/assets/img/t3l-logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/img/t3l-logo.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:opsz,wght@5..120,600;5..120,700&display=swap');
+    :root{--plum:#4a214f;--plum-deep:#311536;--gold:#d8ad5b;--gold-deep:#967027;--ink:#2b2030;--cream:#f8f5ef;--paper:#fffdfa;--muted:#746a72;--line:#e3d7c9}
+    *{box-sizing:border-box}html,body{height:100%}
+    body{margin:0;font-family:'DM Sans',Arial,sans-serif;color:var(--ink);line-height:1.5;
+      background:linear-gradient(160deg,#311536 0%,#4e2452 55%,#241128 100%);display:grid;place-items:center;padding:28px 18px}
+    .card{width:100%;max-width:430px;background:var(--paper);border-radius:22px;padding:38px 34px 32px;
+      box-shadow:0 26px 60px rgba(20,8,26,.45)}
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+    .brand-mark{width:50px;height:50px;border-radius:50%;flex:0 0 50px;object-fit:cover;clip-path:circle(50%);
+      background:radial-gradient(circle at 34% 32%,#fff9de 0,#d8ad5b 34%,#875c2a 68%,#422346 100%)}
+    .brand-title{font-family:'Playfair Display',Georgia,serif;font-size:18px;line-height:1.1;color:#3b1b40}
+    .brand-sub{margin-top:3px;color:var(--gold-deep);font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+    h1{font-family:'Playfair Display',Georgia,serif;font-size:27px;line-height:1.2;color:#3b1b40;margin:4px 0 6px}
+    .lede{color:var(--muted);font-size:14px;margin:0 0 22px}
+    label{display:block;margin-bottom:7px;color:var(--plum);font-size:13px;font-weight:700}
+    input[type=email]{width:100%;border:1px solid #dcd0c2;border-radius:11px;padding:13px 14px;background:#fffdfa;
+      color:var(--ink);font:inherit;outline:0}
+    input[type=email]:focus{border-color:#b7893a;box-shadow:0 0 0 3px rgba(183,137,58,.17)}
+    .btn{width:100%;margin-top:16px;border:0;border-radius:999px;padding:14px 18px;background:var(--plum);color:#fff;
+      font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(74,33,79,.22);transition:background .18s,transform .15s}
+    .btn:hover{background:#35183a}.btn:active{transform:scale(.99)}.btn[disabled]{opacity:.6;cursor:default}
+    .msg{display:none;margin-top:16px;border-radius:11px;padding:12px 14px;font-size:13px;line-height:1.5}
+    .msg.show{display:block}
+    .msg.info{background:#eef4ef;color:#2d6642}.msg.err{background:#f7e5e1;color:#9b4538}.msg.wait{background:#f3eee6;color:#6a5c40}
+    .foot{margin-top:24px;padding-top:18px;border-top:1px solid var(--line);color:#8c8086;font-size:12px;line-height:1.6}
+    .foot a{color:var(--gold-deep);font-weight:700;text-decoration:none}
+    .setup{display:none;margin-top:18px;padding:14px 15px;border:1px dashed #d8c7a6;border-radius:12px;background:#fcf8ef}
+    .setup.show{display:block}.setup h3{margin:0 0 5px;font:700 13px/1.3 'DM Sans';color:#6a4a1c}
+    .setup p{margin:0 0 10px;color:#7a6a4a;font-size:12px;line-height:1.5}
+    .link-btn{border:0;background:transparent;color:var(--gold-deep);font:inherit;font-weight:700;cursor:pointer;padding:0;text-decoration:underline}
+    .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;
+      vertical-align:-2px;margin-right:7px;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <main class="card" role="main">
+    <div class="brand">
+      <img class="brand-mark" src="/assets/img/t3l-logo.png" alt="">
+      <div><div class="brand-title">Teach Them to Love</div><div class="brand-sub">Member &amp; admin portals</div></div>
+    </div>
+    <h1 id="headline">Sign in</h1>
+    <p class="lede" id="lede">Enter your email and we’ll send you a secure sign-in link. No password needed.</p>
+
+    <form id="loginForm" novalidate>
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+      <button class="btn" id="submitBtn" type="submit">Send my sign-in link</button>
+    </form>
+
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+
+    <div class="setup" id="setupBox">
+      <h3>First-time setup</h3>
+      <p>No administrator has been set up yet. Send the one-time setup link to the ministry’s administrator email.</p>
+      <button class="link-btn" id="setupBtn" type="button">Send administrator setup link</button>
+    </div>
+
+    <div class="foot">
+      Accounts are by invitation only. If you need access, contact the ministry at
+      <a href="tel:+15126492693">512-649-2693</a> or <a href="/#t3l-contact">connect with T3L</a>.
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="/portals/auth.js"></script>
+  <script>
+  (function () {
+    var form = document.getElementById('loginForm');
+    var emailInput = document.getElementById('email');
+    var submitBtn = document.getElementById('submitBtn');
+    var msg = document.getElementById('msg');
+    var setupBox = document.getElementById('setupBox');
+    var setupBtn = document.getElementById('setupBtn');
+
+    function show(text, kind) { msg.textContent = text; msg.className = 'msg show ' + (kind || 'info'); }
+    function hide() { msg.className = 'msg'; }
+
+    function routeByRole(member) {
+      if (member && member.status === 'active' && member.role === 'admin') { location.href = T3L_AUTH.ADMIN_PATH; return; }
+      if (member && member.status === 'active') { location.href = T3L_AUTH.CLIENT_PATH; return; }
+      // Signed in but not an authorized member.
+      show('You’re signed in, but this email isn’t set up for portal access yet. Please contact the ministry to request access.', 'err');
+      try { T3L_AUTH.client().auth.signOut(); } catch (e) {}
+    }
+
+    // On load: if a magic link just brought us back (session present), route by role.
+    (async function init() {
+      var sb;
+      try { sb = T3L_AUTH.client(); } catch (e) { show('Could not load the sign-in service. Please refresh.', 'err'); return; }
+      try {
+        var s = await sb.auth.getSession();
+        if (s && s.data && s.data.session) {
+          show('Signing you in…', 'wait');
+          var member = await T3L_AUTH.me();
+          routeByRole(member);
+          return;
+        }
+      } catch (e) {}
+      // No session: check whether first-admin setup is still needed.
+      try {
+        var st = await T3L_AUTH.callFn('status', {});
+        if (st.ok && st.data && st.data.setup_needed) setupBox.className = 'setup show';
+      } catch (e) {}
+    })();
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var email = (emailInput.value || '').trim();
+      if (!email || email.indexOf('@') < 1) { show('Please enter a valid email address.', 'err'); return; }
+      submitBtn.disabled = true; var label = submitBtn.textContent;
+      submitBtn.innerHTML = '<span class="spin"></span>Sending…'; hide();
+      try {
+        var sb = T3L_AUTH.client();
+        var redirectTo = location.origin + T3L_AUTH.LOGIN_PATH;
+        var out = await sb.auth.signInWithOtp({
+          email: email,
+          options: { shouldCreateUser: false, emailRedirectTo: redirectTo }
+        });
+        if (out.error) {
+          // shouldCreateUser:false => unknown emails are rejected. Keep the message neutral.
+          show('If this email has portal access, a sign-in link is on its way. Check your inbox (and spam).', 'info');
+        } else {
+          show('Check your email — we sent a secure sign-in link to ' + email + '. It expires shortly, so use it soon.', 'info');
+        }
+      } catch (err) {
+        show('Something went wrong sending your link. Please try again in a moment.', 'err');
+      } finally {
+        submitBtn.disabled = false; submitBtn.textContent = label;
+      }
+    });
+
+    setupBtn.addEventListener('click', async function () {
+      setupBtn.disabled = true;
+      try {
+        var r = await T3L_AUTH.callFn('bootstrap', {});
+        if (r.ok && r.data && r.data.ok) {
+          show('Administrator setup link sent to the ministry’s registered email. Open it to finish signing in.', 'info');
+          setupBox.className = 'setup';
+        } else {
+          show((r.data && r.data.error) || 'Setup could not be completed. It may already be done.', 'err');
+          setupBtn.disabled = false;
+        }
+      } catch (e) {
+        show('Setup request failed. Please try again.', 'err');
+        setupBtn.disabled = false;
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

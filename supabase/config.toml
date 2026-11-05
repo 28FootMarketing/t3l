@@ -1,0 +1,9 @@
+# Supabase project config for the T3L portal backend.
+# Project ref: neptxzpueslyzfgaktez
+project_id = "neptxzpueslyzfgaktez"
+
+# The t3l-portal function verifies the caller's JWT itself (so it can also serve
+# the public `status` and one-time `bootstrap` actions), so gateway JWT
+# verification is disabled for it.
+[functions.t3l-portal]
+verify_jwt = false

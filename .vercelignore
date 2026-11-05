@@ -1,0 +1,5 @@
+# Backend source — provisioned on Supabase, never served as part of the static
+# site. This includes the admin UI markup (supabase/functions/t3l-portal/
+# admin-app.html), which is returned only by the edge function to a verified
+# admin session and must never become a public static asset.
+supabase/

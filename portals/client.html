@@ -23,8 +23,23 @@
     @media(max-width:980px){.portal-shell{grid-template-columns:1fr}.portal-sidebar{position:fixed;left:0;top:0;z-index:50;width:274px;transform:translateX(-105%);transition:transform .25s ease;box-shadow:22px 0 44px rgba(35,17,40,.22)}.portal-sidebar.open{transform:none}.mobile-overlay{position:fixed;inset:0;z-index:40;background:rgba(35,17,40,.46);backdrop-filter:blur(2px)}.mobile-menu{display:grid;place-items:center}.topbar{padding:0 18px}.topbar-kicker{display:none}.content{padding:28px 20px 48px}.grid-4{grid-template-columns:repeat(2,1fr)}.dashboard-grid,.form-layout,.profile-layout{grid-template-columns:1fr}}
     @media(max-width:600px){.content{padding:23px 14px 40px}.page-title{font-size:33px}.page-description{font-size:14px}.hero{padding:29px 24px;border-radius:18px}.hero h2{font-size:28px}.grid-4{grid-template-columns:1fr}.dashboard-grid{gap:13px}.metric-grid{gap:0}.metric{padding:0 9px}.metric-number{font-size:27px}.calendar-cell{min-height:63px;padding:5px}.calendar-weekdays div{font-size:8px}.day{font-size:11px}.calendar-toolbar{padding:14px 10px}.calendar-month h3{font-size:20px}.form-card,.privacy-panel,.profile-form,.identity-card{padding:22px}.profile-chip span:last-child{display:none}.topbar{height:63px}.calendar-card{overflow-x:auto}.calendar-weekdays,.calendar-grid{min-width:560px}.calendar-card{border-radius:14px}.section-head{margin-top:27px}.section-head h2{font-size:23px}}
   </style>
+  <style>
+    html.t3l-gated #t3l-client-portal{visibility:hidden!important}
+    #t3l-authgate{display:none}
+    html.t3l-gated #t3l-authgate{display:grid}
+  </style>
+  <script>document.documentElement.classList.add('t3l-gated');</script>
 </head>
 <body>
+  <div id="t3l-authgate" style="position:fixed;inset:0;z-index:9999;place-items:center;text-align:center;padding:40px 22px;font-family:'DM Sans',Arial,sans-serif;color:#fff;background:linear-gradient(160deg,#311536,#4e2452 55%,#241128)">
+    <div style="max-width:40ch">
+      <img src="/assets/img/t3l-logo.png" alt="" style="width:66px;height:66px;border-radius:50%;clip-path:circle(50%);object-fit:cover;margin:0 auto 16px;display:block">
+      <p style="text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;font-weight:700;color:#d8ad5b;margin:0 0 10px">Client portal</p>
+      <h1 id="t3l-gate-title" style="font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:1.5rem;margin:0 0 10px">Verifying your access…</h1>
+      <p id="t3l-gate-text" style="opacity:.9;line-height:1.6;margin:0 auto 18px">One moment while we confirm your sign-in.</p>
+      <div id="t3l-gate-actions"></div>
+    </div>
+  </div>
   <div class="ghl-portal" id="t3l-client-portal">
     <div class="mobile-overlay" id="mobileOverlay" aria-hidden="true"></div>
     <div class="portal-shell">
@@ -172,6 +187,68 @@
   } else {
     apply(DEFAULT_ENABLED);
   }
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/portals/auth.js"></script>
+<script>
+/* T3L CLIENT PORTAL — authentication gate.
+   Requires a valid Supabase session AND an active member row before the portal
+   is revealed. Unauthenticated visitors are sent to the login page. */
+(function () {
+  var gate = document.getElementById('t3l-authgate');
+  var titleEl = document.getElementById('t3l-gate-title');
+  var textEl = document.getElementById('t3l-gate-text');
+  var actions = document.getElementById('t3l-gate-actions');
+
+  function fail(title, text, buttons) {
+    titleEl.textContent = title; textEl.textContent = text; actions.innerHTML = '';
+    (buttons || []).forEach(function (b) {
+      var el = document.createElement(b.href ? 'a' : 'button');
+      el.textContent = b.label;
+      el.style.cssText = 'display:inline-block;margin:6px;padding:11px 20px;border-radius:999px;font-weight:700;' +
+        'font-size:.92rem;text-decoration:none;cursor:pointer;border:0;' +
+        (b.gold ? 'background:#d8ad5b;color:#221530' : 'border:2px solid rgba(255,255,255,.6);color:#fff;background:transparent');
+      if (b.href) el.href = b.href; else el.onclick = b.onClick;
+      actions.appendChild(el);
+    });
+  }
+
+  function pass(member) {
+    document.documentElement.classList.remove('t3l-gated');
+    if (gate && gate.parentNode) gate.parentNode.removeChild(gate);
+    try {
+      var chip = document.querySelector('.profile-chip');
+      var name = (member && member.full_name) || (member && member.email) || '';
+      if (chip && name) { var span = chip.querySelector('span:last-child'); if (span) span.textContent = name; }
+    } catch (e) {}
+    try {
+      var topbar = document.querySelector('.topbar');
+      if (topbar && !document.getElementById('t3lSignOut')) {
+        var b = document.createElement('button');
+        b.id = 't3lSignOut'; b.type = 'button'; b.textContent = 'Sign out';
+        b.style.cssText = "margin-left:10px;border:1px solid #e7dcd0;background:#fff;color:#4a214f;border-radius:999px;" +
+          "padding:8px 15px;font:700 12px/1 'DM Sans',sans-serif;cursor:pointer";
+        b.onclick = function () { T3L_AUTH.signOut(); };
+        topbar.appendChild(b);
+      }
+    } catch (e) {}
+  }
+
+  (async function () {
+    var sb;
+    try { sb = T3L_AUTH.client(); }
+    catch (e) { fail('Could not load', 'The sign-in service failed to load. Please refresh the page.', [{ label: 'Refresh', gold: true, onClick: function () { location.reload(); } }]); return; }
+    var session;
+    try { var s = await sb.auth.getSession(); session = s.data && s.data.session; } catch (e) {}
+    if (!session) { location.href = T3L_AUTH.LOGIN_PATH; return; }
+    var member = await T3L_AUTH.me();
+    if (member && member.status === 'active') { pass(member); return; }
+    fail('Access not set up',
+      'You’re signed in, but this account isn’t set up for portal access yet. Please contact the ministry to request access.',
+      [{ label: 'Sign out', onClick: T3L_AUTH.signOut }]);
+  })();
 })();
 </script>
 
