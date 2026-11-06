@@ -205,6 +205,9 @@ Deno.serve(async (req) => {
     if (["invite", "list_members", "set_role", "revoke", "get_config", "set_config",
          "list_prayer_requests", "set_prayer_status", "get_modules", "set_module",
          "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive",
+         "crm_fields_list", "crm_field_save", "crm_field_delete",
+         "crm_stages_list", "crm_stage_save", "crm_households_list", "crm_household_save",
+         "crm_tasks_list", "crm_task_save", "crm_task_toggle", "crm_import", "crm_export",
          "giving_funds_list", "giving_fund_save", "giving_gifts_list", "giving_gift_save",
          "giving_gift_delete", "giving_summary", "giving_statement",
          "giving_pledges_list", "giving_pledge_save"].includes(action)) {
@@ -273,7 +276,13 @@ Deno.serve(async (req) => {
       if (!contact) return json({ error: "That contact was not found." }, 404);
       const { data: activities } = await sb.from("t3l_crm_activities")
         .select("id,kind,body,created_at").eq("contact_id", id).order("created_at", { ascending: false });
-      return json({ contact, activities: activities || [] });
+      const { data: tasks } = await sb.from("t3l_crm_tasks")
+        .select("id,title,due_date,done").eq("contact_id", id).order("done", { ascending: true }).order("due_date", { ascending: true });
+      const { data: gifts } = await sb.from("t3l_giving_gifts")
+        .select("id,amount_cents,fund_id,method,gift_date").eq("contact_id", id).order("gift_date", { ascending: false });
+      const { data: fields } = await sb.from("t3l_crm_fields")
+        .select("key,label,type,options,sort").eq("active", true).order("sort", { ascending: true });
+      return json({ contact, activities: activities || [], tasks: tasks || [], gifts: gifts || [], fields: fields || [] });
     }
 
     if (action === "crm_save") {
@@ -288,6 +297,9 @@ Deno.serve(async (req) => {
         updated_at: new Date().toISOString(),
       };
       if (!row.first_name && !row.last_name && !row.email) return json({ error: "Enter a name or email." }, 400);
+      if (payload.custom && typeof payload.custom === "object" && !Array.isArray(payload.custom)) row.custom = payload.custom;
+      if ("household_id" in payload) row.household_id = payload.household_id ? String(payload.household_id) : null;
+      if (payload.stage) row.stage = String(payload.stage).trim();
       const id = String(payload.id || "");
       if (id) {
         const { data, error } = await sb.from("t3l_crm_contacts").update(row).eq("id", id).select().maybeSingle();
@@ -317,6 +329,134 @@ Deno.serve(async (req) => {
         .update({ status: "archived", updated_at: new Date().toISOString() }).eq("id", id);
       if (error) return json({ error: error.message }, 400);
       return json({ ok: true });
+    }
+
+    // --- Deeper CRM: custom fields, stages, households, tasks, import/export ---
+    if (action === "crm_fields_list") {
+      const { data } = await sb.from("t3l_crm_fields").select("id,key,label,type,options,sort,active").order("sort", { ascending: true });
+      return json({ fields: data || [] });
+    }
+
+    if (action === "crm_field_save") {
+      const label = String(payload.label || "").trim(); if (!label) return json({ error: "Field label is required." }, 400);
+      const type = ["text", "number", "date", "select"].includes(payload.type) ? payload.type : "text";
+      const options = Array.isArray(payload.options) ? payload.options.map((o: any) => String(o).trim()).filter(Boolean) : [];
+      const id = String(payload.id || "");
+      if (id) {
+        const { error } = await sb.from("t3l_crm_fields").update({ label, type, options, sort: Number(payload.sort) || 0, active: payload.active === false ? false : true }).eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+      let key = String(payload.key || label).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40);
+      if (!key) key = "field_" + Date.now();
+      const { error } = await sb.from("t3l_crm_fields").insert({ key, label, type, options, sort: Number(payload.sort) || 0 });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, key });
+    }
+
+    if (action === "crm_field_delete") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_crm_fields").delete().eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (action === "crm_stages_list") {
+      const { data } = await sb.from("t3l_crm_stages").select("id,key,label,sort,active").order("sort", { ascending: true });
+      return json({ stages: data || [] });
+    }
+
+    if (action === "crm_stage_save") {
+      const label = String(payload.label || "").trim(); if (!label) return json({ error: "Stage label is required." }, 400);
+      const id = String(payload.id || "");
+      if (id) {
+        const { error } = await sb.from("t3l_crm_stages").update({ label, sort: Number(payload.sort) || 0, active: payload.active === false ? false : true }).eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+      let key = String(payload.key || label).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40);
+      if (!key) key = "stage_" + Date.now();
+      const { error } = await sb.from("t3l_crm_stages").insert({ key, label, sort: Number(payload.sort) || 0 });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, key });
+    }
+
+    if (action === "crm_households_list") {
+      const { data } = await sb.from("t3l_crm_households").select("id,name").order("name", { ascending: true });
+      return json({ households: data || [] });
+    }
+
+    if (action === "crm_household_save") {
+      const name = String(payload.name || "").trim(); if (!name) return json({ error: "Household name is required." }, 400);
+      const id = String(payload.id || "");
+      if (id) {
+        const { error } = await sb.from("t3l_crm_households").update({ name }).eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+      const { data, error } = await sb.from("t3l_crm_households").insert({ name }).select().maybeSingle();
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, household: data });
+    }
+
+    if (action === "crm_tasks_list") {
+      let query = sb.from("t3l_crm_tasks").select("id,contact_id,title,due_date,done")
+        .order("done", { ascending: true }).order("due_date", { ascending: true }).limit(500);
+      if (payload.contact_id) query = query.eq("contact_id", String(payload.contact_id));
+      if (payload.open) query = query.eq("done", false);
+      const { data, error } = await query;
+      if (error) return json({ error: error.message }, 400);
+      return json({ tasks: data || [] });
+    }
+
+    if (action === "crm_task_save") {
+      const title = String(payload.title || "").trim(); if (!title) return json({ error: "Task title is required." }, 400);
+      const rowt: Record<string, unknown> = {
+        contact_id: payload.contact_id ? String(payload.contact_id) : null,
+        title, due_date: payload.due_date ? String(payload.due_date) : null, updated_at: new Date().toISOString(),
+      };
+      const id = String(payload.id || "");
+      if (id) {
+        const { error } = await sb.from("t3l_crm_tasks").update(rowt).eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+      rowt.created_by = caller!.user.id;
+      const { data, error } = await sb.from("t3l_crm_tasks").insert(rowt).select().maybeSingle();
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, task: data });
+    }
+
+    if (action === "crm_task_toggle") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_crm_tasks").update({ done: !!payload.done, updated_at: new Date().toISOString() }).eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (action === "crm_export") {
+      const { data } = await sb.from("t3l_crm_contacts")
+        .select("first_name,last_name,email,phone,stage,tags,notes,status").eq("status", "active")
+        .order("last_name", { ascending: true }).limit(5000);
+      return json({ contacts: data || [] });
+    }
+
+    if (action === "crm_import") {
+      const rows = Array.isArray(payload.rows) ? payload.rows.slice(0, 2000) : [];
+      if (!rows.length) return json({ error: "No rows to import." }, 400);
+      const clean = rows.map((r: any) => ({
+        first_name: String(r.first_name || "").trim() || null,
+        last_name: String(r.last_name || "").trim() || null,
+        email: String(r.email || "").trim() || null,
+        phone: String(r.phone || "").trim() || null,
+        stage: String(r.stage || "new").trim() || "new",
+        tags: Array.isArray(r.tags) ? r.tags.map((t: any) => String(t).trim()).filter(Boolean) : [],
+        created_by: caller!.user.id,
+      })).filter((r: any) => r.first_name || r.last_name || r.email);
+      if (!clean.length) return json({ error: "No valid rows (each needs a name or email)." }, 400);
+      const { data, error } = await sb.from("t3l_crm_contacts").insert(clean).select("id");
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, inserted: (data || []).length });
     }
 
     // --- Giving: funds, gifts, pledges, reports, statements (amounts in cents) ---
