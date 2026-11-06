@@ -204,9 +204,9 @@ Deno.serve(async (req) => {
 
     if (["invite", "list_members", "set_role", "revoke", "get_config", "set_config",
          "list_prayer_requests", "set_prayer_status", "get_modules", "set_module",
-         "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive",
+         "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive", "crm_lookup",
          "crm_fields_list", "crm_field_save", "crm_field_delete",
-         "crm_stages_list", "crm_stage_save", "crm_households_list", "crm_household_save",
+         "crm_stages_list", "crm_stage_save", "crm_stage_set", "crm_households_list", "crm_household_save",
          "crm_tasks_list", "crm_task_save", "crm_task_toggle", "crm_import", "crm_export",
          "giving_funds_list", "giving_fund_save", "giving_gifts_list", "giving_gift_save",
          "giving_gift_delete", "giving_summary", "giving_statement",
@@ -267,6 +267,25 @@ Deno.serve(async (req) => {
       }
       const { data, error } = await query;
       if (error) return json({ error: error.message }, 400);
+      return json({ contacts: data || [] });
+    }
+
+    // Lightweight contact finder for dedupe + typeahead wiring (gift form, import, etc.)
+    if (action === "crm_lookup") {
+      const email = String(payload.email || "").trim().toLowerCase();
+      // Exact-email match first: used to auto-wire a gift/record to an existing contact.
+      if (email) {
+        const { data } = await sb.from("t3l_crm_contacts")
+          .select("id,first_name,last_name,email,stage").eq("status", "active").ilike("email", email).limit(5);
+        return json({ contacts: data || [], matched_email: (data && data.length) ? email : "" });
+      }
+      const q = String(payload.q || "").trim();
+      if (!q) return json({ contacts: [] });
+      const like = "%" + q.replace(/[%_,]/g, " ") + "%";
+      const { data } = await sb.from("t3l_crm_contacts")
+        .select("id,first_name,last_name,email,stage").eq("status", "active")
+        .or("first_name.ilike." + like + ",last_name.ilike." + like + ",email.ilike." + like)
+        .order("updated_at", { ascending: false }).limit(8);
       return json({ contacts: data || [] });
     }
 
@@ -381,6 +400,23 @@ Deno.serve(async (req) => {
       return json({ ok: true, key });
     }
 
+    // Pipeline board: move the SAME contact record to a new stage, and log the move in its timeline.
+    if (action === "crm_stage_set") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const stage = String(payload.stage || "").trim(); if (!stage) return json({ error: "stage is required." }, 400);
+      const { data: before } = await sb.from("t3l_crm_contacts").select("stage").eq("id", id).maybeSingle();
+      const { error } = await sb.from("t3l_crm_contacts")
+        .update({ stage, updated_at: new Date().toISOString() }).eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      if (before && before.stage !== stage) {
+        await sb.from("t3l_crm_activities").insert({
+          contact_id: id, kind: "stage_change",
+          body: "Stage changed from " + before.stage + " to " + stage, created_by: caller!.user.id,
+        });
+      }
+      return json({ ok: true, stage });
+    }
+
     if (action === "crm_households_list") {
       const { data } = await sb.from("t3l_crm_households").select("id,name").order("name", { ascending: true });
       return json({ households: data || [] });
@@ -451,12 +487,43 @@ Deno.serve(async (req) => {
         phone: String(r.phone || "").trim() || null,
         stage: String(r.stage || "new").trim() || "new",
         tags: Array.isArray(r.tags) ? r.tags.map((t: any) => String(t).trim()).filter(Boolean) : [],
-        created_by: caller!.user.id,
       })).filter((r: any) => r.first_name || r.last_name || r.email);
       if (!clean.length) return json({ error: "No valid rows (each needs a name or email)." }, 400);
-      const { data, error } = await sb.from("t3l_crm_contacts").insert(clean).select("id");
-      if (error) return json({ error: error.message }, 400);
-      return json({ ok: true, inserted: (data || []).length });
+
+      // Seamless wiring: a row whose email already belongs to a contact UPDATES that
+      // contact instead of creating a duplicate. Rows without an email always insert.
+      const emails = Array.from(new Set(clean.map((r: any) => (r.email || "").toLowerCase()).filter(Boolean)));
+      const existing: Record<string, string> = {};
+      if (emails.length) {
+        const { data: found } = await sb.from("t3l_crm_contacts")
+          .select("id,email").eq("status", "active").in("email", emails);
+        (found || []).forEach((c: any) => { if (c.email) existing[String(c.email).toLowerCase()] = c.id; });
+      }
+      let inserted = 0, updated = 0;
+      const toInsert: any[] = [];
+      for (const r of clean) {
+        const key = (r.email || "").toLowerCase();
+        const hitId = key ? existing[key] : null;
+        if (hitId) {
+          const upd: Record<string, unknown> = { updated_at: new Date().toISOString() };
+          // Only fill fields the import actually provides; never blank out existing data.
+          if (r.first_name) upd.first_name = r.first_name;
+          if (r.last_name) upd.last_name = r.last_name;
+          if (r.phone) upd.phone = r.phone;
+          if (r.stage && r.stage !== "new") upd.stage = r.stage;
+          const { error } = await sb.from("t3l_crm_contacts").update(upd).eq("id", hitId);
+          if (!error) updated++;
+        } else {
+          toInsert.push({ ...r, created_by: caller!.user.id });
+          if (key) existing[key] = "pending"; // dedupe within the same import batch
+        }
+      }
+      if (toInsert.length) {
+        const { data, error } = await sb.from("t3l_crm_contacts").insert(toInsert).select("id");
+        if (error) return json({ error: error.message }, 400);
+        inserted = (data || []).length;
+      }
+      return json({ ok: true, inserted, updated });
     }
 
     // --- Giving: funds, gifts, pledges, reports, statements (amounts in cents) ---
@@ -495,10 +562,34 @@ Deno.serve(async (req) => {
     if (action === "giving_gift_save") {
       const cents = Math.round(Number(payload.amount_cents));
       if (!cents || Number.isNaN(cents) || cents < 1) return json({ error: "Enter a gift amount." }, 400);
+      const donorName = String(payload.donor_name || "").trim();
+      const donorEmail = String(payload.donor_email || "").trim();
+      let contactId = payload.contact_id ? String(payload.contact_id) : "";
+      let linked: any = null; // reported back so the UI can confirm the wiring
+
+      // Seamless wiring: if this gift isn't already tied to a CRM contact, try to wire it.
+      if (!contactId) {
+        if (donorEmail) {
+          const { data: hit } = await sb.from("t3l_crm_contacts")
+            .select("id,first_name,last_name,email").eq("status", "active").ilike("email", donorEmail).limit(1);
+          if (hit && hit.length) { contactId = hit[0].id; linked = { ...hit[0], created: false }; }
+        }
+        // No existing contact, but the UI asked to add the donor to the CRM at the same time.
+        if (!contactId && payload.create_contact && (donorName || donorEmail)) {
+          const parts = donorName.split(/\s+/);
+          const first = parts.shift() || donorName || null;
+          const last = parts.length ? parts.join(" ") : null;
+          const { data: made } = await sb.from("t3l_crm_contacts")
+            .insert({ first_name: first, last_name: last, email: donorEmail || null, stage: "donor", created_by: caller!.user.id })
+            .select("id,first_name,last_name,email").maybeSingle();
+          if (made) { contactId = made.id; linked = { ...made, created: true }; }
+        }
+      }
+
       const rowg: Record<string, unknown> = {
-        contact_id: payload.contact_id ? String(payload.contact_id) : null,
-        donor_name: String(payload.donor_name || "").trim() || null,
-        donor_email: String(payload.donor_email || "").trim() || null,
+        contact_id: contactId || null,
+        donor_name: donorName || null,
+        donor_email: donorEmail || null,
         amount_cents: cents,
         fund_id: payload.fund_id ? String(payload.fund_id) : null,
         method: ["cash", "check", "paypal", "cashapp", "card", "other"].includes(payload.method) ? payload.method : "other",
@@ -510,12 +601,12 @@ Deno.serve(async (req) => {
       if (id) {
         const { data, error } = await sb.from("t3l_giving_gifts").update(rowg).eq("id", id).select().maybeSingle();
         if (error) return json({ error: error.message }, 400);
-        return json({ ok: true, gift: data });
+        return json({ ok: true, gift: data, linked });
       }
       rowg.created_by = caller!.user.id;
       const { data, error } = await sb.from("t3l_giving_gifts").insert(rowg).select().maybeSingle();
       if (error) return json({ error: error.message }, 400);
-      return json({ ok: true, gift: data });
+      return json({ ok: true, gift: data, linked });
     }
 
     if (action === "giving_gift_delete") {

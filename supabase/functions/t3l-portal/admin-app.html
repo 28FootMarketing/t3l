@@ -52,7 +52,7 @@
           <section class="view" id="announcements" data-module="announcements"><p class="eyebrow">Publish with care</p><h1 class="page-title">Announcements</h1><p class="page-description">Create a new client-facing notice for members.</p><div class="workspace"><article class="card form-card"><h2>New announcement</h2><p>Use clear, current information. The client portal should remain the public source for notices.</p><form class="admin-action-form" data-action="announcement.create"><div class="fields"><div class="field"><label for="announcementTitle">Title</label><input id="announcementTitle" name="title" maxlength="180" placeholder="Announcement title" required></div><div class="field"><label for="announcementBody">Message</label><textarea id="announcementBody" name="body" maxlength="10000" placeholder="Write the update for clients…" required></textarea></div><div class="field"><label for="announcementDate">Publish date & time</label><input id="announcementDate" name="publishedAt" type="datetime-local" required></div></div><button class="primary-btn" type="submit">Publish announcement</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"></aside></div></section>
           <section class="view" id="events" data-module="events"><p class="eyebrow">Plan ministry moments</p><h1 class="page-title">Events & programs</h1><p class="page-description">Add a calendar entry with the information members need to participate.</p><div class="workspace"><article class="card form-card"><h2>New event</h2><p>Dates and times should be reviewed carefully before publishing to the client portal.</p><form class="admin-action-form" data-action="event.create"><div class="fields"><div class="two-col"><div class="field"><label for="eventTitle">Event title</label><input id="eventTitle" name="title" maxlength="180" placeholder="Event or program name" required></div><div class="field"><label for="eventLocation">Location</label><input id="eventLocation" name="location" maxlength="240" placeholder="Address or meeting location" required></div></div><div class="two-col"><div class="field"><label for="eventStart">Start date & time</label><input id="eventStart" name="startAt" type="datetime-local" required></div><div class="field"><label for="eventEnd">End date & time <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="eventEnd" name="endAt" type="datetime-local"></div></div><div class="field"><label for="eventDescription">Description</label><textarea id="eventDescription" name="description" maxlength="10000" placeholder="Describe the event, service, or program…" required></textarea></div></div><button class="primary-btn" type="submit">Publish event</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"></aside></div></section>
           <section class="view" id="resources" data-module="resources"><p class="eyebrow">Curate helpful materials</p><h1 class="page-title">Resource library</h1><p class="page-description">Publish a resource link for the member portal. Provide a direct, durable file URL.</p><div class="workspace"><article class="card form-card"><h2>Publish a resource</h2><p>Use direct, durable file URLs and descriptive titles so members can identify the material.</p><form class="admin-action-form" data-action="resource.create"><div class="fields"><div class="field"><label for="resourceTitle">Resource title</label><input id="resourceTitle" name="title" maxlength="180" placeholder="Guide or material title" required></div><div class="field"><label for="resourceUrl">Resource URL</label><input id="resourceUrl" name="resourceUrl" type="url" placeholder="https://…" required></div><div class="field"><label for="resourceDescription">Description <span style="font-weight:400;color:#8d8086">(optional)</span></label><textarea id="resourceDescription" name="description" maxlength="3000" placeholder="Explain how this resource supports members…"></textarea></div></div><button class="primary-btn" type="submit">Publish resource</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"></aside></div></section>
-          <section class="view" id="crm" data-module="crm"><p class="eyebrow">Relationships</p><h1 class="page-title">CRM <span class="t3l-tip" data-tip="Your contacts — members, donors, volunteers and leads — with their notes and history. Click a contact to open their timeline.">?</span></h1><p class="page-description">Contacts and their history in one place. Search, add people, and log notes, calls and visits.</p><div class="t3l-tabs" id="t3lCrmTabs"><button class="t3l-tab active" data-ctab="contacts">Contacts</button><button class="t3l-tab" data-ctab="tasks">Tasks</button><button class="t3l-tab" data-ctab="fields">Custom fields</button><button class="t3l-tab" data-ctab="households">Households</button></div><div id="t3lCrmRoot"><div class="zero-table"><strong>Loading&hellip;</strong>Fetching contacts.</div></div></section><section class="view" id="giving" data-module="giving"><p class="eyebrow">Stewardship</p><h1 class="page-title">Giving <span class="t3l-tip" data-tip="Record contributions, manage funds, track pledges, and produce year-end giving statements. Payments are collected on your site; this records and reports them.">?</span></h1><p class="page-description">Record gifts, manage funds, track pledges, and produce year-end giving statements.</p><div class="t3l-tabs"><button class="t3l-tab active" data-gtab="gifts">Gifts</button><button class="t3l-tab" data-gtab="funds">Funds</button><button class="t3l-tab" data-gtab="pledges">Pledges</button><button class="t3l-tab" data-gtab="statements">Statements</button></div><div id="t3lGivingRoot"><div class="zero-table"><strong>Loading&hellip;</strong></div></div></section><section class="view" id="prayer"><p class="eyebrow">Private care workflow</p><h1 class="page-title">Prayer care</h1><p class="page-description">Review prayer requests submitted by members and update their care status.</p><div class="admin-alert"><span>⌑</span><span><strong>Handle private information with discretion.</strong> These requests are confidential &mdash; please share them only with the ministry&rsquo;s care team.</span></div><div class="workspace" style="margin-top:16px"><article class="card form-card"><h2>Update care status</h2><p>Enter the GHL record, contact, or request identifier that your workflow uses to locate the request.</p><form class="admin-action-form" data-action="prayer.status.update"><div class="fields"><div class="field"><label for="prayerRequestId">Request or contact ID</label><input id="prayerRequestId" name="requestId" maxlength="180" placeholder="GHL record or contact identifier" required></div><div class="field"><label for="prayerStatus">Care status</label><select id="prayerStatus" name="status" required><option value="received">Received</option><option value="in_prayer">In prayer</option><option value="closed">Closed</option></select></div><div class="field"><label for="prayerNote">Internal note <span style="font-weight:400;color:#8d8086">(optional)</span></label><textarea id="prayerNote" name="internalNote" maxlength="2000" placeholder="Internal care-team note only…"></textarea></div></div><button class="primary-btn" type="submit">Update care status</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card"><div class="table-header"><h3>Pending care queue</h3></div><div class="zero-table"><strong>No requests yet</strong>Prayer requests submitted from the client portal will appear here.</div></article></aside></div></section>
+          <section class="view" id="crm" data-module="crm"><p class="eyebrow">Relationships</p><h1 class="page-title">CRM <span class="t3l-tip" data-tip="Your contacts — members, donors, volunteers and leads — with their notes and history. Click a contact to open their timeline.">?</span></h1><p class="page-description">Contacts and their history in one place. Search, add people, and log notes, calls and visits.</p><div class="t3l-tabs" id="t3lCrmTabs"><button class="t3l-tab active" data-ctab="contacts">Contacts</button><button class="t3l-tab" data-ctab="pipeline">Pipeline</button><button class="t3l-tab" data-ctab="tasks">Tasks</button><button class="t3l-tab" data-ctab="fields">Custom fields</button><button class="t3l-tab" data-ctab="households">Households</button><button class="t3l-tab" data-ctab="stages">Stages</button><button class="t3l-tab" data-ctab="io">Import / export</button></div><div id="t3lCrmRoot"><div class="zero-table"><strong>Loading&hellip;</strong>Fetching contacts.</div></div></section><section class="view" id="giving" data-module="giving"><p class="eyebrow">Stewardship</p><h1 class="page-title">Giving <span class="t3l-tip" data-tip="Record contributions, manage funds, track pledges, and produce year-end giving statements. Payments are collected on your site; this records and reports them.">?</span></h1><p class="page-description">Record gifts, manage funds, track pledges, and produce year-end giving statements.</p><div class="t3l-tabs"><button class="t3l-tab active" data-gtab="gifts">Gifts</button><button class="t3l-tab" data-gtab="funds">Funds</button><button class="t3l-tab" data-gtab="pledges">Pledges</button><button class="t3l-tab" data-gtab="statements">Statements</button></div><div id="t3lGivingRoot"><div class="zero-table"><strong>Loading&hellip;</strong></div></div></section><section class="view" id="prayer"><p class="eyebrow">Private care workflow</p><h1 class="page-title">Prayer care</h1><p class="page-description">Review prayer requests submitted by members and update their care status.</p><div class="admin-alert"><span>⌑</span><span><strong>Handle private information with discretion.</strong> These requests are confidential &mdash; please share them only with the ministry&rsquo;s care team.</span></div><div class="workspace" style="margin-top:16px"><article class="card form-card"><h2>Update care status</h2><p>Enter the GHL record, contact, or request identifier that your workflow uses to locate the request.</p><form class="admin-action-form" data-action="prayer.status.update"><div class="fields"><div class="field"><label for="prayerRequestId">Request or contact ID</label><input id="prayerRequestId" name="requestId" maxlength="180" placeholder="GHL record or contact identifier" required></div><div class="field"><label for="prayerStatus">Care status</label><select id="prayerStatus" name="status" required><option value="received">Received</option><option value="in_prayer">In prayer</option><option value="closed">Closed</option></select></div><div class="field"><label for="prayerNote">Internal note <span style="font-weight:400;color:#8d8086">(optional)</span></label><textarea id="prayerNote" name="internalNote" maxlength="2000" placeholder="Internal care-team note only…"></textarea></div></div><button class="primary-btn" type="submit">Update care status</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card"><div class="table-header"><h3>Pending care queue</h3></div><div class="zero-table"><strong>No requests yet</strong>Prayer requests submitted from the client portal will appear here.</div></article></aside></div></section>
           <section class="view" id="people"><p class="eyebrow">Accounts &amp; roles</p><h1 class="page-title">People &amp; access <span class="t3l-tip" data-tip="Invite people and set their role. Invitations email a secure sign-in link; no passwords.">?</span></h1><p class="page-description">Invite members and administrators, and manage who can sign in. Accounts are invitation-only &mdash; invited people receive a secure sign-in link by email (no passwords).</p><div class="workspace"><article class="card form-card"><h2>Invite someone</h2><p>They&rsquo;ll receive an email with a secure link to finish signing in.</p><form id="t3lInviteForm"><div class="fields"><div class="field"><label for="inviteEmail">Email address</label><input id="inviteEmail" type="email" autocomplete="off" placeholder="name@example.com" required></div><div class="field" id="inviteRoleField"><label for="inviteRole">Role</label><select id="inviteRole"><option value="client">Client (member)</option><option value="admin">Administrator</option><option value="super_admin">Super administrator</option></select></div></div><button class="primary-btn" type="submit">Send invitation</button><div class="form-status" id="inviteStatus" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card"><div class="table-header"><div><h3>Members &amp; administrators</h3><span id="peopleCount"></span></div><button id="peopleRefresh" type="button" class="secondary-btn" style="margin:0">Refresh</button></div><div id="peopleList"><div class="zero-table"><strong>Loading&hellip;</strong>Fetching the current roster.</div></div></article></aside></div></section><section class="view t3l-super-only" id="settings"><p class="eyebrow">Portal controls</p><h1 class="page-title">Configuration</h1><p class="page-description">Connect the ministry workflow webhooks. Visible to super administrators only.</p><div class="settings-grid"></div></section>
           <p class="footer-line">Teach Them to Love Outreach Ministries · Administrator portal</p>
         </div>
@@ -533,7 +533,105 @@
     });
   }
 
-  var TABS = { contacts: function(){ loadContacts(); }, tasks: tasksTab, fields: fieldsTab, households: householdsTab };
+  /* ---------- Pipeline board (drag to change stage; same contact record) ---------- */
+  async function pipelineTab(){
+    ref=false; await ensureRef();
+    h('<div class="zero-table"><strong>Loading&hellip;</strong></div>');
+    var r = await T3L_AUTH.callFn('crm_list', {});
+    if (!r.ok || !r.data){ h('<div class="zero-table"><strong>Could not load</strong></div>'); return; }
+    var contacts = r.data.contacts || [];
+    var cols = (stages.length ? stages.slice() : [{key:'new',label:'New'}]);
+    var byStage = {}; cols.forEach(function(s){ byStage[s.key]=[]; });
+    var other = [];
+    contacts.forEach(function(c){ var k=c.stage||'new'; if (byStage[k]) byStage[k].push(c); else other.push(c); });
+    if (other.length){ cols = cols.concat([{key:'__other',label:'Other / unlisted'}]); byStage['__other']=other; }
+    var board = cols.map(function(s){
+      var cards = (byStage[s.key]||[]).map(function(c){
+        return '<div class="t3l-pcard" draggable="true" data-id="'+esc(c.id)+'" style="background:#fff;border:1px solid #ecdfce;border-radius:10px;padding:9px 11px;margin:0 0 8px;cursor:grab;font-size:13px;box-shadow:0 1px 2px rgba(60,30,60,.05)"><strong style="color:#3b1b40">'+esc(nameOf(c))+'</strong>'+(c.email?'<div style="color:#9a8c91;font-size:11px;margin-top:2px">'+esc(c.email)+'</div>':'')+'</div>';
+      }).join('');
+      return '<div class="t3l-pcol" data-stage="'+esc(s.key)+'" style="flex:0 0 240px;background:#f6efe5;border-radius:12px;padding:10px;min-height:120px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong style="color:#4a214f;font-size:12px;text-transform:uppercase;letter-spacing:.05em">'+esc(s.label)+'</strong><span style="color:#9a8c91;font-size:12px">'+(byStage[s.key]||[]).length+'</span></div><div class="t3l-pdrop" style="min-height:40px">'+cards+'</div></div>';
+    }).join('');
+    h('<p class="note" style="color:#8a7d83;font-size:13px;margin:0 0 10px">Drag a contact between columns to change their stage. It moves the same contact record and logs the change on their timeline.</p><div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:10px">'+board+'</div>');
+    var dragId=null;
+    root.querySelectorAll('.t3l-pcard').forEach(function(card){
+      card.addEventListener('dragstart', function(e){ dragId=card.dataset.id; e.dataTransfer.effectAllowed='move'; card.style.opacity='.5'; });
+      card.addEventListener('dragend', function(){ card.style.opacity='1'; });
+      card.addEventListener('click', function(){ detailView(card.dataset.id); });
+    });
+    root.querySelectorAll('.t3l-pcol').forEach(function(col){
+      col.addEventListener('dragover', function(e){ e.preventDefault(); col.style.outline='2px dashed #c9a7cf'; });
+      col.addEventListener('dragleave', function(){ col.style.outline='none'; });
+      col.addEventListener('drop', async function(e){ e.preventDefault(); col.style.outline='none'; var stage=col.dataset.stage; if (!dragId || stage==='__other') return; var rr=await T3L_AUTH.callFn('crm_stage_set',{id:dragId,stage:stage}); if (rr.ok) pipelineTab(); else alert((rr.data&&rr.data.error)||'Could not move.'); });
+    });
+  }
+
+  /* ---------- Stages editor (pipeline columns) ---------- */
+  async function stagesTab(){
+    ref=false; await ensureRef();
+    var r = await T3L_AUTH.callFn('crm_stages_list', {}); var all = (r.ok&&r.data)?(r.data.stages||[]):[];
+    h('<div class="workspace"><article class="card form-card"><h2>Add a pipeline stage</h2><div class="fields"><div class="field"><label for="st_label">Stage label</label><input id="st_label" placeholder="e.g. Prospect"></div></div><button class="primary-btn" id="st_save" type="button">Add stage</button> <span class="form-status" id="st_status" style="display:inline-block;margin-left:8px"></span><p class="note" style="color:#8a7d83;font-size:12px;margin-top:10px">Stages are the columns on your pipeline board and the Stage choices on each contact.</p></article>'
+      + '<aside class="side-stack"><article class="card"><div class="table-header"><h3>Stages</h3></div><div style="padding:4px 14px 12px">'
+      + (all.length ? all.map(function(s){ return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid #efe6da"><span><strong style="color:#3b1b40">'+esc(s.label)+'</strong>'+(s.active?'':' <span style="color:#a04c43;font-size:11px">(hidden)</span>')+'</span><span style="white-space:nowrap"><button class="st-ren" data-id="'+esc(s.id)+'" data-label="'+esc(s.label)+'" data-sort="'+esc(s.sort)+'" style="border:0;background:transparent;color:#65416a;font-weight:700;cursor:pointer;margin-right:10px">Rename</button><button class="st-tog" data-id="'+esc(s.id)+'" data-label="'+esc(s.label)+'" data-sort="'+esc(s.sort)+'" data-active="'+(s.active?'1':'0')+'" style="border:1px solid #dfd3c6;background:#fff;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700;cursor:pointer;color:#65416a">'+(s.active?'Hide':'Show')+'</button></span></div>'; }).join('') : '<div class="zero-table">No stages yet.</div>')
+      + '</div></article></aside></div>');
+    document.getElementById('st_save').addEventListener('click', async function(){
+      var stt=document.getElementById('st_status'); stt.className='form-status'; var label=v('st_label'); if(!label){ stt.textContent='Enter a label.'; stt.className='form-status error'; return; }
+      var rr=await T3L_AUTH.callFn('crm_stage_save',{ label:label, sort:(all.length+1)*10 }); if(rr.ok){ ref=false; stagesTab(); } else { stt.textContent=(rr.data&&rr.data.error)||'Could not add.'; stt.className='form-status error'; }
+    });
+    root.querySelectorAll('.st-ren').forEach(function(b){ b.addEventListener('click', async function(){ var nl=prompt('Rename stage', b.dataset.label); if(nl==null)return; nl=nl.trim(); if(!nl)return; var rr=await T3L_AUTH.callFn('crm_stage_save',{id:b.dataset.id,label:nl,sort:Number(b.dataset.sort)||0}); if(rr.ok){ ref=false; stagesTab(); } else alert((rr.data&&rr.data.error)||'Could not rename.'); }); });
+    root.querySelectorAll('.st-tog').forEach(function(b){ b.addEventListener('click', async function(){ var rr=await T3L_AUTH.callFn('crm_stage_save',{id:b.dataset.id,label:b.dataset.label,sort:Number(b.dataset.sort)||0,active:b.dataset.active!=='1'}); if(rr.ok){ ref=false; stagesTab(); } else alert((rr.data&&rr.data.error)||'Could not update.'); }); });
+  }
+
+  /* ---------- Import / export (CSV, dedupe on email) ---------- */
+  function csvEsc(s){ s=String(s==null?'':s); if(/[",\n]/.test(s)) return '"'+s.replace(/"/g,'""')+'"'; return s; }
+  function parseCSV(text){
+    var rows=[], row=[], cur='', i=0, inq=false;
+    while(i<text.length){ var ch=text[i];
+      if(inq){ if(ch==='"'){ if(text[i+1]==='"'){ cur+='"'; i++; } else inq=false; } else cur+=ch; }
+      else { if(ch==='"') inq=true; else if(ch===',') { row.push(cur); cur=''; } else if(ch==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; } else if(ch==='\r'){ /* skip */ } else cur+=ch; }
+      i++;
+    }
+    if(cur!=='' || row.length){ row.push(cur); rows.push(row); }
+    return rows.filter(function(r){ return r.length && r.some(function(x){ return (x||'').trim()!==''; }); });
+  }
+  async function ioTab(){
+    h('<div class="workspace"><article class="card form-card"><h2>Import contacts (CSV)</h2>'
+      + '<p class="note" style="color:#8a7d83;font-size:13px">Paste CSV with a header row, or choose a file. Recognized columns: <strong>first_name, last_name, email, phone, stage, tags</strong>. Anyone whose email already matches a contact is updated in place &mdash; no duplicates.</p>'
+      + '<div class="field"><input type="file" id="io_file" accept=".csv,text/csv"></div>'
+      + '<div class="field"><label for="io_text">&hellip;or paste CSV</label><textarea id="io_text" placeholder="first_name,last_name,email,phone,stage,tags"></textarea></div>'
+      + '<button class="primary-btn" id="io_import" type="button">Import</button> <span class="form-status" id="io_status" style="display:inline-block;margin-left:8px"></span></article>'
+      + '<aside class="side-stack"><article class="card form-card"><h2>Export contacts</h2><p class="note" style="color:#8a7d83;font-size:13px">Download every active contact as a CSV &mdash; open it in Excel, Google Sheets or Numbers.</p><button class="primary-btn" id="io_export" type="button">Download CSV</button> <span class="form-status" id="io_estatus" style="display:inline-block;margin-left:8px"></span></article></aside></div>');
+    document.getElementById('io_file').addEventListener('change', function(){ var f=this.files&&this.files[0]; if(!f)return; var rd=new FileReader(); rd.onload=function(){ document.getElementById('io_text').value=rd.result; }; rd.readAsText(f); });
+    document.getElementById('io_export').addEventListener('click', async function(){
+      var es=document.getElementById('io_estatus'); es.className='form-status'; es.textContent='Preparing&hellip;';
+      var r=await T3L_AUTH.callFn('crm_export',{}); if(!r.ok||!r.data){ es.textContent='Could not export.'; es.className='form-status error'; return; }
+      var cols=['first_name','last_name','email','phone','stage','tags','notes'];
+      var lines=[cols.join(',')];
+      (r.data.contacts||[]).forEach(function(c){ lines.push(cols.map(function(k){ var val=c[k]; if(k==='tags'&&val&&val.join) val=val.join('; '); return csvEsc(val); }).join(',')); });
+      var blob=new Blob([lines.join('\n')],{type:'text/csv'}); var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='t3l-contacts-'+(new Date().toISOString().slice(0,10))+'.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      es.textContent=((r.data.contacts||[]).length)+' exported.'; es.className='form-status success';
+    });
+    document.getElementById('io_import').addEventListener('click', async function(){
+      var ist=document.getElementById('io_status'); ist.className='form-status'; var text=(document.getElementById('io_text').value||'').trim();
+      if(!text){ ist.textContent='Paste CSV or choose a file first.'; ist.className='form-status error'; return; }
+      var rows=parseCSV(text); if(rows.length<2){ ist.textContent='Need a header row plus at least one contact.'; ist.className='form-status error'; return; }
+      var header=rows[0].map(function(x){ return (x||'').trim().toLowerCase().replace(/\s+/g,'_'); });
+      var idx={}; ['first_name','last_name','email','phone','stage','tags'].forEach(function(k){ idx[k]=header.indexOf(k); });
+      if(idx.first_name<0) idx.first_name=header.indexOf('first');
+      if(idx.last_name<0) idx.last_name=header.indexOf('last');
+      var out=[];
+      for(var i=1;i<rows.length;i++){ var r=rows[i]; var g=function(k){ return idx[k]>=0?((r[idx[k]]||'').trim()):''; };
+        var tags=g('tags'); var rec={ first_name:g('first_name'), last_name:g('last_name'), email:g('email'), phone:g('phone'), stage:g('stage')||'new', tags: tags?tags.split(/[;|]/).map(function(x){return x.trim();}).filter(Boolean):[] };
+        if(rec.first_name||rec.last_name||rec.email) out.push(rec);
+      }
+      if(!out.length){ ist.textContent='No valid rows found (each needs a name or email).'; ist.className='form-status error'; return; }
+      ist.textContent='Importing '+out.length+'&hellip;';
+      var rr=await T3L_AUTH.callFn('crm_import',{rows:out});
+      if(rr.ok&&rr.data){ ist.textContent='Done &mdash; '+(rr.data.inserted||0)+' added, '+(rr.data.updated||0)+' updated (matched by email).'; ist.className='form-status success'; document.getElementById('io_text').value=''; }
+      else { ist.textContent=(rr.data&&rr.data.error)||'Import failed.'; ist.className='form-status error'; }
+    });
+  }
+
+  var TABS = { contacts: function(){ loadContacts(); }, pipeline: pipelineTab, tasks: tasksTab, fields: fieldsTab, households: householdsTab, stages: stagesTab, io: ioTab };
   sectionEl.querySelectorAll('.t3l-tab[data-ctab]').forEach(function(btn){
     btn.addEventListener('click', function(){
       sectionEl.querySelectorAll('.t3l-tab[data-ctab]').forEach(function(b){ b.classList.toggle('active', b===btn); });
@@ -581,7 +679,9 @@
     var yr = new Date().getFullYear();
     h('<div class="workspace"><article class="card form-card"><h2>Record a gift</h2><p class="note" style="color:#8a7d83;font-size:13px">Log a contribution. Payment is collected on the site; this records it.</p>'
       + '<div class="fields"><div class="gcol"><div class="field"><label>Amount</label><input id="g_amt" inputmode="decimal" placeholder="0.00"></div><div class="field"><label>Date</label><input id="g_date" type="date" value="'+today()+'"></div></div>'
+      + '<div class="field" style="position:relative"><label>Find existing contact <span style="font-weight:400;color:#8d8086">(optional &mdash; links this gift to their CRM record)</span></label><input id="g_find" placeholder="Search CRM by name or email" autocomplete="off"><input type="hidden" id="g_contact"><div id="g_matches" style="position:absolute;left:0;right:0;top:100%;z-index:30;background:#fff;border:1px solid #e3d7c9;border-radius:10px;box-shadow:0 8px 24px rgba(60,30,60,.12);display:none;max-height:220px;overflow:auto"></div><div id="g_linkmsg" style="font-size:12px;margin-top:5px"></div></div>'
       + '<div class="gcol"><div class="field"><label>Donor name</label><input id="g_name" placeholder="Full name"></div><div class="field"><label>Donor email</label><input id="g_email" type="email" placeholder="name@example.com"></div></div>'
+      + '<label style="display:flex;gap:8px;align-items:center;font-size:12px;color:#766b73;margin:2px 0 6px"><input type="checkbox" id="g_createc" style="accent-color:#4a214f">Add this donor to the CRM if they are not already a contact</label>'
       + '<div class="gcol"><div class="field"><label>Fund</label><select id="g_fund">'+fundOptions('')+'</select></div><div class="field"><label>Method</label><select id="g_method">'+methodOptions('cash')+'</select></div></div>'
       + '<div class="field"><label>Note <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="g_note" placeholder="Memo"></div></div>'
       + '<button class="primary-btn" id="g_save" type="button">Record gift</button> <span class="form-status" id="g_status" style="display:inline-block;margin-left:8px"></span></article>'
@@ -590,13 +690,39 @@
       + '<div id="g_list" style="padding:0 6px 6px"></div></article></aside></div>');
     document.getElementById('g_save').addEventListener('click', saveGift);
     document.getElementById('g_year').addEventListener('change', loadGifts);
+    wireGiftLookup();
     loadGifts();
+  }
+  function wireGiftLookup(){
+    var find=document.getElementById('g_find'), box=document.getElementById('g_matches'); if(!find||!box) return;
+    var t;
+    function clearLink(){ var hid=document.getElementById('g_contact'); if(hid) hid.value=''; var m=document.getElementById('g_linkmsg'); if(m) m.textContent=''; }
+    find.addEventListener('input', function(){
+      clearLink(); clearTimeout(t); var q=find.value.trim();
+      if(q.length<2){ box.style.display='none'; return; }
+      t=setTimeout(async function(){
+        var r=await T3L_AUTH.callFn('crm_lookup',{q:q}); var list=(r.ok&&r.data)?(r.data.contacts||[]):[];
+        if(!list.length){ box.innerHTML='<div style="padding:10px 12px;color:#9a8c91;font-size:13px">No matches &mdash; enter the name and email below to add them.</div>'; box.style.display='block'; return; }
+        box.innerHTML=list.map(function(c){ var nm=(((c.first_name||'')+' '+(c.last_name||'')).trim())||c.email||'(no name)'; return '<div class="g-match" data-id="'+esc(c.id)+'" data-name="'+esc(nm)+'" data-email="'+esc(c.email||'')+'" style="padding:9px 12px;cursor:pointer;border-top:1px solid #f0e8dc;font-size:13px"><strong>'+esc(nm)+'</strong>'+(c.email?' <span style="color:#9a8c91">'+esc(c.email)+'</span>':'')+'</div>'; }).join('');
+        box.style.display='block';
+        box.querySelectorAll('.g-match').forEach(function(d){ d.addEventListener('click', function(){
+          document.getElementById('g_contact').value=d.getAttribute('data-id');
+          document.getElementById('g_name').value=d.getAttribute('data-name');
+          document.getElementById('g_email').value=d.getAttribute('data-email');
+          find.value=d.getAttribute('data-name'); box.style.display='none';
+          var m=document.getElementById('g_linkmsg'); if(m){ m.textContent='✓ Linked to '+d.getAttribute('data-name')+' in the CRM'; m.style.color='#2f7d55'; }
+          var cc=document.getElementById('g_createc'); if(cc) cc.checked=false;
+        }); });
+      }, 250);
+    });
+    document.addEventListener('click', function(e){ if(box && !box.contains(e.target) && e.target!==find) box.style.display='none'; });
   }
   async function saveGift(){
     var st = document.getElementById('g_status'); st.className = 'form-status';
     var cents = toCents(v('g_amt')); if (cents < 1){ st.textContent='Enter a gift amount.'; st.className='form-status error'; return; }
-    var r = await T3L_AUTH.callFn('giving_gift_save', { amount_cents: cents, donor_name: v('g_name'), donor_email: v('g_email'), fund_id: v('g_fund'), method: document.getElementById('g_method').value, gift_date: v('g_date'), note: v('g_note') });
-    if (r.ok){ st.textContent='Recorded.'; st.className='form-status success'; document.getElementById('g_amt').value=''; document.getElementById('g_name').value=''; document.getElementById('g_email').value=''; document.getElementById('g_note').value=''; loadGifts(); }
+    var cc=document.getElementById('g_createc'), hid=document.getElementById('g_contact');
+    var r = await T3L_AUTH.callFn('giving_gift_save', { amount_cents: cents, donor_name: v('g_name'), donor_email: v('g_email'), fund_id: v('g_fund'), method: document.getElementById('g_method').value, gift_date: v('g_date'), note: v('g_note'), contact_id: (hid&&hid.value)||'', create_contact: !!(cc&&cc.checked) });
+    if (r.ok){ var extra=''; if(r.data&&r.data.linked){ var ln=r.data.linked; var who=(((ln.first_name||'')+' '+(ln.last_name||'')).trim())||ln.email||'contact'; extra=ln.created?(' Added '+who+' to the CRM.'):(' Linked to '+who+' in the CRM.'); } st.textContent='Recorded.'+extra; st.className='form-status success'; document.getElementById('g_amt').value=''; document.getElementById('g_name').value=''; document.getElementById('g_email').value=''; document.getElementById('g_note').value=''; if(hid)hid.value=''; var fnd=document.getElementById('g_find'); if(fnd)fnd.value=''; var lm=document.getElementById('g_linkmsg'); if(lm)lm.textContent=''; if(cc)cc.checked=false; loadGifts(); }
     else { st.textContent=(r.data&&r.data.error)||'Could not record.'; st.className='form-status error'; }
   }
   async function loadGifts(){
