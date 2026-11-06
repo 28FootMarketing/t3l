@@ -16,6 +16,10 @@ Georgetown, TX.
 | `404.html` | Themed "page not found" page (served automatically by static hosts such as Vercel). |
 | `robots.txt` | Allows all crawlers and points to the sitemap. |
 | `sitemap.xml` | Single-page sitemap for search engines. |
+| `terms.html` | Terms of Service. **Draft pending attorney review** (noindex until approved; see comments at top of file). Linked from every page footer. |
+| `privacy.html` | Privacy Policy. **Draft pending attorney review**, same rules as `terms.html`. Linked from every page footer. |
+| `vercel.json` | Security headers (nosniff, Referrer-Policy, Permissions-Policy) for every path. |
+| `.well-known/security.txt` | RFC 9116 vulnerability-disclosure contact. Renew the `Expires` date before 2027-10-28. |
 
 ## Standalone hosting (off GoHighLevel)
 
@@ -42,7 +46,8 @@ external CDN:
 | --- | --- | --- |
 | `t3l-logo.png` | Header + footer | Round gold T3L medallion (121×121). |
 | `founder.webp` | Our Story section | Dr. Lolita R. Gilmore-Randall (432×532). |
-| `event-shades-of-purple.webp` | Events section | "Shades of Purple: An Urban Night Affair" flyer. |
+| `event-shades-of-purple.webp` | (unused, kept for reference) | Full "Shades of Purple: An Urban Night Affair" flyer, including ticket QR. |
+| `t3l-logo-3d.webp` | Events section | 600px circular cut of the T3L medallion (upscaled from `t3l-logo.png`), shown as a 3D coin in the post-event thank-you. |
 | `hero-counseling.webp` | Hero background | Counseling scene shown behind the purple wash (subject on the right). |
 
 Paths are **relative** (`assets/img/…`). This works for `index.html` /

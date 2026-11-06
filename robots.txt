@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://t3loutreach.org/sitemap.xml
+Sitemap: https://www.t3loutreach.org/sitemap.xml
