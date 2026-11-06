@@ -123,10 +123,13 @@ Deno.serve(async (req) => {
   const sb = svc();
 
   try {
-    // --- seed_app: raw body upload of the admin console markup ---
-    const qsAction = new URL(req.url).searchParams.get("action");
+    // --- seed_app: raw body upload of an admin console markup ---
+    // ?key=admin_app (regular-admin view, default) | admin_app_super (super-admin view)
+    const url0 = new URL(req.url);
+    const qsAction = url0.searchParams.get("action");
     if (qsAction === "seed_app") {
-      const existing = await sb.from("t3l_portal_assets").select("key").eq("key", "admin_app").maybeSingle();
+      const key = url0.searchParams.get("key") === "admin_app_super" ? "admin_app_super" : "admin_app";
+      const existing = await sb.from("t3l_portal_assets").select("key").eq("key", key).maybeSingle();
       if (existing.data) {
         const caller = await getCaller(sb, req);
         const ok = caller?.member && caller.member.role === "super_admin" && caller.member.status === "active";
@@ -135,9 +138,9 @@ Deno.serve(async (req) => {
       const body = await req.text();
       if (!body || body.length < 200) return json({ error: "Body too small to be the console." }, 400);
       const { error } = await sb.from("t3l_portal_assets")
-        .upsert({ key: "admin_app", content: body, updated_at: new Date().toISOString() }, { onConflict: "key" });
+        .upsert({ key, content: body, updated_at: new Date().toISOString() }, { onConflict: "key" });
       if (error) return json({ error: error.message }, 400);
-      return json({ ok: true, bytes: body.length });
+      return json({ ok: true, key, bytes: body.length });
     }
 
     let payload: any = {};
@@ -187,7 +190,15 @@ Deno.serve(async (req) => {
     if (action === "app") {
       if (!caller) return json({ error: "unauthorized" }, 401);
       if (!isAdmin) return json({ error: "forbidden" }, 403);
-      const { data } = await sb.from("t3l_portal_assets").select("content").eq("key", "admin_app").maybeSingle();
+      // Super admins get the full console (with setup directions); regular
+      // admins get the clean working view. Fall back to admin_app if the
+      // super-admin console has not been seeded.
+      const key = isSuper ? "admin_app_super" : "admin_app";
+      let { data } = await sb.from("t3l_portal_assets").select("content").eq("key", key).maybeSingle();
+      if ((!data || !data.content) && key !== "admin_app") {
+        const fb = await sb.from("t3l_portal_assets").select("content").eq("key", "admin_app").maybeSingle();
+        data = fb.data;
+      }
       return json({ html: (data && data.content) || FALLBACK_HTML });
     }
 
