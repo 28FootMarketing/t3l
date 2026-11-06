@@ -118,10 +118,14 @@
       prayerForm.addEventListener('submit', async function (event) {
         event.preventDefault();
         if (!prayerForm.checkValidity()) { prayerForm.reportValidity(); return; }
-        if (!GHL_PORTAL_CONFIG.prayerWebhookUrl) { status('Setup needed: paste the GHL Workflow Incoming Webhook URL into GHL_PORTAL_CONFIG.prayerWebhookUrl before publishing.', 'error'); return; }
-        const payload = { contactName: document.getElementById('contactName').value.trim(), contactEmail: document.getElementById('contactEmail').value.trim(), ministryRole: document.getElementById('ministryRole').value.trim(), prayerRequest: document.getElementById('prayerRequest').value.trim(), privacyConsent: document.getElementById('privacyConsent').checked, submittedAt: new Date().toISOString(), source: GHL_PORTAL_CONFIG.portalSource };
+        const payload = { name: document.getElementById('contactName').value.trim(), email: document.getElementById('contactEmail').value.trim(), ministry_role: document.getElementById('ministryRole').value.trim(), request: document.getElementById('prayerRequest').value.trim() };
         submitButton.disabled = true; submitButton.textContent = 'Sending…';
-        try { const response = await fetch(GHL_PORTAL_CONFIG.prayerWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error('Webhook request failed'); prayerForm.reset(); status('Your prayer request has been received with care. Thank you for sharing.', 'success'); } catch (error) { status('We could not send your request. Please try again or contact the ministry directly.', 'error'); } finally { submitButton.disabled = false; submitButton.textContent = 'Send prayer request'; }
+        try {
+          const r = await T3L_AUTH.callFn('prayer_request', payload);
+          if (r.ok && r.data && r.data.ok) { prayerForm.reset(); status('Your prayer request has been received with care. Thank you for sharing.', 'success'); }
+          else { status((r.data && r.data.error) || 'We could not send your request. Please try again or contact the ministry directly.', 'error'); }
+        } catch (error) { status('We could not send your request. Please try again or contact the ministry directly.', 'error'); }
+        finally { submitButton.disabled = false; submitButton.textContent = 'Send prayer request'; }
       });
     }());
   </script>

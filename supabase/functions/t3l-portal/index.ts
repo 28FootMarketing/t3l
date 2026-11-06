@@ -161,6 +161,29 @@ Deno.serve(async (req) => {
 
     if (action === "me") return json({ member: caller?.member ?? null });
 
+    if (action === "prayer_request") {
+      if (!caller) return json({ error: "unauthorized" }, 401);
+      if (!caller.member || caller.member.status !== "active") return json({ error: "forbidden" }, 403);
+      const request = String(payload.request || "").trim();
+      if (request.length < 2) return json({ error: "Please enter your prayer request." }, 400);
+      const row = {
+        user_id: caller.user.id,
+        name: String(payload.name || "").trim() || null,
+        email: String(payload.email || "").trim() || null,
+        ministry_role: String(payload.ministry_role || "").trim() || null,
+        request,
+        updated_at: new Date().toISOString(),
+      };
+      const ins = await sb.from("t3l_prayer_requests").insert(row).select().maybeSingle();
+      if (ins.error) return json({ error: ins.error.message }, 400);
+      try {
+        const { data: cfg } = await sb.from("t3l_portal_config").select("value").eq("key", "admin_webhook_url").maybeSingle();
+        const hook = cfg && cfg.value;
+        if (hook) await fetch(hook, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "prayer.request", data: row, submittedAt: new Date().toISOString(), source: "Teach Them to Love Client Portal" }) });
+      } catch (_e) { /* best-effort forward to GoHighLevel */ }
+      return json({ ok: true });
+    }
+
     if (action === "app") {
       if (!caller) return json({ error: "unauthorized" }, 401);
       if (!isAdmin) return json({ error: "forbidden" }, 403);
@@ -168,7 +191,7 @@ Deno.serve(async (req) => {
       return json({ html: (data && data.content) || FALLBACK_HTML });
     }
 
-    if (["invite", "list_members", "set_role", "revoke", "get_config", "set_config"].includes(action)) {
+    if (["invite", "list_members", "set_role", "revoke", "get_config", "set_config", "list_prayer_requests", "set_prayer_status"].includes(action)) {
       if (!caller) return json({ error: "unauthorized" }, 401);
       if (!isAdmin) return json({ error: "forbidden" }, 403);
     }
@@ -192,6 +215,24 @@ Deno.serve(async (req) => {
         { key: "client_announcement_webhook_url", value: String(payload.client_announcement_webhook_url || ""), updated_at: new Date().toISOString() },
       ];
       const { error } = await sb.from("t3l_portal_config").upsert(rows, { onConflict: "key" });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (action === "list_prayer_requests") {
+      const { data } = await sb.from("t3l_prayer_requests")
+        .select("id,name,email,ministry_role,request,status,internal_note,created_at")
+        .order("created_at", { ascending: false });
+      return json({ requests: data || [] });
+    }
+
+    if (action === "set_prayer_status") {
+      const id = String(payload.id || "");
+      const status = payload.status === "in_prayer" ? "in_prayer" : payload.status === "closed" ? "closed" : "received";
+      if (!id) return json({ error: "id is required." }, 400);
+      const patch: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
+      if (typeof payload.internal_note === "string") patch.internal_note = payload.internal_note;
+      const { error } = await sb.from("t3l_prayer_requests").update(patch).eq("id", id);
       if (error) return json({ error: error.message }, 400);
       return json({ ok: true });
     }
