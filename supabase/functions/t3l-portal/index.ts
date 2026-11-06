@@ -202,7 +202,9 @@ Deno.serve(async (req) => {
       return json({ html: (data && data.content) || FALLBACK_HTML });
     }
 
-    if (["invite", "list_members", "set_role", "revoke", "get_config", "set_config", "list_prayer_requests", "set_prayer_status"].includes(action)) {
+    if (["invite", "list_members", "set_role", "revoke", "get_config", "set_config",
+         "list_prayer_requests", "set_prayer_status", "get_modules", "set_module",
+         "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive"].includes(action)) {
       if (!caller) return json({ error: "unauthorized" }, 401);
       if (!isAdmin) return json({ error: "forbidden" }, 403);
     }
@@ -221,11 +223,95 @@ Deno.serve(async (req) => {
     }
 
     if (action === "set_config") {
+      if (!isSuper) return json({ error: "Only a super administrator can change configuration." }, 403);
       const rows = [
         { key: "admin_webhook_url", value: String(payload.admin_webhook_url || ""), updated_at: new Date().toISOString() },
         { key: "client_announcement_webhook_url", value: String(payload.client_announcement_webhook_url || ""), updated_at: new Date().toISOString() },
       ];
       const { error } = await sb.from("t3l_portal_config").upsert(rows, { onConflict: "key" });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    // --- Module on/off registry ---
+    if (action === "get_modules") {
+      const { data } = await sb.from("t3l_portal_modules").select("key,enabled,label,sort").order("sort", { ascending: true });
+      return json({ modules: data || [] });
+    }
+
+    if (action === "set_module") {
+      if (!isSuper) return json({ error: "Only a super administrator can change modules." }, 403);
+      const key = String(payload.key || "");
+      if (!key) return json({ error: "key is required." }, 400);
+      const { error } = await sb.from("t3l_portal_modules")
+        .update({ enabled: !!payload.enabled, updated_at: new Date().toISOString() }).eq("key", key);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    // --- CRM: contacts + activity ---
+    if (action === "crm_list") {
+      const q = String(payload.q || "").trim();
+      let query = sb.from("t3l_crm_contacts")
+        .select("id,first_name,last_name,email,phone,stage,tags,status,updated_at")
+        .eq("status", "active").order("updated_at", { ascending: false }).limit(300);
+      if (q) {
+        const like = "%" + q.replace(/[%_,]/g, " ") + "%";
+        query = query.or("first_name.ilike." + like + ",last_name.ilike." + like + ",email.ilike." + like + ",phone.ilike." + like);
+      }
+      const { data, error } = await query;
+      if (error) return json({ error: error.message }, 400);
+      return json({ contacts: data || [] });
+    }
+
+    if (action === "crm_get") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { data: contact } = await sb.from("t3l_crm_contacts").select("*").eq("id", id).maybeSingle();
+      if (!contact) return json({ error: "That contact was not found." }, 404);
+      const { data: activities } = await sb.from("t3l_crm_activities")
+        .select("id,kind,body,created_at").eq("contact_id", id).order("created_at", { ascending: false });
+      return json({ contact, activities: activities || [] });
+    }
+
+    if (action === "crm_save") {
+      const row: Record<string, unknown> = {
+        first_name: String(payload.first_name || "").trim() || null,
+        last_name: String(payload.last_name || "").trim() || null,
+        email: String(payload.email || "").trim() || null,
+        phone: String(payload.phone || "").trim() || null,
+        stage: String(payload.stage || "new").trim() || "new",
+        tags: Array.isArray(payload.tags) ? payload.tags.map((t: any) => String(t).trim()).filter(Boolean).slice(0, 25) : [],
+        notes: String(payload.notes || "") || null,
+        updated_at: new Date().toISOString(),
+      };
+      if (!row.first_name && !row.last_name && !row.email) return json({ error: "Enter a name or email." }, 400);
+      const id = String(payload.id || "");
+      if (id) {
+        const { data, error } = await sb.from("t3l_crm_contacts").update(row).eq("id", id).select().maybeSingle();
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true, contact: data });
+      }
+      row.created_by = caller!.user.id;
+      const { data, error } = await sb.from("t3l_crm_contacts").insert(row).select().maybeSingle();
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, contact: data });
+    }
+
+    if (action === "crm_activity") {
+      const contact_id = String(payload.contact_id || ""); if (!contact_id) return json({ error: "contact_id is required." }, 400);
+      const kind = ["note", "call", "email", "visit", "stage_change", "other"].includes(payload.kind) ? payload.kind : "note";
+      const body = String(payload.body || "").trim(); if (!body) return json({ error: "Add a note first." }, 400);
+      const { data, error } = await sb.from("t3l_crm_activities")
+        .insert({ contact_id, kind, body, created_by: caller!.user.id }).select().maybeSingle();
+      if (error) return json({ error: error.message }, 400);
+      await sb.from("t3l_crm_contacts").update({ updated_at: new Date().toISOString() }).eq("id", contact_id);
+      return json({ ok: true, activity: data });
+    }
+
+    if (action === "crm_archive") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_crm_contacts")
+        .update({ status: "archived", updated_at: new Date().toISOString() }).eq("id", id);
       if (error) return json({ error: error.message }, 400);
       return json({ ok: true });
     }

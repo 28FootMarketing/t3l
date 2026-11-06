@@ -33,9 +33,9 @@
         <div class="nav-wrap">
           <div class="nav-label">Workspace</div><nav class="admin-nav">
             <button class="nav-item active" data-target="overview"><span class="nav-icon">⌂</span>Overview</button>
-            <button class="nav-item" data-target="announcements"><span class="nav-icon">◈</span>Announcements</button>
-            <button class="nav-item" data-target="events"><span class="nav-icon">◷</span>Events & programs</button>
-            <button class="nav-item" data-target="resources"><span class="nav-icon">▤</span>Resource library</button>
+            <button class="nav-item" data-target="announcements" data-module="announcements"><span class="nav-icon">◈</span>Announcements</button>
+            <button class="nav-item" data-target="events" data-module="events"><span class="nav-icon">◷</span>Events & programs</button>
+            <button class="nav-item" data-target="resources" data-module="resources"><span class="nav-icon">▤</span>Resource library</button><button class="nav-item" data-target="crm" data-module="crm"><span class="nav-icon">◎</span>CRM</button>
             <button class="nav-item" data-target="prayer"><span class="nav-icon">♡</span>Prayer care</button>
           </nav>
           <div class="nav-label">Portal controls</div><nav class="admin-nav"><button class="nav-item" data-target="people"><span class="nav-icon">◉</span>People &amp; access</button><button class="nav-item t3l-super-only" data-target="settings"><span class="nav-icon">⌑</span>Configuration</button></nav>
@@ -49,11 +49,11 @@
             <p class="eyebrow">Ministry administration</p><h1 class="page-title">Good work begins with thoughtful care.</h1><p class="page-description">Your private workspace for the ministry portal. Use the menu to manage announcements, events, resources, prayer care, and member access.</p>
             <div class="hero"><div class="hero-label">Administrator portal</div><h2>Keep the client experience current, clear, and cared for.</h2><p>Keep members cared for and the portal current.</p></div>
             </section>
-          <section class="view" id="announcements"><p class="eyebrow">Publish with care</p><h1 class="page-title">Announcements</h1><p class="page-description">Create a new client-facing notice for members.</p><div class="workspace"><article class="card form-card"><h2>New announcement</h2><p>Use clear, current information. The client portal should remain the public source for notices.</p><form class="admin-action-form" data-action="announcement.create"><div class="fields"><div class="field"><label for="announcementTitle">Title</label><input id="announcementTitle" name="title" maxlength="180" placeholder="Announcement title" required></div><div class="field"><label for="announcementBody">Message</label><textarea id="announcementBody" name="body" maxlength="10000" placeholder="Write the update for clients…" required></textarea></div><div class="field"><label for="announcementDate">Publish date & time</label><input id="announcementDate" name="publishedAt" type="datetime-local" required></div></div><button class="primary-btn" type="submit">Publish announcement</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"></aside></div></section>
-          <section class="view" id="events"><p class="eyebrow">Plan ministry moments</p><h1 class="page-title">Events & programs</h1><p class="page-description">Add a calendar entry with the information members need to participate.</p><div class="workspace"><article class="card form-card"><h2>New event</h2><p>Dates and times should be reviewed carefully before publishing to the client portal.</p><form class="admin-action-form" data-action="event.create"><div class="fields"><div class="two-col"><div class="field"><label for="eventTitle">Event title</label><input id="eventTitle" name="title" maxlength="180" placeholder="Event or program name" required></div><div class="field"><label for="eventLocation">Location</label><input id="eventLocation" name="location" maxlength="240" placeholder="Address or meeting location" required></div></div><div class="two-col"><div class="field"><label for="eventStart">Start date & time</label><input id="eventStart" name="startAt" type="datetime-local" required></div><div class="field"><label for="eventEnd">End date & time <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="eventEnd" name="endAt" type="datetime-local"></div></div><div class="field"><label for="eventDescription">Description</label><textarea id="eventDescription" name="description" maxlength="10000" placeholder="Describe the event, service, or program…" required></textarea></div></div><button class="primary-btn" type="submit">Publish event</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"></aside></div></section>
-          <section class="view" id="resources"><p class="eyebrow">Curate helpful materials</p><h1 class="page-title">Resource library</h1><p class="page-description">Publish a resource link for the member portal. Provide a direct, durable file URL.</p><div class="workspace"><article class="card form-card"><h2>Publish a resource</h2><p>Use direct, durable file URLs and descriptive titles so members can identify the material.</p><form class="admin-action-form" data-action="resource.create"><div class="fields"><div class="field"><label for="resourceTitle">Resource title</label><input id="resourceTitle" name="title" maxlength="180" placeholder="Guide or material title" required></div><div class="field"><label for="resourceUrl">Resource URL</label><input id="resourceUrl" name="resourceUrl" type="url" placeholder="https://…" required></div><div class="field"><label for="resourceDescription">Description <span style="font-weight:400;color:#8d8086">(optional)</span></label><textarea id="resourceDescription" name="description" maxlength="3000" placeholder="Explain how this resource supports members…"></textarea></div></div><button class="primary-btn" type="submit">Publish resource</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"></aside></div></section>
-          <section class="view" id="prayer"><p class="eyebrow">Private care workflow</p><h1 class="page-title">Prayer care</h1><p class="page-description">Review prayer requests submitted by members and update their care status.</p><div class="admin-alert"><span>⌑</span><span><strong>Handle private information with discretion.</strong> These requests are confidential &mdash; please share them only with the ministry&rsquo;s care team.</span></div><div class="workspace" style="margin-top:16px"><article class="card form-card"><h2>Update care status</h2><p>Enter the GHL record, contact, or request identifier that your workflow uses to locate the request.</p><form class="admin-action-form" data-action="prayer.status.update"><div class="fields"><div class="field"><label for="prayerRequestId">Request or contact ID</label><input id="prayerRequestId" name="requestId" maxlength="180" placeholder="GHL record or contact identifier" required></div><div class="field"><label for="prayerStatus">Care status</label><select id="prayerStatus" name="status" required><option value="received">Received</option><option value="in_prayer">In prayer</option><option value="closed">Closed</option></select></div><div class="field"><label for="prayerNote">Internal note <span style="font-weight:400;color:#8d8086">(optional)</span></label><textarea id="prayerNote" name="internalNote" maxlength="2000" placeholder="Internal care-team note only…"></textarea></div></div><button class="primary-btn" type="submit">Update care status</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card"><div class="table-header"><h3>Pending care queue</h3></div><div class="zero-table"><strong>No requests yet</strong>Prayer requests submitted from the client portal will appear here.</div></article></aside></div></section>
-          <section class="view" id="people"><p class="eyebrow">Accounts &amp; roles</p><h1 class="page-title">People &amp; access</h1><p class="page-description">Invite members and administrators, and manage who can sign in. Accounts are invitation-only &mdash; invited people receive a secure sign-in link by email (no passwords).</p><div class="workspace"><article class="card form-card"><h2>Invite someone</h2><p>They&rsquo;ll receive an email with a secure link to finish signing in.</p><form id="t3lInviteForm"><div class="fields"><div class="field"><label for="inviteEmail">Email address</label><input id="inviteEmail" type="email" autocomplete="off" placeholder="name@example.com" required></div><div class="field" id="inviteRoleField"><label for="inviteRole">Role</label><select id="inviteRole"><option value="client">Client (member)</option><option value="admin">Administrator</option><option value="super_admin">Super administrator</option></select></div></div><button class="primary-btn" type="submit">Send invitation</button><div class="form-status" id="inviteStatus" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card"><div class="table-header"><div><h3>Members &amp; administrators</h3><span id="peopleCount"></span></div><button id="peopleRefresh" type="button" class="secondary-btn" style="margin:0">Refresh</button></div><div id="peopleList"><div class="zero-table"><strong>Loading&hellip;</strong>Fetching the current roster.</div></div></article></aside></div></section><section class="view t3l-super-only" id="settings"><p class="eyebrow">Portal controls</p><h1 class="page-title">Configuration</h1><p class="page-description">Connect the ministry workflow webhooks. Visible to super administrators only.</p><div class="settings-grid"></div></section>
+          <section class="view" id="announcements" data-module="announcements"><p class="eyebrow">Publish with care</p><h1 class="page-title">Announcements</h1><p class="page-description">Create a new client-facing notice for members.</p><div class="workspace"><article class="card form-card"><h2>New announcement</h2><p>Use clear, current information. The client portal should remain the public source for notices.</p><form class="admin-action-form" data-action="announcement.create"><div class="fields"><div class="field"><label for="announcementTitle">Title</label><input id="announcementTitle" name="title" maxlength="180" placeholder="Announcement title" required></div><div class="field"><label for="announcementBody">Message</label><textarea id="announcementBody" name="body" maxlength="10000" placeholder="Write the update for clients…" required></textarea></div><div class="field"><label for="announcementDate">Publish date & time</label><input id="announcementDate" name="publishedAt" type="datetime-local" required></div></div><button class="primary-btn" type="submit">Publish announcement</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"></aside></div></section>
+          <section class="view" id="events" data-module="events"><p class="eyebrow">Plan ministry moments</p><h1 class="page-title">Events & programs</h1><p class="page-description">Add a calendar entry with the information members need to participate.</p><div class="workspace"><article class="card form-card"><h2>New event</h2><p>Dates and times should be reviewed carefully before publishing to the client portal.</p><form class="admin-action-form" data-action="event.create"><div class="fields"><div class="two-col"><div class="field"><label for="eventTitle">Event title</label><input id="eventTitle" name="title" maxlength="180" placeholder="Event or program name" required></div><div class="field"><label for="eventLocation">Location</label><input id="eventLocation" name="location" maxlength="240" placeholder="Address or meeting location" required></div></div><div class="two-col"><div class="field"><label for="eventStart">Start date & time</label><input id="eventStart" name="startAt" type="datetime-local" required></div><div class="field"><label for="eventEnd">End date & time <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="eventEnd" name="endAt" type="datetime-local"></div></div><div class="field"><label for="eventDescription">Description</label><textarea id="eventDescription" name="description" maxlength="10000" placeholder="Describe the event, service, or program…" required></textarea></div></div><button class="primary-btn" type="submit">Publish event</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"></aside></div></section>
+          <section class="view" id="resources" data-module="resources"><p class="eyebrow">Curate helpful materials</p><h1 class="page-title">Resource library</h1><p class="page-description">Publish a resource link for the member portal. Provide a direct, durable file URL.</p><div class="workspace"><article class="card form-card"><h2>Publish a resource</h2><p>Use direct, durable file URLs and descriptive titles so members can identify the material.</p><form class="admin-action-form" data-action="resource.create"><div class="fields"><div class="field"><label for="resourceTitle">Resource title</label><input id="resourceTitle" name="title" maxlength="180" placeholder="Guide or material title" required></div><div class="field"><label for="resourceUrl">Resource URL</label><input id="resourceUrl" name="resourceUrl" type="url" placeholder="https://…" required></div><div class="field"><label for="resourceDescription">Description <span style="font-weight:400;color:#8d8086">(optional)</span></label><textarea id="resourceDescription" name="description" maxlength="3000" placeholder="Explain how this resource supports members…"></textarea></div></div><button class="primary-btn" type="submit">Publish resource</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"></aside></div></section>
+          <section class="view" id="crm" data-module="crm"><p class="eyebrow">Relationships</p><h1 class="page-title">CRM <span class="t3l-tip" data-tip="Your contacts — members, donors, volunteers and leads — with their notes and history. Click a contact to open their timeline.">?</span></h1><p class="page-description">Contacts and their history in one place. Search, add people, and log notes, calls and visits.</p><div id="t3lCrmRoot"><div class="zero-table"><strong>Loading&hellip;</strong>Fetching contacts.</div></div></section><section class="view" id="prayer"><p class="eyebrow">Private care workflow</p><h1 class="page-title">Prayer care</h1><p class="page-description">Review prayer requests submitted by members and update their care status.</p><div class="admin-alert"><span>⌑</span><span><strong>Handle private information with discretion.</strong> These requests are confidential &mdash; please share them only with the ministry&rsquo;s care team.</span></div><div class="workspace" style="margin-top:16px"><article class="card form-card"><h2>Update care status</h2><p>Enter the GHL record, contact, or request identifier that your workflow uses to locate the request.</p><form class="admin-action-form" data-action="prayer.status.update"><div class="fields"><div class="field"><label for="prayerRequestId">Request or contact ID</label><input id="prayerRequestId" name="requestId" maxlength="180" placeholder="GHL record or contact identifier" required></div><div class="field"><label for="prayerStatus">Care status</label><select id="prayerStatus" name="status" required><option value="received">Received</option><option value="in_prayer">In prayer</option><option value="closed">Closed</option></select></div><div class="field"><label for="prayerNote">Internal note <span style="font-weight:400;color:#8d8086">(optional)</span></label><textarea id="prayerNote" name="internalNote" maxlength="2000" placeholder="Internal care-team note only…"></textarea></div></div><button class="primary-btn" type="submit">Update care status</button><button class="secondary-btn" type="reset">Clear</button><div class="form-status" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card"><div class="table-header"><h3>Pending care queue</h3></div><div class="zero-table"><strong>No requests yet</strong>Prayer requests submitted from the client portal will appear here.</div></article></aside></div></section>
+          <section class="view" id="people"><p class="eyebrow">Accounts &amp; roles</p><h1 class="page-title">People &amp; access <span class="t3l-tip" data-tip="Invite people and set their role. Invitations email a secure sign-in link; no passwords.">?</span></h1><p class="page-description">Invite members and administrators, and manage who can sign in. Accounts are invitation-only &mdash; invited people receive a secure sign-in link by email (no passwords).</p><div class="workspace"><article class="card form-card"><h2>Invite someone</h2><p>They&rsquo;ll receive an email with a secure link to finish signing in.</p><form id="t3lInviteForm"><div class="fields"><div class="field"><label for="inviteEmail">Email address</label><input id="inviteEmail" type="email" autocomplete="off" placeholder="name@example.com" required></div><div class="field" id="inviteRoleField"><label for="inviteRole">Role</label><select id="inviteRole"><option value="client">Client (member)</option><option value="admin">Administrator</option><option value="super_admin">Super administrator</option></select></div></div><button class="primary-btn" type="submit">Send invitation</button><div class="form-status" id="inviteStatus" role="status" aria-live="polite"></div></form></article><aside class="side-stack"><article class="card"><div class="table-header"><div><h3>Members &amp; administrators</h3><span id="peopleCount"></span></div><button id="peopleRefresh" type="button" class="secondary-btn" style="margin:0">Refresh</button></div><div id="peopleList"><div class="zero-table"><strong>Loading&hellip;</strong>Fetching the current roster.</div></div></article></aside></div></section><section class="view t3l-super-only" id="settings"><p class="eyebrow">Portal controls</p><h1 class="page-title">Configuration</h1><p class="page-description">Connect the ministry workflow webhooks. Visible to super administrators only.</p><div class="settings-grid"></div></section>
           <p class="footer-line">Teach Them to Love Outreach Ministries · Administrator portal</p>
         </div>
       </main>
@@ -343,6 +343,124 @@
     load();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+
+<style>
+.t3l-tip{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#eadfc2;color:#6a4a1c;font:700 11px/1 'DM Sans',sans-serif;cursor:help;vertical-align:middle;position:relative;margin-left:6px}
+.t3l-tip:hover::after,.t3l-tip:focus::after{content:attr(data-tip);position:absolute;left:50%;transform:translateX(-50%);top:140%;z-index:60;background:#311536;color:#fff;padding:9px 11px;border-radius:9px;font:400 12px/1.45 'DM Sans',sans-serif;white-space:normal;width:250px;text-align:left;box-shadow:0 10px 26px rgba(20,8,26,.35)}
+.t3l-tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700;background:#f0e6ec;color:#713879;margin:0 4px 4px 0}
+#t3lCrmRoot textarea{width:100%;min-height:90px;border:1px solid #dfd3c6;border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;resize:vertical}
+</style>
+<script>
+/* Hide nav items / views for modules that are switched OFF. (T3L_AUTH already loaded above.) */
+(function () {
+  async function run(){
+    try {
+      var r = await T3L_AUTH.callFn('get_modules', {});
+      if (!r.ok || !r.data) return;
+      var off = {}; (r.data.modules || []).forEach(function(m){ if (!m.enabled) off[m.key] = 1; });
+      document.querySelectorAll('[data-module]').forEach(function(el){ if (off[el.getAttribute('data-module')]) el.style.display = 'none'; });
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+})();
+</script>
+<script>
+/* CRM — contacts list, detail, edit, activity timeline. */
+(function () {
+  var root = document.getElementById('t3lCrmRoot'); if (!root) return;
+  var STAGES = ['new','active','inactive','member','volunteer','donor','lead'];
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function fmtDate(s){ try { return new Date(s).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}); } catch(e){ return s||''; } }
+  function nameOf(c){ return (((c.first_name||'')+' '+(c.last_name||'')).trim()) || c.email || '(no name)'; }
+  function v(id){ var el=document.getElementById(id); return el?(el.value||'').trim():''; }
+  function h(markup){ root.innerHTML = markup; }
+
+  function listView(contacts, q){
+    var rows = contacts.map(function(c){
+      var tags = (c.tags||[]).map(function(t){ return '<span class="t3l-tag">'+esc(t)+'</span>'; }).join(' ');
+      return '<tr class="t3l-crm-row" data-id="'+esc(c.id)+'" style="cursor:pointer;border-top:1px solid #efe6da">'
+        + '<td style="padding:11px 12px">'+esc(nameOf(c))+'</td>'
+        + '<td style="padding:11px 10px">'+esc(c.email||'')+'</td>'
+        + '<td style="padding:11px 10px">'+esc(c.phone||'')+'</td>'
+        + '<td style="padding:11px 10px">'+esc(c.stage||'')+'</td>'
+        + '<td style="padding:11px 10px">'+tags+'</td></tr>';
+    }).join('');
+    var table = contacts.length
+      ? '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="text-align:left;color:#9a8c91;font-size:11px;text-transform:uppercase;letter-spacing:.07em"><th style="padding:10px 12px">Name</th><th style="padding:10px">Email</th><th style="padding:10px">Phone</th><th style="padding:10px">Stage</th><th style="padding:10px">Tags</th></tr></thead><tbody>'+rows+'</tbody></table>'
+      : '<div class="zero-table"><strong>No contacts</strong>Add your first contact to get started.</div>';
+    h('<div class="card"><div class="table-header"><input id="t3lCrmSearch" placeholder="Search name, email, phone" value="'+esc(q||'')+'" style="flex:1;border:1px solid #dfd3c6;border-radius:10px;padding:9px 12px;font-size:13px;min-width:200px"><button class="primary-btn" id="t3lCrmNew" type="button" style="margin-left:10px">New contact</button></div><div style="overflow:auto;padding:0 6px 6px">'+table+'</div></div>');
+    var s = document.getElementById('t3lCrmSearch'), t;
+    s.addEventListener('input', function(){ clearTimeout(t); t = setTimeout(function(){ load(s.value); }, 300); });
+    document.getElementById('t3lCrmNew').addEventListener('click', function(){ editView(null); });
+    root.querySelectorAll('.t3l-crm-row').forEach(function(r){ r.addEventListener('click', function(){ detailView(r.dataset.id); }); });
+  }
+
+  async function load(q){
+    h('<div class="zero-table"><strong>Loading&hellip;</strong></div>');
+    var r = await T3L_AUTH.callFn('crm_list', { q: q || '' });
+    if (r.ok && r.data) listView(r.data.contacts || [], q); else h('<div class="zero-table"><strong>Could not load</strong>Please try again.</div>');
+  }
+
+  function fld(label,id,val,type){ return '<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+(type||'text')+'" value="'+esc(val||'')+'"></div>'; }
+  function editView(c){
+    c = c || {};
+    var stageOpts = STAGES.map(function(s){ return '<option value="'+s+'"'+(((c.stage||'new')===s)?' selected':'')+'>'+s+'</option>'; }).join('');
+    h('<div class="card form-card"><h2>'+(c.id?'Edit contact':'New contact')+'</h2><div class="fields">'
+      + '<div class="two-col">'+fld('First name','cf_first',c.first_name)+fld('Last name','cf_last',c.last_name)+'</div>'
+      + '<div class="two-col">'+fld('Email','cf_email',c.email,'email')+fld('Phone','cf_phone',c.phone)+'</div>'
+      + '<div class="field"><label for="cf_stage">Stage</label><select id="cf_stage">'+stageOpts+'</select></div>'
+      + '<div class="field"><label for="cf_tags">Tags <span style="font-weight:400;color:#8d8086">(comma-separated)</span></label><input id="cf_tags" value="'+esc((c.tags||[]).join(', '))+'"></div>'
+      + '<div class="field"><label for="cf_notes">Notes</label><textarea id="cf_notes">'+esc(c.notes||'')+'</textarea></div></div>'
+      + '<button class="primary-btn" id="cf_save" type="button">Save</button> <button class="secondary-btn" id="cf_cancel" type="button">Cancel</button> <span class="form-status" id="cf_status" style="display:inline-block;margin-left:8px"></span></div>');
+    document.getElementById('cf_cancel').addEventListener('click', function(){ c.id ? detailView(c.id) : load(); });
+    document.getElementById('cf_save').addEventListener('click', async function(){
+      var p = { id: c.id||'', first_name: v('cf_first'), last_name: v('cf_last'), email: v('cf_email'), phone: v('cf_phone'),
+                stage: document.getElementById('cf_stage').value,
+                tags: v('cf_tags').split(',').map(function(x){ return x.trim(); }).filter(Boolean),
+                notes: v('cf_notes') };
+      var st = document.getElementById('cf_status'); st.className = 'form-status';
+      var r = await T3L_AUTH.callFn('crm_save', p);
+      if (r.ok && r.data && r.data.contact) detailView(r.data.contact.id);
+      else { st.textContent = (r.data && r.data.error) || 'Could not save.'; st.className = 'form-status error'; }
+    });
+  }
+
+  function detailView(id){
+    h('<div class="zero-table"><strong>Loading&hellip;</strong></div>');
+    T3L_AUTH.callFn('crm_get', { id: id }).then(function(r){
+      if (!r.ok || !r.data || !r.data.contact){ h('<div class="zero-table"><strong>Not found</strong></div>'); return; }
+      var c = r.data.contact, acts = r.data.activities || [];
+      var tags = (c.tags||[]).map(function(t){ return '<span class="t3l-tag">'+esc(t)+'</span>'; }).join(' ');
+      var timeline = acts.length ? acts.map(function(a){
+        return '<div style="padding:12px 0;border-top:1px solid #efe6da"><div style="font-size:11px;color:#9a8c91;text-transform:capitalize">'+esc(a.kind)+' &middot; '+esc(fmtDate(a.created_at))+'</div><div style="white-space:pre-wrap;color:#4b3f50;font-size:13px;margin-top:3px">'+esc(a.body||'')+'</div></div>';
+      }).join('') : '<p class="note" style="color:#8a7d83;font-size:13px">No activity yet.</p>';
+      h('<div style="display:flex;gap:8px;margin-bottom:14px"><button class="secondary-btn" id="cd_back" type="button">&larr; All contacts</button><button class="secondary-btn" id="cd_edit" type="button">Edit</button><button class="secondary-btn" id="cd_arch" type="button" style="color:#a04c43">Archive</button></div>'
+        + '<div class="workspace"><article class="card form-card"><h2>'+esc(nameOf(c))+'</h2>'
+        + '<p class="note" style="color:#766b73;font-size:13px">'+esc(c.email||'')+(c.phone?' &middot; '+esc(c.phone):'')+'</p>'
+        + '<p style="margin:6px 0">Stage: <strong style="color:#4a214f;text-transform:capitalize">'+esc(c.stage||'')+'</strong></p>'
+        + (tags?('<p style="margin:6px 0">'+tags+'</p>'):'')
+        + (c.notes?('<p style="white-space:pre-wrap;color:#4b3f50;font-size:13px;margin-top:10px">'+esc(c.notes)+'</p>'):'')
+        + '</article><aside class="side-stack"><article class="card"><div class="table-header"><h3>Activity</h3></div><div style="padding:16px 18px">'
+        + '<div class="field"><textarea id="cd_note" placeholder="Log a note, call, email or visit&hellip;"></textarea></div>'
+        + '<div style="display:flex;gap:8px;align-items:center"><select id="cd_kind" style="border:1px solid #dfd3c6;border-radius:8px;padding:8px;font-size:12px"><option value="note">Note</option><option value="call">Call</option><option value="email">Email</option><option value="visit">Visit</option></select><button class="primary-btn" id="cd_add" type="button">Add</button></div>'
+        + '<div style="margin-top:12px">'+timeline+'</div></div></article></aside></div>');
+      document.getElementById('cd_back').addEventListener('click', function(){ load(); });
+      document.getElementById('cd_edit').addEventListener('click', function(){ editView(c); });
+      document.getElementById('cd_arch').addEventListener('click', async function(){ if (!confirm('Archive this contact?')) return; var rr = await T3L_AUTH.callFn('crm_archive', { id: c.id }); if (rr.ok) load(); else alert((rr.data && rr.data.error) || 'Could not archive.'); });
+      document.getElementById('cd_add').addEventListener('click', async function(){
+        var body = document.getElementById('cd_note').value.trim(); if (!body) return;
+        var kind = document.getElementById('cd_kind').value;
+        var rr = await T3L_AUTH.callFn('crm_activity', { contact_id: c.id, kind: kind, body: body });
+        if (rr.ok) detailView(c.id); else alert((rr.data && rr.data.error) || 'Could not add the note.');
+      });
+    });
+  }
+
+  var loaded = false;
+  function maybeLoad(){ if (loaded) return; loaded = true; load(); }
+  document.querySelectorAll('[data-target="crm"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad, 30); }); });
 })();
 </script>
 </body>
