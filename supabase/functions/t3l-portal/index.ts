@@ -204,7 +204,10 @@ Deno.serve(async (req) => {
 
     if (["invite", "list_members", "set_role", "revoke", "get_config", "set_config",
          "list_prayer_requests", "set_prayer_status", "get_modules", "set_module",
-         "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive"].includes(action)) {
+         "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive",
+         "giving_funds_list", "giving_fund_save", "giving_gifts_list", "giving_gift_save",
+         "giving_gift_delete", "giving_summary", "giving_statement",
+         "giving_pledges_list", "giving_pledge_save"].includes(action)) {
       if (!caller) return json({ error: "unauthorized" }, 401);
       if (!isAdmin) return json({ error: "forbidden" }, 403);
     }
@@ -313,6 +316,130 @@ Deno.serve(async (req) => {
       const { error } = await sb.from("t3l_crm_contacts")
         .update({ status: "archived", updated_at: new Date().toISOString() }).eq("id", id);
       if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    // --- Giving: funds, gifts, pledges, reports, statements (amounts in cents) ---
+    if (action === "giving_funds_list") {
+      const { data } = await sb.from("t3l_giving_funds").select("id,name,active,sort").order("sort", { ascending: true });
+      return json({ funds: data || [] });
+    }
+
+    if (action === "giving_fund_save") {
+      const name = String(payload.name || "").trim();
+      if (!name) return json({ error: "Fund name is required." }, 400);
+      const rowf = { name, active: payload.active === false ? false : true, sort: Number(payload.sort) || 0 };
+      const id = String(payload.id || "");
+      const res = id
+        ? await sb.from("t3l_giving_funds").update(rowf).eq("id", id)
+        : await sb.from("t3l_giving_funds").insert(rowf);
+      if (res.error) return json({ error: res.error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (action === "giving_gifts_list") {
+      let query = sb.from("t3l_giving_gifts")
+        .select("id,contact_id,donor_name,donor_email,amount_cents,fund_id,method,gift_date,note")
+        .order("gift_date", { ascending: false }).limit(1000);
+      if (payload.from) query = query.gte("gift_date", String(payload.from));
+      if (payload.to) query = query.lte("gift_date", String(payload.to));
+      if (payload.fund_id) query = query.eq("fund_id", String(payload.fund_id));
+      if (payload.contact_id) query = query.eq("contact_id", String(payload.contact_id));
+      if (payload.donor_email) query = query.ilike("donor_email", String(payload.donor_email));
+      const { data, error } = await query;
+      if (error) return json({ error: error.message }, 400);
+      const total = (data || []).reduce((s: number, g: any) => s + (g.amount_cents || 0), 0);
+      return json({ gifts: data || [], total_cents: total });
+    }
+
+    if (action === "giving_gift_save") {
+      const cents = Math.round(Number(payload.amount_cents));
+      if (!cents || Number.isNaN(cents) || cents < 1) return json({ error: "Enter a gift amount." }, 400);
+      const rowg: Record<string, unknown> = {
+        contact_id: payload.contact_id ? String(payload.contact_id) : null,
+        donor_name: String(payload.donor_name || "").trim() || null,
+        donor_email: String(payload.donor_email || "").trim() || null,
+        amount_cents: cents,
+        fund_id: payload.fund_id ? String(payload.fund_id) : null,
+        method: ["cash", "check", "paypal", "cashapp", "card", "other"].includes(payload.method) ? payload.method : "other",
+        gift_date: String(payload.gift_date || "").trim() || new Date().toISOString().slice(0, 10),
+        note: String(payload.note || "") || null,
+        updated_at: new Date().toISOString(),
+      };
+      const id = String(payload.id || "");
+      if (id) {
+        const { data, error } = await sb.from("t3l_giving_gifts").update(rowg).eq("id", id).select().maybeSingle();
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true, gift: data });
+      }
+      rowg.created_by = caller!.user.id;
+      const { data, error } = await sb.from("t3l_giving_gifts").insert(rowg).select().maybeSingle();
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, gift: data });
+    }
+
+    if (action === "giving_gift_delete") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_giving_gifts").delete().eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (action === "giving_summary") {
+      const year = parseInt(String(payload.year || new Date().getFullYear()), 10);
+      const { data, error } = await sb.from("t3l_giving_gifts")
+        .select("amount_cents,fund_id,gift_date").gte("gift_date", year + "-01-01").lte("gift_date", year + "-12-31").limit(100000);
+      if (error) return json({ error: error.message }, 400);
+      const byFund: Record<string, number> = {}; const byMonth = new Array(12).fill(0); let grand = 0;
+      (data || []).forEach((g: any) => {
+        grand += g.amount_cents || 0;
+        const fk = g.fund_id || "none"; byFund[fk] = (byFund[fk] || 0) + (g.amount_cents || 0);
+        const m = parseInt(String(g.gift_date).slice(5, 7), 10) - 1; if (m >= 0 && m < 12) byMonth[m] += g.amount_cents || 0;
+      });
+      return json({ year, grand_cents: grand, by_fund: byFund, by_month: byMonth, count: (data || []).length });
+    }
+
+    if (action === "giving_statement") {
+      const email = String(payload.donor_email || "").trim().toLowerCase();
+      if (!email) return json({ error: "Donor email is required." }, 400);
+      const year = parseInt(String(payload.year || new Date().getFullYear()), 10);
+      const { data, error } = await sb.from("t3l_giving_gifts")
+        .select("amount_cents,fund_id,method,gift_date,note,donor_name")
+        .ilike("donor_email", email).gte("gift_date", year + "-01-01").lte("gift_date", year + "-12-31")
+        .order("gift_date", { ascending: true });
+      if (error) return json({ error: error.message }, 400);
+      const total = (data || []).reduce((s: number, g: any) => s + (g.amount_cents || 0), 0);
+      const donor_name = (data || []).map((g: any) => g.donor_name).filter(Boolean)[0] || "";
+      return json({ year, donor_email: email, donor_name, gifts: data || [], total_cents: total });
+    }
+
+    if (action === "giving_pledges_list") {
+      const { data } = await sb.from("t3l_giving_pledges")
+        .select("id,donor_name,donor_email,amount_cents,fund_id,frequency,start_date,end_date,status,note")
+        .order("created_at", { ascending: false }).limit(500);
+      return json({ pledges: data || [] });
+    }
+
+    if (action === "giving_pledge_save") {
+      const cents = Math.round(Number(payload.amount_cents));
+      if (!cents || Number.isNaN(cents) || cents < 1) return json({ error: "Enter a pledge amount." }, 400);
+      const rowp: Record<string, unknown> = {
+        donor_name: String(payload.donor_name || "").trim() || null,
+        donor_email: String(payload.donor_email || "").trim() || null,
+        amount_cents: cents,
+        fund_id: payload.fund_id ? String(payload.fund_id) : null,
+        frequency: ["one_time", "weekly", "monthly", "yearly"].includes(payload.frequency) ? payload.frequency : "monthly",
+        start_date: payload.start_date ? String(payload.start_date) : null,
+        end_date: payload.end_date ? String(payload.end_date) : null,
+        status: ["active", "completed", "cancelled"].includes(payload.status) ? payload.status : "active",
+        note: String(payload.note || "") || null,
+        updated_at: new Date().toISOString(),
+      };
+      const id = String(payload.id || "");
+      const res = id
+        ? await sb.from("t3l_giving_pledges").update(rowp).eq("id", id)
+        : await sb.from("t3l_giving_pledges").insert(rowp);
+      if (res.error) return json({ error: res.error.message }, 400);
       return json({ ok: true });
     }
 
