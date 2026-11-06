@@ -287,5 +287,56 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
 </script>
+<script>
+/* Prayer care — live queue of requests submitted from the client portal. */
+(function () {
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function fmtDate(s){ try { return new Date(s).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}); } catch(e){ return s || ''; } }
+  function statusLabel(s){ return s === 'in_prayer' ? 'In prayer' : s === 'closed' ? 'Closed' : 'Received'; }
+  function render(list, host){
+    if (!list.length){ host.innerHTML = '<div class="zero-table"><strong>No requests yet</strong>Prayer requests submitted from the client portal will appear here.</div>'; return; }
+    host.innerHTML = list.map(function(p){
+      var opts = ['received','in_prayer','closed'].map(function(s){ return '<option value="'+s+'"'+(p.status===s?' selected':'')+'>'+statusLabel(s)+'</option>'; }).join('');
+      return '<div style="padding:16px 18px;border-top:1px solid #efe6da">'
+        + '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong style="color:#3b1b40">'+esc(p.name||'Anonymous')+'</strong>'
+        + '<span style="color:#9a8c91;font-size:11px">'+esc(fmtDate(p.created_at))+'</span></div>'
+        + (p.email ? '<div style="color:#766b73;font-size:12px">'+esc(p.email)+(p.ministry_role?' &middot; '+esc(p.ministry_role):'')+'</div>' : '')
+        + '<p style="margin:8px 0 10px;color:#4b3f50;font-size:13px;line-height:1.55;white-space:pre-wrap">'+esc(p.request)+'</p>'
+        + '<div style="display:flex;align-items:center;gap:8px"><label style="margin:0;color:#8a7d83;font-size:11px;font-weight:700">Status</label>'
+        + '<select class="t3l-pr-status" data-id="'+esc(p.id)+'" style="border:1px solid #dfd3c6;border-radius:8px;padding:6px 8px;font-size:12px">'+opts+'</select>'
+        + '<span class="t3l-pr-saved" style="color:#2d6642;font-size:11px;font-weight:700"></span></div></div>';
+    }).join('');
+    host.querySelectorAll('.t3l-pr-status').forEach(function(sel){
+      sel.addEventListener('change', async function(){
+        sel.disabled = true;
+        var r = await T3L_AUTH.callFn('set_prayer_status', { id: sel.dataset.id, status: sel.value });
+        sel.disabled = false;
+        var tag = sel.parentNode.querySelector('.t3l-pr-saved');
+        if (r.ok){ if (tag){ tag.textContent = 'Saved'; setTimeout(function(){ tag.textContent=''; }, 1500); } }
+        else alert((r.data && r.data.error) || 'Could not update the status.');
+      });
+    });
+  }
+  async function load(){
+    var view = document.getElementById('prayer'); if (!view) return;
+    var queueCard = null;
+    view.querySelectorAll('.card').forEach(function(c){ var h = c.querySelector('h3'); if (h && /pending care queue/i.test(h.textContent)) queueCard = c; });
+    if (!queueCard) return;
+    var host = queueCard.querySelector('.t3l-pr-host');
+    if (!host){ var z = queueCard.querySelector('.zero-table'); host = document.createElement('div'); host.className = 't3l-pr-host'; if (z) z.replaceWith(host); else queueCard.appendChild(host); }
+    host.innerHTML = '<div class="zero-table"><strong>Loading&hellip;</strong>Fetching prayer requests.</div>';
+    var r = await T3L_AUTH.callFn('list_prayer_requests', {});
+    if (r.ok && r.data) render(r.data.requests || [], host);
+    else host.innerHTML = '<div class="zero-table"><strong>Could not load</strong>Please try again.</div>';
+  }
+  function start(){
+    // The old GHL "update care status" form is superseded by the inline controls; hide it.
+    var f = document.querySelector('[data-action="prayer.status.update"]'); if (f){ var card = f.closest('.card'); if (card) card.style.display = 'none'; }
+    document.querySelectorAll('[data-target="prayer"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(load, 30); }); });
+    load();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
 </body>
 </html>
