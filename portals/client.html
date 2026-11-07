@@ -57,7 +57,7 @@
           <button class="nav-item" data-target="updates"><span class="nav-icon">◈</span>Updates</button>
           <button class="nav-item" data-target="events" data-module="events"><span class="nav-icon">◷</span>Events</button>
           <button class="nav-item" data-target="community" data-module="community"><span class="nav-icon">◍</span>Community</button>
-          <button class="nav-item" data-target="resources"><span class="nav-icon">▤</span>Resources</button>
+          <button class="nav-item" data-target="resources" data-module="resources"><span class="nav-icon">▤</span>Resources</button>
           <button class="nav-item" data-target="prayer"><span class="nav-icon">♡</span>Prayer</button>
           <button class="nav-item" data-target="profile"><span class="nav-icon">◉</span>My profile</button>
         </nav></div>
@@ -73,7 +73,7 @@
             <div class="grid-4">
               <button class="quick-card" data-target="updates"><span class="quick-icon purple">◈</span><h3>Ministry updates</h3><p>Read the latest ministry news and important notices.</p><span class="arrow">↗</span></button>
               <button class="quick-card" data-target="events" data-module="events"><span class="quick-icon gold">◷</span><h3>Events & programs</h3><p>See upcoming outreach gatherings, services, and programs.</p><span class="arrow">↗</span></button>
-              <button class="quick-card" data-target="resources"><span class="quick-icon green">▤</span><h3>Resource library</h3><p>Access helpful guides and ministry materials.</p><span class="arrow">↗</span></button>
+              <button class="quick-card" data-target="resources" data-module="resources"><span class="quick-icon green">▤</span><h3>Resource library</h3><p>Access helpful guides and ministry materials.</p><span class="arrow">↗</span></button>
               <button class="quick-card" data-target="prayer"><span class="quick-icon rose">♡</span><h3>Prayer support</h3><p>Share a private prayer request with the ministry team.</p><span class="arrow">↗</span></button>
             </div>
             <div class="dashboard-grid"><article class="card card-pad"><p class="eyebrow">At a glance</p><h2 style="margin:5px 0 0;font:600 26px/1.2 'Playfair Display',Georgia,serif;color:#3b1b40">Your ministry space</h2><div class="metric-grid"><div class="metric"><div class="metric-number">—</div><div class="metric-label">Updates shared</div></div><div class="metric"><div class="metric-number">—</div><div class="metric-label">Events listed</div></div><div class="metric"><div class="metric-number">—</div><div class="metric-label">Resources ready</div></div></div></article><article class="card card-pad care-card"><p class="eyebrow">Private & caring</p><h3>Need prayer?</h3><p>Share what is on your heart with a request for the authorized ministry care team.</p><button class="text-link" data-target="prayer">Submit a request&nbsp; →</button></article></div>
@@ -86,7 +86,7 @@
             <div id="t3lCommTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px"><button class="t3l-ctab active" data-commtab="feed">Feed</button><button class="t3l-ctab" data-commtab="groups">Groups</button><button class="t3l-ctab" data-commtab="directory">Directory</button><button class="t3l-ctab" data-commtab="me">My profile</button></div>
             <div id="t3lCommRoot"><article class="card empty"><div class="empty-icon">◍</div><h3>Loading…</h3></article></div>
           </section>
-          <section class="view" id="resources"><p class="eyebrow">Guides & materials</p><h1 class="page-title">Resource library</h1><p class="page-description">A thoughtfully organized collection of ministry materials available for your personal use.</p><article class="card empty"><div class="empty-icon" style="background:#e2efeb;color:#286d63">▤</div><h3>Resources are being prepared</h3><p>Guides, documents, and ministry materials will appear here as the team makes them available.</p></article></section>
+          <section class="view" id="resources" data-module="resources"><p class="eyebrow">Guides & materials</p><h1 class="page-title">Resource library</h1><p class="page-description">A thoughtfully organized collection of ministry materials available for your personal use.</p><div id="t3lResList" style="margin-bottom:16px"></div><article class="card empty"><div class="empty-icon" style="background:#e2efeb;color:#286d63">▤</div><h3>Resources are being prepared</h3><p>Guides, documents, and ministry materials will appear here as the team makes them available.</p></article></section>
           <section class="view" id="prayer"><p class="eyebrow">Private prayer support</p><h1 class="page-title">Share what is on your heart</h1><p class="page-description">Your request is intended for the authorized ministry care team. Complete the form below and it will post to your configured GoHighLevel Workflow webhook.</p><div class="form-layout"><article class="card privacy-panel"><div class="empty-icon" style="background:rgba(255,255,255,.13);color:#ecd69d">♡</div><h2>A confidential space</h2><p>Share as much or as little as feels right. The ministry can receive requests through the GoHighLevel workflow configured for this portal.</p><div class="privacy-box"><span>⌑</span><span>Do not use this form for emergencies. If you are in immediate danger, call your local emergency number.</span></div></article><article class="card form-card"><h2>Prayer request</h2><p>Fields marked required are used to route your request appropriately.</p><form id="prayerRequestForm" novalidate><div class="fields"><div class="field"><label for="contactName">Your name</label><input id="contactName" name="contactName" type="text" autocomplete="name" placeholder="Enter your name" required></div><div class="field"><label for="contactEmail">Email address</label><input id="contactEmail" name="contactEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div><div class="field"><label for="ministryRole">Ministry role <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="ministryRole" name="ministryRole" type="text" placeholder="e.g., Member or Volunteer"></div><div class="field"><label for="prayerRequest">Your request</label><textarea id="prayerRequest" name="prayerRequest" maxlength="5000" placeholder="Write your prayer request here…" required></textarea></div><label class="consent"><input id="privacyConsent" type="checkbox" required><span>I understand that this request will be sent to Teach Them to Love through its configured ministry workflow.</span></label></div><button class="primary-btn" id="submitPrayerButton" type="submit">Send prayer request</button><div class="form-status" id="formStatus" role="status" aria-live="polite"></div></form></article></div></section>
           <section class="view" id="profile"><p class="eyebrow">Your account</p><h1 class="page-title">Profile & contact details</h1><p class="page-description">This standalone GoHighLevel portal template is ready to connect to your membership and contact data sources.</p><div class="profile-layout"><article class="card identity-card"><div class="profile-mark">M</div><h2>Portal member</h2><p>Member contact details are connected through your GoHighLevel membership configuration.</p><span class="role-pill">Member access</span><p style="margin-top:23px">Administrative privileges are managed separately and are not exposed in this client template.</p></article><article class="card profile-form"><h2>Personal details</h2><p>These placeholders are designed for GHL custom values or form elements in your member-area implementation.</p><div class="fields"><div class="field"><label>Full name</label><div class="locked">{{contact.name}}</div></div><div class="field"><label>Email address</label><div class="locked">{{contact.email}}</div></div><div class="field"><label>Phone number</label><div class="locked">{{contact.phone}}</div></div><div class="field"><label>Ministry role</label><div class="locked">{{contact.ministry_role}}</div></div></div><p class="notice">Replace the placeholders above with the appropriate GoHighLevel contact custom values available in your account.</p></article></div></section>
           <p class="footer-line">Teach Them to Love Outreach Ministries · Client portal · <a href="https://www.t3loutreach.org/terms.html" style="color:inherit">Terms of Service</a> · <a href="https://www.t3loutreach.org/privacy.html" style="color:inherit">Privacy Policy</a></p>
@@ -414,6 +414,30 @@
   }
   function maybeLoad(){ if(loaded)return; loaded=true; load(); }
   document.querySelectorAll('[data-target="events"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad,30); }); });
+})();
+</script>
+<script>
+/* Member portal — Resource library (Supabase-backed). Shows published resources. */
+(function () {
+  var sectionEl = document.getElementById('resources'); if (!sectionEl) return;
+  var root = document.getElementById('t3lResList'); if (!root) return;
+  if (typeof T3L_AUTH === 'undefined' || !T3L_AUTH.callFn) return;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var loaded=false;
+  async function load(){
+    var r = await T3L_AUTH.callFn('resources_list', {}); var list=(r.ok&&r.data)?(r.data.resources||[]):[];
+    if(!list.length){ root.innerHTML=''; return; }
+    var empty=sectionEl.querySelector('.card.empty'); if(empty) empty.style.display='none';
+    root.innerHTML=list.map(function(x){
+      return '<a href="'+esc(x.url)+'" target="_blank" rel="noopener" class="card card-pad" style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;text-decoration:none;color:inherit">'
+        +'<div style="flex:0 0 auto;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#e2efeb;color:#286d63;font-size:20px">▤</div>'
+        +'<div style="flex:1 1 auto;min-width:0"><h4 style="margin:0;font:600 18px/1.25 \'Playfair Display\',Georgia,serif;color:#3b1b40">'+esc(x.title)+'</h4>'
+        +(x.description?('<p style="margin:6px 0 0;color:#4b3f50;font-size:14px">'+esc(x.description)+'</p>'):'')
+        +'<div style="margin-top:8px;color:#967027;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase">Open resource ↗</div></div></a>';
+    }).join('');
+  }
+  function maybeLoad(){ if(loaded)return; loaded=true; load(); }
+  document.querySelectorAll('[data-target="resources"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad,30); }); });
 })();
 </script>
 </body>

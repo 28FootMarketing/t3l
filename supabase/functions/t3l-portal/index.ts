@@ -358,6 +358,15 @@ Deno.serve(async (req) => {
       return json({ events: data || [] });
     }
 
+    // Published resources for the member portal "Resource library" (any active member).
+    if (action === "resources_list") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const { data } = await sb.from("t3l_resources")
+        .select("id,title,url,description,created_at")
+        .eq("published", true).order("created_at", { ascending: false }).limit(200);
+      return json({ resources: data || [] });
+    }
+
     if (action === "app") {
       if (!caller) return json({ error: "unauthorized" }, 401);
       if (!isAdmin) return json({ error: "forbidden" }, 403);
@@ -378,6 +387,8 @@ Deno.serve(async (req) => {
          "comms_announcement_list", "comms_announcement_save", "comms_announcement_delete",
          "comms_email_send", "comms_email_log",
          "events_admin_list", "event_save", "event_delete",
+         "resources_admin_list", "resource_save", "resource_delete",
+         "admin_overview",
          "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive", "crm_lookup",
          "crm_fields_list", "crm_field_save", "crm_field_delete",
          "crm_stages_list", "crm_stage_save", "crm_stage_set", "crm_households_list", "crm_household_save",
@@ -564,6 +575,65 @@ Deno.serve(async (req) => {
       const { error } = await sb.from("t3l_events").delete().eq("id", id);
       if (error) return json({ error: error.message }, 400);
       return json({ ok: true });
+    }
+
+    // --- Resources (Supabase-backed; replaces the old GoHighLevel webhook form) ---
+    if (action === "resources_admin_list") {
+      const { data } = await sb.from("t3l_resources")
+        .select("id,title,url,description,published,created_at")
+        .order("created_at", { ascending: false }).limit(300);
+      return json({ resources: data || [] });
+    }
+
+    if (action === "resource_save") {
+      const title = String(payload.title || "").trim(); if (!title) return json({ error: "A resource title is required." }, 400);
+      const url = String(payload.url || "").trim(); if (!url) return json({ error: "A resource URL is required." }, 400);
+      const row: Record<string, unknown> = {
+        title,
+        url,
+        description: String(payload.description || "").trim() || null,
+        published: payload.published === false ? false : true,
+        updated_at: new Date().toISOString(),
+      };
+      const id = String(payload.id || "");
+      if (id) {
+        const { error } = await sb.from("t3l_resources").update(row).eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+      const { data, error } = await sb.from("t3l_resources").insert({ ...row, created_by: caller!.user.id }).select().maybeSingle();
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, resource: data });
+    }
+
+    if (action === "resource_delete") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_resources").delete().eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    // --- Admin dashboard overview: live counts + the next few upcoming events ---
+    if (action === "admin_overview") {
+      const today = new Date().toISOString().slice(0, 10);
+      const [prayer, events, upcoming, anns, resources] = await Promise.all([
+        sb.from("t3l_prayer_requests").select("id", { count: "exact", head: true }).neq("status", "closed"),
+        sb.from("t3l_events").select("id", { count: "exact", head: true }).eq("published", true).gte("start_date", today),
+        sb.from("t3l_events").select("id,title,location,start_date,start_time,published")
+          .eq("published", true).gte("start_date", today)
+          .order("start_date", { ascending: true }).order("start_time", { ascending: true, nullsFirst: true }).limit(5),
+        sb.from("t3l_announcements").select("id", { count: "exact", head: true }).eq("published", true),
+        sb.from("t3l_resources").select("id", { count: "exact", head: true }).eq("published", true),
+      ]);
+      return json({
+        counts: {
+          prayer_pending: prayer.count || 0,
+          upcoming_events: events.count || 0,
+          announcements: anns.count || 0,
+          resources: resources.count || 0,
+        },
+        upcoming_events: upcoming.data || [],
+      });
     }
 
     // --- CRM: contacts + activity ---
