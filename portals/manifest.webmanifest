@@ -1,0 +1,19 @@
+{
+  "name": "Teach Them to Love — Member Portal",
+  "short_name": "T3L Portal",
+  "description": "Your private member space: updates, events, community, resources, and prayer support.",
+  "id": "/portals/client.html",
+  "start_url": "/portals/client.html",
+  "scope": "/portals/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#311536",
+  "theme_color": "#35183a",
+  "lang": "en-US",
+  "categories": ["lifestyle", "social"],
+  "icons": [
+    { "src": "/portals/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/portals/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/portals/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
