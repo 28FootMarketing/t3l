@@ -78,7 +78,7 @@
             </div>
             <div class="dashboard-grid"><article class="card card-pad"><p class="eyebrow">At a glance</p><h2 style="margin:5px 0 0;font:600 26px/1.2 'Playfair Display',Georgia,serif;color:#3b1b40">Your ministry space</h2><div class="metric-grid"><div class="metric"><div class="metric-number">—</div><div class="metric-label">Updates shared</div></div><div class="metric"><div class="metric-number">—</div><div class="metric-label">Events listed</div></div><div class="metric"><div class="metric-number">—</div><div class="metric-label">Resources ready</div></div></div></article><article class="card card-pad care-card"><p class="eyebrow">Private & caring</p><h3>Need prayer?</h3><p>Share what is on your heart with a request for the authorized ministry care team.</p><button class="text-link" data-target="prayer">Submit a request&nbsp; →</button></article></div>
           </section>
-          <section class="view" id="updates"><p class="eyebrow">Stay connected</p><h1 class="page-title">Announcements & updates</h1><p class="page-description">Important ministry news and notices are published here by the authorized ministry team.</p><article class="card empty"><div class="empty-icon">◈</div><h3>No announcements yet</h3><p>When the ministry shares a new notice or update, it will appear here for you.</p></article></section>
+          <section class="view" id="updates"><p class="eyebrow">Stay connected</p><h1 class="page-title">Announcements & updates</h1><p class="page-description">Important ministry news and notices are published here by the ministry team.</p><div id="t3lUpdatesRoot"><article class="card empty"><div class="empty-icon">◈</div><h3>Loading&hellip;</h3></article></div></section>
           <section class="view" id="events"><p class="eyebrow">Gather together</p><h1 class="page-title">Events & programs</h1><p class="page-description">Browse outreach events, services, and programs on the ministry calendar.</p><article class="card calendar-card"><div class="calendar-toolbar"><button class="icon-btn" id="previousMonth" aria-label="Previous month">‹</button><div class="calendar-month"><h3 id="calendarMonth">Month</h3><p>Ministry calendar</p></div><button class="icon-btn" id="nextMonth" aria-label="Next month">›</button></div><div class="calendar-weekdays"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="calendar-grid" id="calendarGrid"></div></article><p class="no-events">Events are managed by your ministry’s authorized administrators and will appear here when scheduled.</p></section>
           <section class="view" id="community" data-module="community">
             <style>.t3l-ctab{border:1px solid #e0d3c4;background:#fffdfa;color:#6b4a70;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer}.t3l-ctab.active{background:#4a214f;color:#fff;border-color:#4a214f}.t3l-ctab:focus-visible{outline:2px solid rgba(183,137,58,.6);outline-offset:2px}</style>
@@ -337,6 +337,24 @@
   var loaded=false;
   function maybeLoad(){ if(loaded)return; loaded=true; feedTab(); }
   document.querySelectorAll('[data-target="community"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad,30); }); });
+})();
+</script>
+
+<script>
+/* T3L CLIENT PORTAL — Updates view: show published announcements. */
+(function () {
+  var sectionEl = document.getElementById('updates'); if (!sectionEl) return;
+  var root = document.getElementById('t3lUpdatesRoot'); if (!root) return;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function day(s){ try{ return new Date(s).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}); }catch(e){ return ''; } }
+  var loaded = false;
+  async function load(){
+    var r = await T3L_AUTH.callFn('announcements_feed', {}); var a = (r.ok&&r.data)?(r.data.announcements||[]):[];
+    if (!a.length){ root.innerHTML = '<article class="card empty"><div class="empty-icon">◈</div><h3>No announcements yet</h3><p>When the ministry shares a new notice or update, it will appear here for you.</p></article>'; return; }
+    root.innerHTML = a.map(function(x){ return '<article class="card card-pad" style="margin-bottom:14px"><div style="color:#967027;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">'+esc(day(x.created_at))+'</div><h2 style="margin:6px 0 0;font:600 24px/1.2 \'Playfair Display\',Georgia,serif;color:#3b1b40">'+esc(x.title)+'</h2><p style="white-space:pre-wrap;color:#4b3f50;font-size:14px;margin:10px 0 0">'+esc(x.body)+'</p></article>'; }).join('');
+  }
+  function maybeLoad(){ if (loaded) return; loaded = true; load(); }
+  document.querySelectorAll('[data-target="updates"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad, 30); }); });
 })();
 </script>
 
