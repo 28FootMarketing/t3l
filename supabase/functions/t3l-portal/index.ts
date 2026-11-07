@@ -31,8 +31,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const FIRST_ADMIN_EMAIL = (Deno.env.get("T3L_FIRST_ADMIN_EMAIL") || "").toLowerCase().trim();
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 
 type Role = "client" | "admin" | "super_admin";
+
+function escapeHtml(s: string): string {
+  return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" } as Record<string, string>)[c]);
+}
 
 const FALLBACK_HTML = `<!doctype html><meta charset="utf-8"><title>Admin</title>
 <body style="font-family:system-ui;background:#2a123f;color:#fff;display:grid;place-items:center;min-height:100vh;text-align:center;margin:0">
@@ -334,6 +339,14 @@ Deno.serve(async (req) => {
       return json({ error: "unknown community action" }, 400);
     }
 
+    // Published announcements for the member portal "Updates" view (any active member).
+    if (action === "announcements_feed") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const { data } = await sb.from("t3l_announcements")
+        .select("id,title,body,created_at").eq("published", true).order("created_at", { ascending: false }).limit(50);
+      return json({ announcements: data || [] });
+    }
+
     if (action === "app") {
       if (!caller) return json({ error: "unauthorized" }, 401);
       if (!isAdmin) return json({ error: "forbidden" }, 403);
@@ -351,6 +364,8 @@ Deno.serve(async (req) => {
 
     if (["invite", "list_members", "set_role", "revoke", "get_config", "set_config",
          "list_prayer_requests", "set_prayer_status", "set_module",
+         "comms_announcement_list", "comms_announcement_save", "comms_announcement_delete",
+         "comms_email_send", "comms_email_log",
          "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive", "crm_lookup",
          "crm_fields_list", "crm_field_save", "crm_field_delete",
          "crm_stages_list", "crm_stage_save", "crm_stage_set", "crm_households_list", "crm_household_save",
@@ -403,6 +418,100 @@ Deno.serve(async (req) => {
         .update({ enabled: !!payload.enabled, updated_at: new Date().toISOString() }).eq("key", key);
       if (error) return json({ error: error.message }, 400);
       return json({ ok: true });
+    }
+
+    // --- Communications: portal announcements + email broadcasts (Resend) ---
+    if (action === "comms_announcement_list") {
+      const { data } = await sb.from("t3l_announcements")
+        .select("id,title,body,published,created_at").order("created_at", { ascending: false }).limit(200);
+      return json({ announcements: data || [] });
+    }
+
+    if (action === "comms_announcement_save") {
+      const title = String(payload.title || "").trim(); if (!title) return json({ error: "Title is required." }, 400);
+      const body = String(payload.body || "").trim(); if (body.length < 2) return json({ error: "Write the announcement." }, 400);
+      const row = { title, body, published: payload.published === false ? false : true, updated_at: new Date().toISOString() };
+      const id = String(payload.id || "");
+      if (id) {
+        const { error } = await sb.from("t3l_announcements").update(row).eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+      const { data, error } = await sb.from("t3l_announcements").insert({ ...row, created_by: caller!.user.id }).select().maybeSingle();
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, announcement: data });
+    }
+
+    if (action === "comms_announcement_delete") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_announcements").delete().eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (action === "comms_email_log") {
+      const { data } = await sb.from("t3l_comms_email_log")
+        .select("id,subject,audience,recipients,sent,failed,status,created_at").order("created_at", { ascending: false }).limit(100);
+      return json({ log: data || [] });
+    }
+
+    if (action === "comms_email_send") {
+      const subject = String(payload.subject || "").trim();
+      const body = String(payload.body || "").trim();
+      if (!subject) return json({ error: "Subject is required." }, 400);
+      if (body.length < 2) return json({ error: "Write a message." }, 400);
+
+      const audienceKey = String(payload.audience || "members");
+      let emails: string[] = []; let label = "All members";
+      if (audienceKey === "members") {
+        const { data } = await sb.from("t3l_portal_members").select("email").eq("status", "active");
+        emails = (data || []).map((r: any) => r.email); label = "All members";
+      } else if (audienceKey === "crm_all") {
+        const { data } = await sb.from("t3l_crm_contacts").select("email").eq("status", "active").not("email", "is", null);
+        emails = (data || []).map((r: any) => r.email); label = "All CRM contacts";
+      } else if (audienceKey.indexOf("crm_stage:") === 0) {
+        const stage = audienceKey.slice("crm_stage:".length);
+        const { data } = await sb.from("t3l_crm_contacts").select("email").eq("status", "active").eq("stage", stage).not("email", "is", null);
+        emails = (data || []).map((r: any) => r.email); label = "CRM stage: " + stage;
+      }
+
+      const seen: Record<string, boolean> = {}; const list: string[] = [];
+      emails.forEach((e) => { const k = String(e || "").toLowerCase().trim(); if (k && k.indexOf("@") > 0 && !seen[k]) { seen[k] = true; list.push(String(e).trim()); } });
+
+      if (!list.length) {
+        await sb.from("t3l_comms_email_log").insert({ subject, audience: label, recipients: 0, sent: 0, failed: 0, status: "no_recipients", created_by: caller!.user.id });
+        return json({ error: "No recipients with an email address in that audience." }, 400);
+      }
+      if (!RESEND_API_KEY) {
+        await sb.from("t3l_comms_email_log").insert({ subject, audience: label, recipients: list.length, sent: 0, failed: list.length, status: "not_configured", error: "RESEND_API_KEY not set", created_by: caller!.user.id });
+        return json({ error: "Email sending is not configured yet. The Resend API key has not been added." }, 400);
+      }
+
+      const { data: cfg } = await sb.from("t3l_portal_config").select("value").eq("key", "comms_from_email").maybeSingle();
+      const from = (cfg && cfg.value) || "Teach Them to Love <outreach@mail.28footsystems.com>";
+      const html = '<div style="font-family:Arial,sans-serif;font-size:15px;color:#2b2030;line-height:1.6;white-space:pre-wrap">' + escapeHtml(body) + '</div>';
+      const cap = list.slice(0, 500); // safety cap per send
+      let sent = 0, failed = 0; let firstErr = "";
+
+      // Resend batch endpoint: up to 100 messages/call, each with its own single recipient
+      // (so members never see one another's addresses).
+      for (let i = 0; i < cap.length; i += 100) {
+        const chunk = cap.slice(i, i + 100);
+        const batch = chunk.map((to) => ({ from, to: [to], subject, html, text: body }));
+        try {
+          const res = await fetch("https://api.resend.com/emails/batch", {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
+            body: JSON.stringify(batch),
+          });
+          if (res.ok) { sent += chunk.length; }
+          else { failed += chunk.length; if (!firstErr) { try { const j = await res.json(); firstErr = (j && (j.message || JSON.stringify(j))) || ("HTTP " + res.status); } catch (_e) { firstErr = "HTTP " + res.status; } } }
+        } catch (e) { failed += chunk.length; if (!firstErr) firstErr = String((e as Error).message || e); }
+      }
+      const status = failed === 0 ? "sent" : (sent > 0 ? "partial" : "failed");
+      await sb.from("t3l_comms_email_log").insert({ subject, audience: label, recipients: cap.length, sent, failed, status, error: firstErr || null, created_by: caller!.user.id });
+      if (status === "failed") return json({ error: "Send failed: " + (firstErr || "unknown error") }, 400);
+      return json({ ok: true, recipients: cap.length, sent, failed, status });
     }
 
     // --- CRM: contacts + activity ---
