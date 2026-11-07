@@ -199,15 +199,213 @@ Deno.serve(async (req) => {
       const uid = caller.user.id;
       const memberName = (caller.member.full_name || caller.member.email || "Member");
 
+      // --- Skool-style gamification helpers (points = likes received on your posts) ---
+      const pointsFor = async (who: string): Promise<number> => {
+        const { data: myPosts } = await sb.from("t3l_community_posts").select("id").eq("author_user_id", who);
+        const ids = (myPosts || []).map((p: any) => p.id);
+        if (!ids.length) return 0;
+        const { count } = await sb.from("t3l_community_likes").select("id", { count: "exact", head: true }).in("post_id", ids);
+        return count || 0;
+      };
+      const getLevels = async (): Promise<any[]> => {
+        const { data } = await sb.from("t3l_community_levels").select("level,min_points,name").order("level", { ascending: true });
+        return data && data.length ? data : [{ level: 1, min_points: 0, name: "Level 1" }];
+      };
+      const levelFor = (points: number, levels: any[]) => {
+        let cur = levels[0]; for (const L of levels) { if (points >= L.min_points) cur = L; }
+        const next = levels.find((L: any) => L.min_points > points) || null;
+        return { level: cur, next };
+      };
+
       if (action === "community_feed") {
         const { data } = await sb.from("t3l_community_posts")
           .select("id,author_user_id,author_name,body,pinned,created_at")
           .eq("hidden", false).order("pinned", { ascending: false }).order("created_at", { ascending: false }).limit(60);
-        const posts = (data || []).map((p: any) => ({
+        const list = data || [];
+        const ids = list.map((p: any) => p.id);
+        const counts: Record<string, number> = {}; const mineLiked: Record<string, boolean> = {};
+        if (ids.length) {
+          const { data: likes } = await sb.from("t3l_community_likes").select("post_id,user_id").in("post_id", ids);
+          (likes || []).forEach((l: any) => { counts[l.post_id] = (counts[l.post_id] || 0) + 1; if (l.user_id === uid) mineLiked[l.post_id] = true; });
+        }
+        const posts = list.map((p: any) => ({
           id: p.id, author_name: p.author_name, body: p.body, pinned: p.pinned,
           created_at: p.created_at, mine: p.author_user_id === uid,
+          likes: counts[p.id] || 0, liked: !!mineLiked[p.id],
         }));
         return json({ posts });
+      }
+
+      // Like / unlike a post (1 like = 1 point to the post's author).
+      if (action === "community_post_like") {
+        const post_id = String(payload.post_id || ""); if (!post_id) return json({ error: "post_id is required." }, 400);
+        const like = payload.like !== false;
+        if (like) {
+          await sb.from("t3l_community_likes").upsert({ post_id, user_id: uid }, { onConflict: "post_id,user_id" });
+        } else {
+          await sb.from("t3l_community_likes").delete().eq("post_id", post_id).eq("user_id", uid);
+        }
+        const { count } = await sb.from("t3l_community_likes").select("id", { count: "exact", head: true }).eq("post_id", post_id);
+        return json({ ok: true, likes: count || 0, liked: like });
+      }
+
+      // My gamification stats: points, level, progress to next, lessons completed.
+      if (action === "community_me") {
+        const points = await pointsFor(uid);
+        const levels = await getLevels();
+        const { level, next } = levelFor(points, levels);
+        const { count: done } = await sb.from("t3l_community_lesson_progress")
+          .select("id", { count: "exact", head: true }).eq("user_id", uid).eq("completed", true);
+        return json({ points, level: level.level, level_name: level.name,
+          next_level: next ? next.level : null, next_name: next ? next.name : null,
+          next_points: next ? next.min_points : null, lessons_completed: done || 0 });
+      }
+
+      if (action === "community_levels") {
+        return json({ levels: await getLevels() });
+      }
+
+      // Leaderboard: points earned in a window (7-day / 30-day / all-time).
+      if (action === "community_leaderboard") {
+        const range = String(payload.range || "all");
+        let since: string | null = null;
+        if (range === "7d") since = new Date(Date.now() - 7 * 864e5).toISOString();
+        else if (range === "30d") since = new Date(Date.now() - 30 * 864e5).toISOString();
+        const { data, error } = await sb.rpc("t3l_community_leaderboard", { p_since: since });
+        if (error) return json({ error: error.message }, 400);
+        const levels = await getLevels();
+        const rows = (data || []).map((r: any, i: number) => {
+          const lv = levelFor(Number(r.points) || 0, levels).level;
+          return { rank: i + 1, user_id: r.user_id, display_name: r.display_name, points: Number(r.points) || 0,
+            level: lv.level, level_name: lv.name, mine: r.user_id === uid };
+        });
+        return json({ range, rows });
+      }
+
+      // Classroom: list courses with my lock state + progress.
+      if (action === "community_courses") {
+        const points = await pointsFor(uid);
+        const levels = await getLevels();
+        const myLevel = levelFor(points, levels).level.level;
+        const { data: courses } = await sb.from("t3l_community_courses")
+          .select("id,title,description,cover_url,unlock_level,sort").eq("published", true).order("sort", { ascending: true });
+        const cids = (courses || []).map((c: any) => c.id);
+        const lessonCount: Record<string, number> = {}; const lessonIds: Record<string, string[]> = {};
+        if (cids.length) {
+          const { data: lessons } = await sb.from("t3l_community_lessons").select("id,course_id").eq("published", true).in("course_id", cids);
+          (lessons || []).forEach((l: any) => { lessonCount[l.course_id] = (lessonCount[l.course_id] || 0) + 1; (lessonIds[l.course_id] = lessonIds[l.course_id] || []).push(l.id); });
+        }
+        const { data: prog } = await sb.from("t3l_community_lesson_progress").select("lesson_id").eq("user_id", uid).eq("completed", true);
+        const doneSet: Record<string, boolean> = {}; (prog || []).forEach((p: any) => { doneSet[p.lesson_id] = true; });
+        const out = (courses || []).map((c: any) => {
+          const total = lessonCount[c.id] || 0;
+          const done = (lessonIds[c.id] || []).filter((id: string) => doneSet[id]).length;
+          return { id: c.id, title: c.title, description: c.description, cover_url: c.cover_url,
+            unlock_level: c.unlock_level, locked: myLevel < c.unlock_level, lessons: total, completed: done };
+        });
+        return json({ courses: out, my_level: myLevel });
+      }
+
+      // Classroom: one course with its lessons + my completion (respects level lock).
+      if (action === "community_course") {
+        const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+        const { data: course } = await sb.from("t3l_community_courses").select("id,title,description,cover_url,unlock_level,published").eq("id", id).maybeSingle();
+        if (!course || !course.published) return json({ error: "That course was not found." }, 404);
+        const points = await pointsFor(uid);
+        const levels = await getLevels();
+        const myLevel = levelFor(points, levels).level.level;
+        if (myLevel < course.unlock_level) {
+          return json({ course: { id: course.id, title: course.title, description: course.description, unlock_level: course.unlock_level }, locked: true, my_level: myLevel });
+        }
+        const { data: lessons } = await sb.from("t3l_community_lessons")
+          .select("id,section,title,content,video_url,sort").eq("course_id", id).eq("published", true).order("sort", { ascending: true });
+        const { data: prog } = await sb.from("t3l_community_lesson_progress").select("lesson_id").eq("user_id", uid).eq("completed", true);
+        const doneSet: Record<string, boolean> = {}; (prog || []).forEach((p: any) => { doneSet[p.lesson_id] = true; });
+        const out = (lessons || []).map((l: any) => ({ ...l, completed: !!doneSet[l.id] }));
+        return json({ course: { id: course.id, title: course.title, description: course.description, cover_url: course.cover_url, unlock_level: course.unlock_level }, locked: false, lessons: out });
+      }
+
+      // Classroom: mark a lesson complete / incomplete.
+      if (action === "community_lesson_complete") {
+        const lesson_id = String(payload.lesson_id || ""); if (!lesson_id) return json({ error: "lesson_id is required." }, 400);
+        const done = payload.completed !== false;
+        if (done) {
+          await sb.from("t3l_community_lesson_progress").upsert({ lesson_id, user_id: uid, completed: true, completed_at: new Date().toISOString() }, { onConflict: "lesson_id,user_id" });
+        } else {
+          await sb.from("t3l_community_lesson_progress").delete().eq("lesson_id", lesson_id).eq("user_id", uid);
+        }
+        return json({ ok: true, completed: done });
+      }
+
+      // --- Admin authoring: courses + lessons ---
+      if (action === "community_courses_admin") {
+        if (!isAdmin) return json({ error: "Only an administrator can manage the classroom." }, 403);
+        const { data: courses } = await sb.from("t3l_community_courses")
+          .select("id,title,description,cover_url,unlock_level,published,sort").order("sort", { ascending: true });
+        const cids = (courses || []).map((c: any) => c.id);
+        const counts: Record<string, number> = {};
+        if (cids.length) {
+          const { data: lessons } = await sb.from("t3l_community_lessons").select("id,course_id").in("course_id", cids);
+          (lessons || []).forEach((l: any) => { counts[l.course_id] = (counts[l.course_id] || 0) + 1; });
+        }
+        return json({ courses: (courses || []).map((c: any) => ({ ...c, lessons: counts[c.id] || 0 })) });
+      }
+
+      if (action === "community_course_save") {
+        if (!isAdmin) return json({ error: "Only an administrator can manage the classroom." }, 403);
+        const title = String(payload.title || "").trim(); if (!title) return json({ error: "Course title is required." }, 400);
+        const row: Record<string, unknown> = {
+          title, description: String(payload.description || "").trim() || null,
+          cover_url: String(payload.cover_url || "").trim() || null,
+          unlock_level: Math.max(1, Number(payload.unlock_level) || 1),
+          published: payload.published === false ? false : true,
+          sort: Number(payload.sort) || 0, updated_at: new Date().toISOString(),
+        };
+        const id = String(payload.id || "");
+        if (id) { const { error } = await sb.from("t3l_community_courses").update(row).eq("id", id); if (error) return json({ error: error.message }, 400); return json({ ok: true }); }
+        const { data, error } = await sb.from("t3l_community_courses").insert({ ...row, created_by: uid }).select().maybeSingle();
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true, course: data });
+      }
+
+      if (action === "community_course_delete") {
+        if (!isAdmin) return json({ error: "Only an administrator can manage the classroom." }, 403);
+        const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+        const { error } = await sb.from("t3l_community_courses").delete().eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+
+      if (action === "community_lessons_admin") {
+        if (!isAdmin) return json({ error: "Only an administrator can manage the classroom." }, 403);
+        const course_id = String(payload.course_id || ""); if (!course_id) return json({ error: "course_id is required." }, 400);
+        const { data } = await sb.from("t3l_community_lessons")
+          .select("id,section,title,content,video_url,published,sort").eq("course_id", course_id).order("sort", { ascending: true });
+        return json({ lessons: data || [] });
+      }
+
+      if (action === "community_lesson_save") {
+        if (!isAdmin) return json({ error: "Only an administrator can manage the classroom." }, 403);
+        const course_id = String(payload.course_id || ""); if (!course_id) return json({ error: "course_id is required." }, 400);
+        const title = String(payload.title || "").trim(); if (!title) return json({ error: "Lesson title is required." }, 400);
+        const row: Record<string, unknown> = {
+          course_id, title, section: String(payload.section || "").trim() || null,
+          content: String(payload.content || "").trim() || null, video_url: String(payload.video_url || "").trim() || null,
+          published: payload.published === false ? false : true, sort: Number(payload.sort) || 0, updated_at: new Date().toISOString(),
+        };
+        const id = String(payload.id || "");
+        if (id) { const { error } = await sb.from("t3l_community_lessons").update(row).eq("id", id); if (error) return json({ error: error.message }, 400); return json({ ok: true }); }
+        const { data, error } = await sb.from("t3l_community_lessons").insert(row).select().maybeSingle();
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true, lesson: data });
+      }
+
+      if (action === "community_lesson_delete") {
+        if (!isAdmin) return json({ error: "Only an administrator can manage the classroom." }, 403);
+        const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+        const { error } = await sb.from("t3l_community_lessons").delete().eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
       }
 
       if (action === "community_post") {

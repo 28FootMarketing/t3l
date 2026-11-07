@@ -83,7 +83,7 @@
           <section class="view" id="community" data-module="community">
             <style>.t3l-ctab{border:1px solid #e0d3c4;background:#fffdfa;color:#6b4a70;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer}.t3l-ctab.active{background:#4a214f;color:#fff;border-color:#4a214f}.t3l-ctab:focus-visible{outline:2px solid rgba(183,137,58,.6);outline-offset:2px}</style>
             <p class="eyebrow">Connect & belong</p><h1 class="page-title">Community</h1><p class="page-description">Share encouragement, find a small group, and connect with others walking the same journey — one step at a time.</p>
-            <div id="t3lCommTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px"><button class="t3l-ctab active" data-commtab="feed">Feed</button><button class="t3l-ctab" data-commtab="groups">Groups</button><button class="t3l-ctab" data-commtab="directory">Directory</button><button class="t3l-ctab" data-commtab="me">My profile</button></div>
+            <div id="t3lCommLevel" style="margin:0 0 14px"></div><div id="t3lCommTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px"><button class="t3l-ctab active" data-commtab="feed">Feed</button><button class="t3l-ctab" data-commtab="classroom">Classroom</button><button class="t3l-ctab" data-commtab="leaderboard">Leaderboard</button><button class="t3l-ctab" data-commtab="groups">Groups</button><button class="t3l-ctab" data-commtab="directory">Directory</button><button class="t3l-ctab" data-commtab="me">My profile</button></div>
             <div id="t3lCommRoot"><article class="card empty"><div class="empty-icon">◍</div><h3>Loading…</h3></article></div>
           </section>
           <section class="view" id="resources" data-module="resources"><p class="eyebrow">Guides & materials</p><h1 class="page-title">Resource library</h1><p class="page-description">A thoughtfully organized collection of ministry materials available for your personal use.</p><div id="t3lResList" style="margin-bottom:16px"></div><article class="card empty"><div class="empty-icon" style="background:#e2efeb;color:#286d63">▤</div><h3>Resources are being prepared</h3><p>Guides, documents, and ministry materials will appear here as the team makes them available.</p></article></section>
@@ -287,7 +287,7 @@
     var r = await call('community_feed'); var posts=(r.ok&&r.data)?(r.data.posts||[]):[];
     var compose = '<article class="card card-pad" style="margin-bottom:16px"><div class="field"><label for="c_post">Share with the community</label><textarea id="c_post" maxlength="5000" placeholder="Share an encouragement, a praise, or an update…" style="min-height:92px"></textarea></div><button class="primary-btn" id="c_postbtn" type="button">Post</button> <span class="form-status" id="c_poststatus" style="display:inline-block;margin-left:8px"></span></article>';
     var list = posts.length ? posts.map(function(p){
-      return '<article class="card card-pad" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><strong style="color:#3b1b40">'+esc(p.author_name)+(p.pinned?' <span style="color:#967027;font-size:11px;font-weight:700">★ Pinned</span>':'')+'</strong><span style="color:#9a8c91;font-size:12px">'+esc(when(p.created_at))+(p.mine?' · <button class="c-del" data-id="'+esc(p.id)+'" style="border:0;background:transparent;color:#a04c43;cursor:pointer;font-weight:700">Remove</button>':'')+'</span></div><p style="white-space:pre-wrap;color:#4b3f50;font-size:14px;margin:8px 0 0">'+esc(p.body)+'</p></article>';
+      return '<article class="card card-pad" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><strong style="color:#3b1b40">'+esc(p.author_name)+(p.pinned?' <span style="color:#967027;font-size:11px;font-weight:700">★ Pinned</span>':'')+'</strong><span style="color:#9a8c91;font-size:12px">'+esc(when(p.created_at))+(p.mine?' · <button class="c-del" data-id="'+esc(p.id)+'" style="border:0;background:transparent;color:#a04c43;cursor:pointer;font-weight:700">Remove</button>':'')+'</span></div><p style="white-space:pre-wrap;color:#4b3f50;font-size:14px;margin:8px 0 0">'+esc(p.body)+'</p>'+'<div style="margin-top:10px"><button class="c-like" data-id="'+esc(p.id)+'" data-liked="'+(p.liked?'1':'0')+'" style="border:1px solid '+(p.liked?'#4a214f':'#e0d3c4')+';background:'+(p.liked?'#4a214f':'#fff')+';color:'+(p.liked?'#fff':'#6b4a70')+';border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer">&#9829; <span class="c-likecount">'+(p.likes||0)+'</span></button></div>'+'</article>';
     }).join('') : '<article class="card empty"><div class="empty-icon">◍</div><h3>No posts yet</h3><p>Be the first to share something with your community.</p></article>';
     h(compose + list);
     document.getElementById('c_postbtn').addEventListener('click', async function(){
@@ -296,6 +296,7 @@
       var rr=await call('community_post',{body:body}); if(rr.ok){ feedTab(); } else { st.textContent=(rr.data&&rr.data.error)||'Could not post.'; st.className='form-status error'; }
     });
     root.querySelectorAll('.c-del').forEach(function(b){ b.addEventListener('click', async function(){ if(!confirm('Remove this post?'))return; var rr=await call('community_post_delete',{id:b.getAttribute('data-id')}); if(rr.ok){ feedTab(); } else alert((rr.data&&rr.data.error)||'Could not remove.'); }); });
+    root.querySelectorAll('.c-like').forEach(function(b){ b.addEventListener('click', async function(){ var liked=b.getAttribute('data-liked')==='1'; b.disabled=true; var rr=await call('community_post_like',{post_id:b.getAttribute('data-id'),like:!liked}); b.disabled=false; if(rr.ok&&rr.data){ b.setAttribute('data-liked',rr.data.liked?'1':'0'); b.style.background=rr.data.liked?'#4a214f':'#fff'; b.style.color=rr.data.liked?'#fff':'#6b4a70'; b.style.borderColor=rr.data.liked?'#4a214f':'#e0d3c4'; var cc=b.querySelector('.c-likecount'); if(cc)cc.textContent=rr.data.likes; loadMe(); } else alert((rr.data&&rr.data.error)||'Could not update.'); }); });
   }
 
   async function groupsTab(){
@@ -332,10 +333,64 @@
     });
   }
 
-  var TABS={feed:feedTab,groups:groupsTab,directory:dirTab,me:meTab};
+  async function loadMe(){
+    var box=document.getElementById('t3lCommLevel'); if(!box) return;
+    var r=await call('community_me'); if(!r.ok||!r.data){ box.innerHTML=''; return; }
+    var d=r.data; var pct = d.next_points ? Math.min(100, Math.round((d.points/d.next_points)*100)) : 100;
+    box.innerHTML='<div class="card card-pad" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
+      +'<div style="flex:0 0 auto;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#4a214f;color:#fff;font:700 18px/1 \'DM Sans\',sans-serif">L'+d.level+'</div>'
+      +'<div style="flex:1 1 160px;min-width:140px"><strong style="color:#3b1b40">Level '+d.level+' &middot; '+esc(d.level_name)+'</strong>'
+      +'<div style="color:#9a8c91;font-size:12px;margin-top:2px">'+d.points+' point'+(d.points===1?'':'s')+(d.next_name?(' &middot; '+(d.next_points-d.points)+' to '+esc(d.next_name)):' &middot; top level')+'</div>'
+      +'<div style="height:7px;border-radius:999px;background:#eadfce;margin-top:7px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#d8ad5b"></div></div></div>'
+      +'<div style="flex:0 0 auto;color:#967027;font-size:12px;font-weight:700">'+d.lessons_completed+' lesson'+(d.lessons_completed===1?'':'s')+' done</div></div>';
+  }
+
+  async function classroomTab(){
+    h('<article class="card empty"><div class="empty-icon">&#9636;</div><h3>Loading&hellip;</h3></article>');
+    var r=await call('community_courses'); var courses=(r.ok&&r.data)?(r.data.courses||[]):[];
+    if(!courses.length){ h('<article class="card empty"><div class="empty-icon">&#9636;</div><h3>No courses yet</h3><p>Growth tracks will appear here as the ministry adds them.</p></article>'); return; }
+    h('<div>'+courses.map(function(c){
+      var pct=c.lessons?Math.round((c.completed/c.lessons)*100):0;
+      var badge=c.locked?'<span style="color:#a04c43;font-size:12px;font-weight:700">&#128274; Unlocks at level '+c.unlock_level+'</span>':'<span style="color:#9a8c91;font-size:12px">'+c.completed+'/'+c.lessons+' lessons &middot; '+pct+'%</span>';
+      return '<article class="card card-pad c-course" data-id="'+esc(c.id)+'" data-locked="'+(c.locked?'1':'0')+'" style="margin-bottom:12px;cursor:'+(c.locked?'default':'pointer')+';opacity:'+(c.locked?'.6':'1')+'"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><strong style="color:#3b1b40;font-size:16px">'+esc(c.title)+'</strong>'+(c.description?'<p style="color:#6b5f67;font-size:13px;margin:6px 0 0;max-width:52ch">'+esc(c.description)+'</p>':'')+'<div style="margin-top:8px">'+badge+'</div></div>'+(c.locked?'':'<span style="color:#4a214f;font-weight:700">Open &rarr;</span>')+'</div>'+((c.locked||!c.lessons)?'':'<div style="height:7px;border-radius:999px;background:#eadfce;margin-top:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#d8ad5b"></div></div>')+'</article>';
+    }).join('')+'</div>');
+    root.querySelectorAll('.c-course').forEach(function(b){ b.addEventListener('click', function(){ if(b.getAttribute('data-locked')==='1') return; courseView(b.getAttribute('data-id')); }); });
+  }
+
+  async function courseView(id){
+    h('<article class="card empty"><div class="empty-icon">&#9636;</div><h3>Loading&hellip;</h3></article>');
+    var r=await call('community_course',{id:id}); if(!r.ok||!r.data){ classroomTab(); return; }
+    var d=r.data; var c=d.course;
+    var back='<button class="text-link" id="c_back" type="button" style="font-size:13px;margin-bottom:10px">&larr; All courses</button>';
+    if(d.locked){ h(back+'<article class="card card-pad"><strong style="color:#3b1b40;font-size:18px">'+esc(c.title)+'</strong><p style="color:#a04c43;font-weight:700;margin-top:10px">&#128274; This course unlocks at level '+c.unlock_level+'. Keep sharing to earn points!</p></article>'); document.getElementById('c_back').addEventListener('click',classroomTab); return; }
+    var lessons=d.lessons||[];
+    var head='<article class="card card-pad" style="margin-bottom:12px"><strong style="color:#3b1b40;font-size:20px">'+esc(c.title)+'</strong>'+(c.description?'<p style="color:#6b5f67;font-size:14px;margin:8px 0 0">'+esc(c.description)+'</p>':'')+'</article>';
+    var body=lessons.length?lessons.map(function(l,i){
+      return '<article class="card card-pad" style="margin-bottom:10px"><div style="color:#967027;font-size:11px;font-weight:700;text-transform:uppercase">'+(l.section?esc(l.section)+' &middot; ':'')+'Lesson '+(i+1)+'</div><strong style="color:#3b1b40;font-size:16px">'+esc(l.title)+'</strong>'+(l.content?'<p style="white-space:pre-wrap;color:#4b3f50;font-size:14px;margin:8px 0 0">'+esc(l.content)+'</p>':'')+(l.video_url?'<div style="margin-top:8px"><a href="'+esc(l.video_url)+'" target="_blank" rel="noopener" style="color:#4a214f;font-weight:700;font-size:13px">&#9654; Watch / open &#8599;</a></div>':'')+'<div style="margin-top:10px"><button class="c-lesson" data-id="'+esc(l.id)+'" data-done="'+(l.completed?'1':'0')+'" style="border:1px solid '+(l.completed?'#2d6642':'#e0d3c4')+';background:'+(l.completed?'#2d6642':'#fff')+';color:'+(l.completed?'#fff':'#6b4a70')+';border-radius:999px;padding:7px 15px;font-size:13px;font-weight:700;cursor:pointer">'+(l.completed?'&#10003; Completed':'Mark complete')+'</button></div></article>';
+    }).join(''):'<article class="card empty"><div class="empty-icon">&#9636;</div><h3>No lessons yet</h3></article>';
+    h(back+head+body);
+    document.getElementById('c_back').addEventListener('click',classroomTab);
+    root.querySelectorAll('.c-lesson').forEach(function(b){ b.addEventListener('click', async function(){ var done=b.getAttribute('data-done')==='1'; b.disabled=true; var rr=await call('community_lesson_complete',{lesson_id:b.getAttribute('data-id'),completed:!done}); b.disabled=false; if(rr.ok&&rr.data){ b.setAttribute('data-done',rr.data.completed?'1':'0'); b.innerHTML=rr.data.completed?'&#10003; Completed':'Mark complete'; b.style.background=rr.data.completed?'#2d6642':'#fff'; b.style.color=rr.data.completed?'#fff':'#6b4a70'; b.style.borderColor=rr.data.completed?'#2d6642':'#e0d3c4'; loadMe(); } else alert((rr.data&&rr.data.error)||'Could not update.'); }); });
+  }
+
+  async function leaderboardTab(range){
+    range=range||'7d';
+    h('<article class="card empty"><div class="empty-icon">&#9670;</div><h3>Loading&hellip;</h3></article>');
+    var r=await call('community_leaderboard',{range:range}); var rows=(r.ok&&r.data)?(r.data.rows||[]):[];
+    var ranges=[['7d','This week'],['30d','This month'],['all','All-time']];
+    var tabs='<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">'+ranges.map(function(t){ return '<button class="c-lbrange t3l-ctab'+(range===t[0]?' active':'')+'" data-r="'+t[0]+'">'+t[1]+'</button>'; }).join('')+'</div>';
+    var body=rows.length?('<div>'+rows.map(function(x){
+      var medal=x.rank===1?'&#129351;':x.rank===2?'&#129352;':x.rank===3?'&#129353;':('#'+x.rank);
+      return '<article class="card card-pad" style="margin-bottom:8px;display:flex;align-items:center;gap:12px'+(x.mine?';border:2px solid #4a214f':'')+'"><div style="flex:0 0 auto;width:34px;text-align:center;font-weight:700;color:#4a214f">'+medal+'</div><div style="flex:1"><strong style="color:#3b1b40">'+esc(x.display_name)+(x.mine?' <span style="color:#967027;font-size:11px">(you)</span>':'')+'</strong><div style="color:#9a8c91;font-size:12px">Level '+x.level+' &middot; '+esc(x.level_name)+'</div></div><div style="flex:0 0 auto;font-weight:700;color:#4a214f">'+x.points+' pts</div></article>';
+    }).join('')+'</div>'):'<article class="card empty"><div class="empty-icon">&#9670;</div><h3>No points yet</h3><p>Points come from likes on your posts. Share something encouraging to get started.</p></article>';
+    h(tabs+body);
+    root.querySelectorAll('.c-lbrange').forEach(function(b){ b.addEventListener('click', function(){ leaderboardTab(b.getAttribute('data-r')); }); });
+  }
+
+  var TABS={feed:feedTab,classroom:classroomTab,leaderboard:function(){leaderboardTab('7d');},groups:groupsTab,directory:dirTab,me:meTab};
   sectionEl.querySelectorAll('.t3l-ctab').forEach(function(btn){ btn.addEventListener('click', function(){ var n=btn.getAttribute('data-commtab'); setActive(n); (TABS[n]||feedTab)(); }); });
   var loaded=false;
-  function maybeLoad(){ if(loaded)return; loaded=true; feedTab(); }
+  function maybeLoad(){ if(loaded)return; loaded=true; loadMe(); feedTab(); }
   document.querySelectorAll('[data-target="community"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad,30); }); });
 })();
 </script>
