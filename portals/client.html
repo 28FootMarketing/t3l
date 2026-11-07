@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#35183a">
   <title>Teach Them to Love | Client Portal</title>
+  <link rel="manifest" href="/portals/manifest.webmanifest">
+  <link rel="icon" href="/portals/icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/portals/icons/icon-192.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="T3L Portal">
   <!--
     GOHIGHLEVEL INSTALLATION
     1. In a GHL Funnel or Website page, add a Custom HTML element.
@@ -49,6 +56,7 @@
           <button class="nav-item active" data-target="home"><span class="nav-icon">⌂</span>Home</button>
           <button class="nav-item" data-target="updates"><span class="nav-icon">◈</span>Updates</button>
           <button class="nav-item" data-target="events"><span class="nav-icon">◷</span>Events</button>
+          <button class="nav-item" data-target="community"><span class="nav-icon">◍</span>Community</button>
           <button class="nav-item" data-target="resources"><span class="nav-icon">▤</span>Resources</button>
           <button class="nav-item" data-target="prayer"><span class="nav-icon">♡</span>Prayer</button>
           <button class="nav-item" data-target="profile"><span class="nav-icon">◉</span>My profile</button>
@@ -72,6 +80,12 @@
           </section>
           <section class="view" id="updates"><p class="eyebrow">Stay connected</p><h1 class="page-title">Announcements & updates</h1><p class="page-description">Important ministry news and notices are published here by the authorized ministry team.</p><article class="card empty"><div class="empty-icon">◈</div><h3>No announcements yet</h3><p>When the ministry shares a new notice or update, it will appear here for you.</p></article></section>
           <section class="view" id="events"><p class="eyebrow">Gather together</p><h1 class="page-title">Events & programs</h1><p class="page-description">Browse outreach events, services, and programs on the ministry calendar.</p><article class="card calendar-card"><div class="calendar-toolbar"><button class="icon-btn" id="previousMonth" aria-label="Previous month">‹</button><div class="calendar-month"><h3 id="calendarMonth">Month</h3><p>Ministry calendar</p></div><button class="icon-btn" id="nextMonth" aria-label="Next month">›</button></div><div class="calendar-weekdays"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="calendar-grid" id="calendarGrid"></div></article><p class="no-events">Events are managed by your ministry’s authorized administrators and will appear here when scheduled.</p></section>
+          <section class="view" id="community">
+            <style>.t3l-ctab{border:1px solid #e0d3c4;background:#fffdfa;color:#6b4a70;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer}.t3l-ctab.active{background:#4a214f;color:#fff;border-color:#4a214f}.t3l-ctab:focus-visible{outline:2px solid rgba(183,137,58,.6);outline-offset:2px}</style>
+            <p class="eyebrow">Connect & belong</p><h1 class="page-title">Community</h1><p class="page-description">Share encouragement, find a small group, and connect with others walking the same journey — one step at a time.</p>
+            <div id="t3lCommTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px"><button class="t3l-ctab active" data-commtab="feed">Feed</button><button class="t3l-ctab" data-commtab="groups">Groups</button><button class="t3l-ctab" data-commtab="directory">Directory</button><button class="t3l-ctab" data-commtab="me">My profile</button></div>
+            <div id="t3lCommRoot"><article class="card empty"><div class="empty-icon">◍</div><h3>Loading…</h3></article></div>
+          </section>
           <section class="view" id="resources"><p class="eyebrow">Guides & materials</p><h1 class="page-title">Resource library</h1><p class="page-description">A thoughtfully organized collection of ministry materials available for your personal use.</p><article class="card empty"><div class="empty-icon" style="background:#e2efeb;color:#286d63">▤</div><h3>Resources are being prepared</h3><p>Guides, documents, and ministry materials will appear here as the team makes them available.</p></article></section>
           <section class="view" id="prayer"><p class="eyebrow">Private prayer support</p><h1 class="page-title">Share what is on your heart</h1><p class="page-description">Your request is intended for the authorized ministry care team. Complete the form below and it will post to your configured GoHighLevel Workflow webhook.</p><div class="form-layout"><article class="card privacy-panel"><div class="empty-icon" style="background:rgba(255,255,255,.13);color:#ecd69d">♡</div><h2>A confidential space</h2><p>Share as much or as little as feels right. The ministry can receive requests through the GoHighLevel workflow configured for this portal.</p><div class="privacy-box"><span>⌑</span><span>Do not use this form for emergencies. If you are in immediate danger, call your local emergency number.</span></div></article><article class="card form-card"><h2>Prayer request</h2><p>Fields marked required are used to route your request appropriately.</p><form id="prayerRequestForm" novalidate><div class="fields"><div class="field"><label for="contactName">Your name</label><input id="contactName" name="contactName" type="text" autocomplete="name" placeholder="Enter your name" required></div><div class="field"><label for="contactEmail">Email address</label><input id="contactEmail" name="contactEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div><div class="field"><label for="ministryRole">Ministry role <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="ministryRole" name="ministryRole" type="text" placeholder="e.g., Member or Volunteer"></div><div class="field"><label for="prayerRequest">Your request</label><textarea id="prayerRequest" name="prayerRequest" maxlength="5000" placeholder="Write your prayer request here…" required></textarea></div><label class="consent"><input id="privacyConsent" type="checkbox" required><span>I understand that this request will be sent to Teach Them to Love through its configured ministry workflow.</span></label></div><button class="primary-btn" id="submitPrayerButton" type="submit">Send prayer request</button><div class="form-status" id="formStatus" role="status" aria-live="polite"></div></form></article></div></section>
           <section class="view" id="profile"><p class="eyebrow">Your account</p><h1 class="page-title">Profile & contact details</h1><p class="page-description">This standalone GoHighLevel portal template is ready to connect to your membership and contact data sources.</p><div class="profile-layout"><article class="card identity-card"><div class="profile-mark">M</div><h2>Portal member</h2><p>Member contact details are connected through your GoHighLevel membership configuration.</p><span class="role-pill">Member access</span><p style="margin-top:23px">Administrative privileges are managed separately and are not exposed in this client template.</p></article><article class="card profile-form"><h2>Personal details</h2><p>These placeholders are designed for GHL custom values or form elements in your member-area implementation.</p><div class="fields"><div class="field"><label>Full name</label><div class="locked">{{contact.name}}</div></div><div class="field"><label>Email address</label><div class="locked">{{contact.email}}</div></div><div class="field"><label>Phone number</label><div class="locked">{{contact.phone}}</div></div><div class="field"><label>Ministry role</label><div class="locked">{{contact.ministry_role}}</div></div></div><p class="notice">Replace the placeholders above with the appropriate GoHighLevel contact custom values available in your account.</p></article></div></section>
@@ -253,6 +267,90 @@
       'You’re signed in, but this account isn’t set up for portal access yet. Please contact the ministry to request access.',
       [{ label: 'Sign out', onClick: T3L_AUTH.signOut }]);
   })();
+})();
+</script>
+
+<script>
+/* T3L CLIENT PORTAL — Community module (feed, small groups, directory, profile).
+   Member-facing; all data flows through the gated t3l-portal edge function. */
+(function () {
+  var sectionEl = document.getElementById('community'); if (!sectionEl) return;
+  var root = document.getElementById('t3lCommRoot');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function when(s){ try{ var d=new Date(s), diff=(Date.now()-d.getTime())/1000; if(diff<60)return 'just now'; if(diff<3600)return Math.floor(diff/60)+'m ago'; if(diff<86400)return Math.floor(diff/3600)+'h ago'; return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }catch(e){return '';} }
+  function h(markup){ root.innerHTML = markup; }
+  function call(a,p){ return T3L_AUTH.callFn(a,p||{}); }
+  function setActive(name){ sectionEl.querySelectorAll('.t3l-ctab').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-commtab')===name); }); }
+
+  async function feedTab(){
+    h('<article class="card empty"><div class="empty-icon">◍</div><h3>Loading…</h3></article>');
+    var r = await call('community_feed'); var posts=(r.ok&&r.data)?(r.data.posts||[]):[];
+    var compose = '<article class="card card-pad" style="margin-bottom:16px"><div class="field"><label for="c_post">Share with the community</label><textarea id="c_post" maxlength="5000" placeholder="Share an encouragement, a praise, or an update…" style="min-height:92px"></textarea></div><button class="primary-btn" id="c_postbtn" type="button">Post</button> <span class="form-status" id="c_poststatus" style="display:inline-block;margin-left:8px"></span></article>';
+    var list = posts.length ? posts.map(function(p){
+      return '<article class="card card-pad" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><strong style="color:#3b1b40">'+esc(p.author_name)+(p.pinned?' <span style="color:#967027;font-size:11px;font-weight:700">★ Pinned</span>':'')+'</strong><span style="color:#9a8c91;font-size:12px">'+esc(when(p.created_at))+(p.mine?' · <button class="c-del" data-id="'+esc(p.id)+'" style="border:0;background:transparent;color:#a04c43;cursor:pointer;font-weight:700">Remove</button>':'')+'</span></div><p style="white-space:pre-wrap;color:#4b3f50;font-size:14px;margin:8px 0 0">'+esc(p.body)+'</p></article>';
+    }).join('') : '<article class="card empty"><div class="empty-icon">◍</div><h3>No posts yet</h3><p>Be the first to share something with your community.</p></article>';
+    h(compose + list);
+    document.getElementById('c_postbtn').addEventListener('click', async function(){
+      var st=document.getElementById('c_poststatus'); st.className='form-status'; var body=(document.getElementById('c_post').value||'').trim();
+      if(body.length<2){ st.textContent='Write a message first.'; st.className='form-status error'; return; }
+      var rr=await call('community_post',{body:body}); if(rr.ok){ feedTab(); } else { st.textContent=(rr.data&&rr.data.error)||'Could not post.'; st.className='form-status error'; }
+    });
+    root.querySelectorAll('.c-del').forEach(function(b){ b.addEventListener('click', async function(){ if(!confirm('Remove this post?'))return; var rr=await call('community_post_delete',{id:b.getAttribute('data-id')}); if(rr.ok){ feedTab(); } else alert((rr.data&&rr.data.error)||'Could not remove.'); }); });
+  }
+
+  async function groupsTab(){
+    h('<article class="card empty"><div class="empty-icon">◷</div><h3>Loading…</h3></article>');
+    var r = await call('community_groups'); var groups=(r.ok&&r.data)?(r.data.groups||[]):[];
+    if(!groups.length){ h('<article class="card empty"><div class="empty-icon">◷</div><h3>No groups yet</h3><p>Small groups will appear here as the ministry adds them.</p></article>'); return; }
+    h(groups.map(function(g){
+      return '<article class="card card-pad" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><strong style="color:#3b1b40;font-size:16px">'+esc(g.name)+'</strong>'+(g.meeting_time?'<div style="color:#967027;font-size:12px;font-weight:700;margin-top:3px">'+esc(g.meeting_time)+'</div>':'')+(g.description?'<p style="color:#6b5f67;font-size:13px;margin:8px 0 0;max-width:52ch">'+esc(g.description)+'</p>':'')+'<div style="color:#9a8c91;font-size:12px;margin-top:8px">'+g.member_count+' member'+(g.member_count===1?'':'s')+'</div></div><button class="primary-btn c-join" data-id="'+esc(g.id)+'" data-joined="'+(g.joined?'1':'0')+'" style="'+(g.joined?'background:#fff;color:#4a214f;border:1px solid #d8c7a6':'')+'">'+(g.joined?'Joined ✓':'Join')+'</button></div></article>';
+    }).join(''));
+    root.querySelectorAll('.c-join').forEach(function(b){ b.addEventListener('click', async function(){ var joined=b.getAttribute('data-joined')==='1'; var rr=await call(joined?'community_group_leave':'community_group_join',{group_id:b.getAttribute('data-id')}); if(rr.ok){ groupsTab(); } else alert((rr.data&&rr.data.error)||'Could not update.'); }); });
+  }
+
+  async function dirTab(){
+    h('<article class="card empty"><div class="empty-icon">◉</div><h3>Loading…</h3></article>');
+    var r = await call('community_directory'); var ppl=(r.ok&&r.data)?(r.data.profiles||[]):[];
+    var note='<p class="page-description" style="margin:0 0 14px;font-size:13px">Members choose whether to appear here. Turn on “Show me in the directory” in <button class="text-link" id="c_goprofile" type="button" style="font-size:13px">My profile</button>.</p>';
+    var body = ppl.length ? ppl.map(function(p){ return '<article class="card card-pad" style="margin-bottom:10px"><strong style="color:#3b1b40">'+esc(p.display_name||'Member')+'</strong>'+(p.about?'<p style="color:#6b5f67;font-size:13px;margin:6px 0 0">'+esc(p.about)+'</p>':'')+'</article>'; }).join('') : '<article class="card empty"><div class="empty-icon">◉</div><h3>No one listed yet</h3><p>Members who opt in to the directory will appear here.</p></article>';
+    h(note + body);
+    var g=document.getElementById('c_goprofile'); if(g) g.addEventListener('click', function(){ setActive('me'); meTab(); });
+  }
+
+  async function meTab(){
+    h('<article class="card empty"><div class="empty-icon">◉</div><h3>Loading…</h3></article>');
+    var r = await call('community_profile_get'); var pr=(r.ok&&r.data&&r.data.profile)?r.data.profile:{display_name:'',about:'',show_in_directory:false};
+    h('<article class="card form-card"><h2>My community profile</h2><p>Choose how you appear to other members. You control whether you are listed in the directory.</p><div class="fields">'
+      +'<div class="field"><label for="cp_name">Display name</label><input id="cp_name" value="'+esc(pr.display_name||'')+'" placeholder="How your name appears"></div>'
+      +'<div class="field"><label for="cp_about">About <span style="font-weight:400;color:#8d8086">(optional)</span></label><textarea id="cp_about" maxlength="600" placeholder="A sentence about you…">'+esc(pr.about||'')+'</textarea></div>'
+      +'<label class="consent"><input type="checkbox" id="cp_show"'+(pr.show_in_directory?' checked':'')+'><span>Show me in the member directory</span></label>'
+      +'</div><button class="primary-btn" id="cp_save" type="button">Save</button> <span class="form-status" id="cp_status" style="display:inline-block;margin-left:8px"></span></article>');
+    document.getElementById('cp_save').addEventListener('click', async function(){
+      var st=document.getElementById('cp_status'); st.className='form-status';
+      var rr=await call('community_profile_save',{ display_name:(document.getElementById('cp_name').value||'').trim(), about:(document.getElementById('cp_about').value||'').trim(), show_in_directory:document.getElementById('cp_show').checked });
+      if(rr.ok){ st.textContent='Saved.'; st.className='form-status success'; } else { st.textContent=(rr.data&&rr.data.error)||'Could not save.'; st.className='form-status error'; }
+    });
+  }
+
+  var TABS={feed:feedTab,groups:groupsTab,directory:dirTab,me:meTab};
+  sectionEl.querySelectorAll('.t3l-ctab').forEach(function(btn){ btn.addEventListener('click', function(){ var n=btn.getAttribute('data-commtab'); setActive(n); (TABS[n]||feedTab)(); }); });
+  var loaded=false;
+  function maybeLoad(){ if(loaded)return; loaded=true; feedTab(); }
+  document.querySelectorAll('[data-target="community"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad,30); }); });
+})();
+</script>
+
+<!-- PWA: installable app + offline shell -->
+<button id="t3lInstall" type="button" aria-label="Install this app" style="display:none;position:fixed;right:16px;bottom:16px;z-index:9998;border:0;border-radius:999px;padding:12px 18px;background:#4a214f;color:#fff;font:700 13px/1 'DM Sans',Arial,sans-serif;box-shadow:0 8px 20px rgba(53,24,58,.32);cursor:pointer">⬇&nbsp; Install app</button>
+<script>
+(function () {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('/portals/sw.js', { scope: '/portals/' }).catch(function () {}); });
+  }
+  var deferred = null, btn = document.getElementById('t3lInstall');
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; if (btn) btn.style.display = 'block'; });
+  if (btn) btn.addEventListener('click', async function () { if (!deferred) return; btn.style.display = 'none'; deferred.prompt(); try { await deferred.userChoice; } catch (e) {} deferred = null; });
+  window.addEventListener('appinstalled', function () { if (btn) btn.style.display = 'none'; });
 })();
 </script>
 

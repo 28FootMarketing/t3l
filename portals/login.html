@@ -7,7 +7,12 @@
   <meta name="theme-color" content="#311536">
   <title>Sign in · Teach Them to Love Portals</title>
   <link rel="icon" href="/assets/img/t3l-logo.png" type="image/png">
-  <link rel="apple-touch-icon" href="/assets/img/t3l-logo.png">
+  <link rel="apple-touch-icon" href="/portals/icons/icon-192.png">
+  <link rel="manifest" href="/portals/manifest.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="T3L Portal">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:opsz,wght@5..120,600;5..120,700&display=swap');
     :root{--plum:#4a214f;--plum-deep:#311536;--gold:#d8ad5b;--gold-deep:#967027;--ink:#2b2030;--cream:#f8f5ef;--paper:#fffdfa;--muted:#746a72;--line:#e3d7c9}
@@ -69,6 +74,7 @@
     <div class="foot">
       Accounts are by invitation only. If you need access, contact the ministry at
       <a href="tel:+15126492693">512-649-2693</a> or <a href="/#t3l-contact">connect with T3L</a>.
+      <div style="margin-top:14px"><button id="t3lInstall" type="button" style="display:none;border:1px solid #dcd0c2;background:#fff;color:#4a214f;border-radius:999px;padding:9px 16px;font:700 12px/1 'DM Sans',Arial,sans-serif;cursor:pointer">⬇&nbsp; Install the member app</button></div>
     </div>
   </main>
 
@@ -156,6 +162,18 @@
         setupBtn.disabled = false;
       }
     });
+  })();
+  </script>
+  <script>
+  /* PWA: register the member-portal service worker + offer install. */
+  (function () {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () { navigator.serviceWorker.register('/portals/sw.js', { scope: '/portals/' }).catch(function () {}); });
+    }
+    var deferred = null, btn = document.getElementById('t3lInstall');
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; if (btn) btn.style.display = 'inline-block'; });
+    if (btn) btn.addEventListener('click', async function () { if (!deferred) return; btn.style.display = 'none'; deferred.prompt(); try { await deferred.userChoice; } catch (e) {} deferred = null; });
+    window.addEventListener('appinstalled', function () { if (btn) btn.style.display = 'none'; });
   })();
   </script>
 </body>

@@ -187,6 +187,117 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    // --- Community module (any ACTIVE member: client/admin/super) ---
+    if (action.startsWith("community_")) {
+      if (!caller) return json({ error: "unauthorized" }, 401);
+      if (!caller.member || caller.member.status !== "active") return json({ error: "forbidden" }, 403);
+      const uid = caller.user.id;
+      const memberName = (caller.member.full_name || caller.member.email || "Member");
+
+      if (action === "community_feed") {
+        const { data } = await sb.from("t3l_community_posts")
+          .select("id,author_user_id,author_name,body,pinned,created_at")
+          .eq("hidden", false).order("pinned", { ascending: false }).order("created_at", { ascending: false }).limit(60);
+        const posts = (data || []).map((p: any) => ({
+          id: p.id, author_name: p.author_name, body: p.body, pinned: p.pinned,
+          created_at: p.created_at, mine: p.author_user_id === uid,
+        }));
+        return json({ posts });
+      }
+
+      if (action === "community_post") {
+        const body = String(payload.body || "").trim();
+        if (body.length < 2) return json({ error: "Write a message to share." }, 400);
+        if (body.length > 5000) return json({ error: "That message is too long." }, 400);
+        const { data, error } = await sb.from("t3l_community_posts")
+          .insert({ author_user_id: uid, author_name: memberName, body }).select().maybeSingle();
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true, post: data });
+      }
+
+      if (action === "community_post_delete") {
+        const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+        const { data: post } = await sb.from("t3l_community_posts").select("author_user_id").eq("id", id).maybeSingle();
+        if (!post) return json({ error: "That post was not found." }, 404);
+        if (post.author_user_id !== uid && !isAdmin) return json({ error: "You can only remove your own posts." }, 403);
+        const { error } = await sb.from("t3l_community_posts").delete().eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+
+      if (action === "community_groups") {
+        const { data: groups } = await sb.from("t3l_community_groups")
+          .select("id,name,description,meeting_time,location,sort").eq("active", true).order("sort", { ascending: true });
+        const { data: mine } = await sb.from("t3l_community_group_members").select("group_id").eq("user_id", uid);
+        const { data: all } = await sb.from("t3l_community_group_members").select("group_id");
+        const joined: Record<string, boolean> = {}; (mine || []).forEach((m: any) => { joined[m.group_id] = true; });
+        const counts: Record<string, number> = {}; (all || []).forEach((m: any) => { counts[m.group_id] = (counts[m.group_id] || 0) + 1; });
+        const out = (groups || []).map((g: any) => ({
+          id: g.id, name: g.name, description: g.description, meeting_time: g.meeting_time, location: g.location,
+          member_count: counts[g.id] || 0, joined: !!joined[g.id],
+        }));
+        return json({ groups: out });
+      }
+
+      if (action === "community_group_join") {
+        const group_id = String(payload.group_id || ""); if (!group_id) return json({ error: "group_id is required." }, 400);
+        const { error } = await sb.from("t3l_community_group_members")
+          .upsert({ group_id, user_id: uid, member_name: memberName }, { onConflict: "group_id,user_id" });
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+
+      if (action === "community_group_leave") {
+        const group_id = String(payload.group_id || ""); if (!group_id) return json({ error: "group_id is required." }, 400);
+        const { error } = await sb.from("t3l_community_group_members").delete().eq("group_id", group_id).eq("user_id", uid);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+
+      // Admin-only: create / edit a group.
+      if (action === "community_group_save") {
+        if (!isAdmin) return json({ error: "Only an administrator can manage groups." }, 403);
+        const name = String(payload.name || "").trim(); if (!name) return json({ error: "Group name is required." }, 400);
+        const rowg = {
+          name, description: String(payload.description || "") || null,
+          meeting_time: String(payload.meeting_time || "") || null, location: String(payload.location || "") || null,
+          active: payload.active === false ? false : true, sort: Number(payload.sort) || 0,
+        };
+        const id = String(payload.id || "");
+        const res = id
+          ? await sb.from("t3l_community_groups").update(rowg).eq("id", id)
+          : await sb.from("t3l_community_groups").insert(rowg);
+        if (res.error) return json({ error: res.error.message }, 400);
+        return json({ ok: true });
+      }
+
+      if (action === "community_directory") {
+        const { data } = await sb.from("t3l_community_profiles")
+          .select("display_name,about").eq("show_in_directory", true).order("display_name", { ascending: true }).limit(500);
+        return json({ profiles: data || [] });
+      }
+
+      if (action === "community_profile_get") {
+        const { data } = await sb.from("t3l_community_profiles").select("display_name,about,show_in_directory").eq("user_id", uid).maybeSingle();
+        return json({ profile: data || { display_name: memberName, about: "", show_in_directory: false } });
+      }
+
+      if (action === "community_profile_save") {
+        const row = {
+          user_id: uid,
+          display_name: String(payload.display_name || "").trim() || memberName,
+          about: String(payload.about || "").trim() || null,
+          show_in_directory: !!payload.show_in_directory,
+          updated_at: new Date().toISOString(),
+        };
+        const { error } = await sb.from("t3l_community_profiles").upsert(row, { onConflict: "user_id" });
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+
+      return json({ error: "unknown community action" }, 400);
+    }
+
     if (action === "app") {
       if (!caller) return json({ error: "unauthorized" }, 401);
       if (!isAdmin) return json({ error: "forbidden" }, 403);
