@@ -154,6 +154,138 @@ Deno.serve(async (req) => {
 
     if (action === "status") return json({ setup_needed: (await activeSuperCount(sb)) === 0 });
 
+    // --- Public: impact / transparency feed (no auth) ---
+    // Only aggregate counts + admin-curated PUBLISHED content. Never any PII.
+    if (action === "impact_public") {
+      const today = new Date().toISOString().slice(0, 10);
+      const [settings, metrics, stories, members, eventsHosted, lessons, posts, hoursRows, prayers] = await Promise.all([
+        sb.from("t3l_impact_settings").select("headline,intro").eq("id", 1).maybeSingle(),
+        sb.from("t3l_impact_metrics").select("label,value,unit,icon,sort").eq("published", true).order("sort", { ascending: true }),
+        sb.from("t3l_impact_stories").select("title,summary,body,image_url,sort,created_at").eq("published", true).order("sort", { ascending: true }).limit(24),
+        sb.from("t3l_portal_members").select("user_id", { count: "exact", head: true }).eq("status", "active"),
+        sb.from("t3l_events").select("id", { count: "exact", head: true }).eq("published", true).lt("start_date", today),
+        sb.from("t3l_community_lessons").select("id", { count: "exact", head: true }).eq("published", true),
+        sb.from("t3l_community_posts").select("id", { count: "exact", head: true }).eq("hidden", false),
+        sb.from("t3l_volunteer_hours").select("hours").eq("status", "verified"),
+        sb.from("t3l_prayer_prayed").select("id", { count: "exact", head: true }),
+      ]);
+      let volunteerHours = 0;
+      (hoursRows.data || []).forEach((r: any) => { volunteerHours += Number(r.hours) || 0; });
+      return json({
+        settings: settings.data || { headline: "Our Impact", intro: "" },
+        metrics: metrics.data || [],
+        stories: stories.data || [],
+        auto: {
+          community_members: members.count || 0,
+          events_hosted: eventsHosted.count || 0,
+          classroom_lessons: lessons.count || 0,
+          community_posts: posts.count || 0,
+          volunteer_hours: Math.round(volunteerHours),
+          prayers_covered: prayers.count || 0,
+        },
+      });
+    }
+
+    // --- Cron: automated email journeys (pg_cron -> this endpoint) ---
+    // Guarded by a shared secret; never requires a user session. Ships inert:
+    // every journey is inactive until an admin switches it on, and each send is
+    // deduped by the unique (journey_key,email,anchor) ledger row.
+    if (action === "cron_email_journeys") {
+      const secret = String(payload.secret || req.headers.get("x-cron-secret") || "");
+      const { data: cs } = await sb.from("t3l_portal_config").select("value").eq("key", "cron_secret").maybeSingle();
+      const expected = (cs && cs.value) || "";
+      if (!expected || secret !== expected) return json({ error: "forbidden" }, 403);
+      if (!RESEND_API_KEY) return json({ ok: true, skipped: "RESEND_API_KEY not set" });
+
+      const { data: cfg } = await sb.from("t3l_portal_config").select("value").eq("key", "comms_from_email").maybeSingle();
+      const from = (cfg && cfg.value) || "Teach Them to Love <outreach@mail.28footsystems.com>";
+      const { data: journeys } = await sb.from("t3l_email_journeys").select("*").eq("active", true);
+      const active = journeys || [];
+      const now = Date.now();
+      const results: Record<string, number> = {};
+      const render = (s: string, vars: Record<string, string>) =>
+        String(s || "").replace(/\{\{(\w+)\}\}/g, (_m: string, k: string) => (vars[k] != null ? vars[k] : ""));
+      const nameFromMember = (m: any) => (m.full_name || (m.email ? String(m.email).split("@")[0] : "friend"));
+
+      // Claim + send one email; dedupe via the unique (journey_key,email,anchor).
+      const deliver = async (jkey: string, uid: string | null, email: string, anchor: string, subject: string, text: string): Promise<boolean> => {
+        const claim = await sb.from("t3l_email_journey_log")
+          .insert({ journey_key: jkey, user_id: uid, email, anchor, status: "sent" }).select("id").maybeSingle();
+        if (claim.error) return false; // already claimed (unique violation) => skip
+        const html = '<div style="font-family:Arial,sans-serif;font-size:15px;color:#2b2030;line-height:1.6;white-space:pre-wrap">' + escapeHtml(text) + '</div>';
+        try {
+          const res = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
+            body: JSON.stringify({ from, to: [email], subject, html, text }),
+          });
+          if (!res.ok) {
+            let e = "HTTP " + res.status; try { const j = await res.json(); e = (j && (j.message || JSON.stringify(j))) || e; } catch (_x) { /* noop */ }
+            await sb.from("t3l_email_journey_log").update({ status: "failed", error: e }).eq("journey_key", jkey).eq("email", email).eq("anchor", anchor);
+            return false;
+          }
+          return true;
+        } catch (e) {
+          await sb.from("t3l_email_journey_log").update({ status: "failed", error: String((e as Error).message || e) }).eq("journey_key", jkey).eq("email", email).eq("anchor", anchor);
+          return false;
+        }
+      };
+
+      let budget = 300; // safety cap per run
+      for (const j of active) {
+        let sent = 0;
+        if (j.trigger_type === "welcome") {
+          const lo = new Date(now - (j.delay_hours + 96) * 3600 * 1000).toISOString(); // 4-day catch-up window
+          const hi = new Date(now - j.delay_hours * 3600 * 1000).toISOString();
+          const { data: mem } = await sb.from("t3l_portal_members")
+            .select("user_id,email,full_name,created_at").eq("status", "active")
+            .gte("created_at", lo).lte("created_at", hi).limit(200);
+          for (const m of (mem || [])) {
+            if (budget <= 0) break; if (!m.email) continue;
+            const vars = { name: nameFromMember(m) };
+            if (await deliver(j.key, m.user_id, m.email, "member:" + m.user_id, render(j.subject, vars), render(j.body, vars))) { sent++; budget--; }
+          }
+        } else if (j.trigger_type === "event_reminder") {
+          const today = new Date().toISOString().slice(0, 10);
+          const horizon = new Date(now + (j.lead_hours || 48) * 3600 * 1000).toISOString().slice(0, 10);
+          const { data: evs } = await sb.from("t3l_events").select("id,title,start_date,start_time")
+            .eq("published", true).gte("start_date", today).lte("start_date", horizon)
+            .order("start_date", { ascending: true }).limit(20);
+          if ((evs || []).length) {
+            const { data: mem } = await sb.from("t3l_portal_members").select("user_id,email,full_name").eq("status", "active").limit(1000);
+            for (const ev of (evs || [])) {
+              const dateLabel = ev.start_date + (ev.start_time ? (" at " + ev.start_time) : "");
+              for (const m of (mem || [])) {
+                if (budget <= 0) break; if (!m.email) continue;
+                const vars = { name: nameFromMember(m), event_title: ev.title || "an upcoming event", event_date: dateLabel };
+                if (await deliver(j.key, m.user_id, m.email, "event:" + ev.id, render(j.subject, vars), render(j.body, vars))) { sent++; budget--; }
+              }
+            }
+          }
+        } else if (j.trigger_type === "reengagement") {
+          const cutoffIso = new Date(now - (j.inactive_days || 45) * 86400 * 1000).toISOString();
+          const bucket = new Date().toISOString().slice(0, 7); // at most once per member per month
+          const { data: mem } = await sb.from("t3l_portal_members")
+            .select("user_id,email,full_name,created_at").eq("status", "active")
+            .lte("created_at", cutoffIso).limit(500);
+          for (const m of (mem || [])) {
+            if (budget <= 0) break; if (!m.email) continue;
+            const [p, l, lp, su] = await Promise.all([
+              sb.from("t3l_community_posts").select("id", { count: "exact", head: true }).eq("author_user_id", m.user_id).gte("created_at", cutoffIso),
+              sb.from("t3l_community_likes").select("id", { count: "exact", head: true }).eq("user_id", m.user_id).gte("created_at", cutoffIso),
+              sb.from("t3l_community_lesson_progress").select("id", { count: "exact", head: true }).eq("user_id", m.user_id).gte("completed_at", cutoffIso),
+              sb.from("t3l_volunteer_signups").select("id", { count: "exact", head: true }).eq("user_id", m.user_id).gte("created_at", cutoffIso),
+            ]);
+            if ((p.count || 0) + (l.count || 0) + (lp.count || 0) + (su.count || 0) > 0) continue; // still active
+            const vars = { name: nameFromMember(m) };
+            if (await deliver(j.key, m.user_id, m.email, "reengage:" + bucket, render(j.subject, vars), render(j.body, vars))) { sent++; budget--; }
+          }
+        }
+        results[j.key] = sent;
+      }
+      return json({ ok: true, sent: results });
+    }
+
     if (action === "bootstrap") {
       if (!FIRST_ADMIN_EMAIL) return json({ error: "Administrator email is not configured on the server." }, 400);
       if ((await activeSuperCount(sb)) > 0) return json({ error: "Administrator setup is already complete." }, 409);
@@ -565,6 +697,146 @@ Deno.serve(async (req) => {
       return json({ resources: data || [] });
     }
 
+    // ================= VOLUNTEER MODULE (any active member) =================
+    if (action === "volunteer_opportunities") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const uid = caller.user.id;
+      const nowIso = new Date().toISOString();
+      const { data: opps } = await sb.from("t3l_volunteer_opportunities")
+        .select("id,title,description,location,starts_at,ends_at,slots,role_id,sort")
+        .eq("published", true)
+        .or("ends_at.is.null,ends_at.gte." + nowIso)
+        .order("starts_at", { ascending: true, nullsFirst: false }).order("sort", { ascending: true }).limit(100);
+      const list = opps || [];
+      const ids = list.map((o: any) => o.id);
+      const roleIds = Array.from(new Set(list.map((o: any) => o.role_id).filter(Boolean)));
+      const taken: Record<string, number> = {}; const mine: Record<string, boolean> = {};
+      const roleMap: Record<string, string> = {};
+      if (ids.length) {
+        const { data: su } = await sb.from("t3l_volunteer_signups").select("opportunity_id,user_id,status").in("opportunity_id", ids).neq("status", "cancelled");
+        (su || []).forEach((s: any) => { taken[s.opportunity_id] = (taken[s.opportunity_id] || 0) + 1; if (s.user_id === uid) mine[s.opportunity_id] = true; });
+      }
+      if (roleIds.length) {
+        const { data: roles } = await sb.from("t3l_volunteer_roles").select("id,title").in("id", roleIds);
+        (roles || []).forEach((r: any) => { roleMap[r.id] = r.title; });
+      }
+      const opportunities = list.map((o: any) => ({
+        id: o.id, title: o.title, description: o.description, location: o.location,
+        starts_at: o.starts_at, ends_at: o.ends_at, slots: o.slots,
+        role_title: o.role_id ? (roleMap[o.role_id] || null) : null,
+        taken: taken[o.id] || 0, full: o.slots != null && (taken[o.id] || 0) >= o.slots,
+        signed_up: !!mine[o.id],
+      }));
+      return json({ opportunities });
+    }
+
+    if (action === "volunteer_signup") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const uid = caller.user.id;
+      const opportunity_id = String(payload.opportunity_id || ""); if (!opportunity_id) return json({ error: "opportunity_id is required." }, 400);
+      const { data: opp } = await sb.from("t3l_volunteer_opportunities").select("id,slots,published").eq("id", opportunity_id).maybeSingle();
+      if (!opp || !opp.published) return json({ error: "That opportunity is no longer available." }, 404);
+      if (opp.slots != null) {
+        const { count } = await sb.from("t3l_volunteer_signups").select("id", { count: "exact", head: true }).eq("opportunity_id", opportunity_id).neq("status", "cancelled");
+        const already = await sb.from("t3l_volunteer_signups").select("id,status").eq("opportunity_id", opportunity_id).eq("user_id", uid).maybeSingle();
+        const iAmCounted = already.data && already.data.status !== "cancelled";
+        if (!iAmCounted && (count || 0) >= opp.slots) return json({ error: "All slots for this opportunity are full." }, 409);
+      }
+      const row = { opportunity_id, user_id: uid, name: caller.member.full_name || null, email: caller.member.email || null, status: "signed_up", note: String(payload.note || "").trim() || null, updated_at: new Date().toISOString() };
+      const { error } = await sb.from("t3l_volunteer_signups").upsert(row, { onConflict: "opportunity_id,user_id" });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (action === "volunteer_cancel") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const opportunity_id = String(payload.opportunity_id || ""); if (!opportunity_id) return json({ error: "opportunity_id is required." }, 400);
+      const { error } = await sb.from("t3l_volunteer_signups").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("opportunity_id", opportunity_id).eq("user_id", caller.user.id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (action === "volunteer_log_hours") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const hours = Number(payload.hours);
+      if (!(hours > 0) || hours > 1000) return json({ error: "Enter the number of hours served (0–1000)." }, 400);
+      const row = {
+        user_id: caller.user.id,
+        opportunity_id: String(payload.opportunity_id || "") || null,
+        name: caller.member.full_name || null,
+        hours: Math.round(hours * 100) / 100,
+        served_on: String(payload.served_on || "").trim() || new Date().toISOString().slice(0, 10),
+        description: String(payload.description || "").trim() || null,
+        status: "pending",
+      };
+      const { error } = await sb.from("t3l_volunteer_hours").insert(row);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    if (action === "volunteer_my_hours") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const { data } = await sb.from("t3l_volunteer_hours")
+        .select("id,hours,served_on,description,status,created_at").eq("user_id", caller.user.id)
+        .order("served_on", { ascending: false }).limit(100);
+      const rows = data || [];
+      let verified = 0, pending = 0;
+      rows.forEach((r: any) => { if (r.status === "verified") verified += Number(r.hours) || 0; else if (r.status === "pending") pending += Number(r.hours) || 0; });
+      return json({ hours: rows, totals: { verified: Math.round(verified * 100) / 100, pending: Math.round(pending * 100) / 100 } });
+    }
+
+    // ================= PRAYER WALL (any active member) =================
+    if (action === "prayer_wall") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const uid = caller.user.id;
+      const { data } = await sb.from("t3l_prayer_requests")
+        .select("id,name,request,anonymous,answered,answered_note,created_at")
+        .eq("on_wall", true).order("answered", { ascending: true }).order("created_at", { ascending: false }).limit(100);
+      const list = data || [];
+      const ids = list.map((r: any) => r.id);
+      const counts: Record<string, number> = {}; const mine: Record<string, boolean> = {};
+      if (ids.length) {
+        const { data: prayed } = await sb.from("t3l_prayer_prayed").select("request_id,user_id").in("request_id", ids);
+        (prayed || []).forEach((p: any) => { counts[p.request_id] = (counts[p.request_id] || 0) + 1; if (p.user_id === uid) mine[p.request_id] = true; });
+      }
+      const requests = list.map((r: any) => ({
+        id: r.id, name: r.anonymous ? null : (r.name || null), request: r.request,
+        answered: r.answered, answered_note: r.answered_note, created_at: r.created_at,
+        prayed: counts[r.id] || 0, i_prayed: !!mine[r.id],
+      }));
+      return json({ requests });
+    }
+
+    if (action === "prayer_pray") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const request_id = String(payload.request_id || ""); if (!request_id) return json({ error: "request_id is required." }, 400);
+      const { data: req } = await sb.from("t3l_prayer_requests").select("id,on_wall").eq("id", request_id).maybeSingle();
+      if (!req || !req.on_wall) return json({ error: "That request is not on the prayer wall." }, 404);
+      await sb.from("t3l_prayer_prayed").upsert({ request_id, user_id: caller.user.id }, { onConflict: "request_id,user_id" });
+      const { count } = await sb.from("t3l_prayer_prayed").select("id", { count: "exact", head: true }).eq("request_id", request_id);
+      return json({ ok: true, prayed: count || 0 });
+    }
+
+    // Member submits a request they'd like shared on the wall (held for admin review).
+    if (action === "prayer_wall_submit") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const request = String(payload.request || "").trim();
+      if (request.length < 2) return json({ error: "Please enter your prayer request." }, 400);
+      const anonymous = payload.anonymous === true;
+      const row = {
+        user_id: caller.user.id,
+        name: anonymous ? null : (caller.member.full_name || null),
+        email: caller.member.email || null,
+        request,
+        anonymous,
+        on_wall: false, // held for admin review before it appears on the wall
+        updated_at: new Date().toISOString(),
+      };
+      const { error } = await sb.from("t3l_prayer_requests").insert(row);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
     if (action === "app") {
       if (!caller) return json({ error: "unauthorized" }, 401);
       if (!isAdmin) return json({ error: "forbidden" }, 403);
@@ -587,6 +859,14 @@ Deno.serve(async (req) => {
          "events_admin_list", "event_save", "event_delete",
          "resources_admin_list", "resource_save", "resource_delete",
          "admin_overview",
+         "volunteer_roles_admin", "volunteer_role_save", "volunteer_role_delete",
+         "volunteer_opps_admin", "volunteer_opp_save", "volunteer_opp_delete",
+         "volunteer_signups_admin", "volunteer_signup_set",
+         "volunteer_hours_admin", "volunteer_hours_review",
+         "impact_admin", "impact_metric_save", "impact_metric_delete",
+         "impact_story_save", "impact_story_delete", "impact_settings_save",
+         "prayer_wall_set",
+         "email_journeys_admin", "email_journey_save", "email_journey_toggle", "email_journey_test",
          "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive", "crm_lookup",
          "crm_fields_list", "crm_field_save", "crm_field_delete",
          "crm_stages_list", "crm_stage_save", "crm_stage_set", "crm_households_list", "crm_household_save",
@@ -814,7 +1094,8 @@ Deno.serve(async (req) => {
     // --- Admin dashboard overview: live counts + the next few upcoming events ---
     if (action === "admin_overview") {
       const today = new Date().toISOString().slice(0, 10);
-      const [prayer, events, upcoming, anns, resources] = await Promise.all([
+      const nowIso = new Date().toISOString();
+      const [prayer, events, upcoming, anns, resources, hoursPending, wallPending, openOpps] = await Promise.all([
         sb.from("t3l_prayer_requests").select("id", { count: "exact", head: true }).neq("status", "closed"),
         sb.from("t3l_events").select("id", { count: "exact", head: true }).eq("published", true).gte("start_date", today),
         sb.from("t3l_events").select("id,title,location,start_date,start_time,published")
@@ -822,6 +1103,9 @@ Deno.serve(async (req) => {
           .order("start_date", { ascending: true }).order("start_time", { ascending: true, nullsFirst: true }).limit(5),
         sb.from("t3l_announcements").select("id", { count: "exact", head: true }).eq("published", true),
         sb.from("t3l_resources").select("id", { count: "exact", head: true }).eq("published", true),
+        sb.from("t3l_volunteer_hours").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        sb.from("t3l_prayer_requests").select("id", { count: "exact", head: true }).eq("on_wall", false).neq("status", "closed"),
+        sb.from("t3l_volunteer_opportunities").select("id", { count: "exact", head: true }).eq("published", true).or("ends_at.is.null,ends_at.gte." + nowIso),
       ]);
       return json({
         counts: {
@@ -829,9 +1113,263 @@ Deno.serve(async (req) => {
           upcoming_events: events.count || 0,
           announcements: anns.count || 0,
           resources: resources.count || 0,
+          volunteer_hours_pending: hoursPending.count || 0,
+          prayer_wall_pending: wallPending.count || 0,
+          open_opportunities: openOpps.count || 0,
         },
         upcoming_events: upcoming.data || [],
       });
+    }
+
+    // ================= VOLUNTEER ADMIN =================
+    if (action === "volunteer_roles_admin") {
+      const { data } = await sb.from("t3l_volunteer_roles")
+        .select("id,title,description,category,time_commitment,active,sort").order("sort", { ascending: true }).order("title", { ascending: true });
+      return json({ roles: data || [] });
+    }
+    if (action === "volunteer_role_save") {
+      const title = String(payload.title || "").trim(); if (!title) return json({ error: "A role title is required." }, 400);
+      const row: Record<string, unknown> = {
+        title,
+        description: String(payload.description || "").trim() || null,
+        category: String(payload.category || "").trim() || null,
+        time_commitment: String(payload.time_commitment || "").trim() || null,
+        active: payload.active === false ? false : true,
+        sort: parseInt(String(payload.sort || "0"), 10) || 0,
+        updated_at: new Date().toISOString(),
+      };
+      const id = String(payload.id || "");
+      if (id) { const { error } = await sb.from("t3l_volunteer_roles").update(row).eq("id", id); if (error) return json({ error: error.message }, 400); return json({ ok: true }); }
+      const { error } = await sb.from("t3l_volunteer_roles").insert({ ...row, created_by: caller!.user.id });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+    if (action === "volunteer_role_delete") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_volunteer_roles").delete().eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+    if (action === "volunteer_opps_admin") {
+      const { data } = await sb.from("t3l_volunteer_opportunities")
+        .select("id,role_id,event_id,title,description,location,starts_at,ends_at,slots,published,sort")
+        .order("starts_at", { ascending: false, nullsFirst: false }).order("sort", { ascending: true }).limit(300);
+      const list = data || [];
+      const ids = list.map((o: any) => o.id);
+      const counts: Record<string, number> = {};
+      if (ids.length) {
+        const { data: su } = await sb.from("t3l_volunteer_signups").select("opportunity_id,status").in("opportunity_id", ids).neq("status", "cancelled");
+        (su || []).forEach((s: any) => { counts[s.opportunity_id] = (counts[s.opportunity_id] || 0) + 1; });
+      }
+      const opps = list.map((o: any) => ({ ...o, signups: counts[o.id] || 0 }));
+      return json({ opportunities: opps });
+    }
+    if (action === "volunteer_opp_save") {
+      const title = String(payload.title || "").trim(); if (!title) return json({ error: "An opportunity title is required." }, 400);
+      const slotsRaw = String(payload.slots == null ? "" : payload.slots).trim();
+      const row: Record<string, unknown> = {
+        role_id: String(payload.role_id || "") || null,
+        event_id: String(payload.event_id || "") || null,
+        title,
+        description: String(payload.description || "").trim() || null,
+        location: String(payload.location || "").trim() || null,
+        starts_at: String(payload.starts_at || "").trim() || null,
+        ends_at: String(payload.ends_at || "").trim() || null,
+        slots: slotsRaw ? (parseInt(slotsRaw, 10) || null) : null,
+        published: payload.published === false ? false : true,
+        sort: parseInt(String(payload.sort || "0"), 10) || 0,
+        updated_at: new Date().toISOString(),
+      };
+      const id = String(payload.id || "");
+      if (id) { const { error } = await sb.from("t3l_volunteer_opportunities").update(row).eq("id", id); if (error) return json({ error: error.message }, 400); return json({ ok: true }); }
+      const { error } = await sb.from("t3l_volunteer_opportunities").insert({ ...row, created_by: caller!.user.id });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+    if (action === "volunteer_opp_delete") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_volunteer_opportunities").delete().eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+    if (action === "volunteer_signups_admin") {
+      const opportunity_id = String(payload.opportunity_id || ""); if (!opportunity_id) return json({ error: "opportunity_id is required." }, 400);
+      const { data } = await sb.from("t3l_volunteer_signups")
+        .select("id,user_id,name,email,status,note,created_at").eq("opportunity_id", opportunity_id).order("created_at", { ascending: true });
+      return json({ signups: data || [] });
+    }
+    if (action === "volunteer_signup_set") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const status = String(payload.status || "");
+      if (["signed_up", "confirmed", "attended", "cancelled", "no_show"].indexOf(status) < 0) return json({ error: "Invalid status." }, 400);
+      const { error } = await sb.from("t3l_volunteer_signups").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+    if (action === "volunteer_hours_admin") {
+      const status = String(payload.status || "");
+      let q = sb.from("t3l_volunteer_hours").select("id,user_id,name,hours,served_on,description,status,created_at").order("created_at", { ascending: false }).limit(300);
+      if (status) q = q.eq("status", status);
+      const { data } = await q;
+      const rows = data || [];
+      const [pend, ver] = await Promise.all([
+        sb.from("t3l_volunteer_hours").select("hours").eq("status", "pending"),
+        sb.from("t3l_volunteer_hours").select("hours").eq("status", "verified"),
+      ]);
+      const sum = (arr: any[]) => Math.round((arr || []).reduce((a, r) => a + (Number(r.hours) || 0), 0) * 100) / 100;
+      return json({ hours: rows, totals: { pending: sum(pend.data || []), verified: sum(ver.data || []) } });
+    }
+    if (action === "volunteer_hours_review") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const decision = String(payload.decision || "");
+      if (decision !== "verified" && decision !== "rejected") return json({ error: "decision must be verified or rejected." }, 400);
+      const { error } = await sb.from("t3l_volunteer_hours").update({ status: decision, verified_by: caller!.user.id, verified_at: new Date().toISOString() }).eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    // ================= IMPACT ADMIN =================
+    if (action === "impact_admin") {
+      const today = new Date().toISOString().slice(0, 10);
+      const [settings, metrics, stories, members, eventsHosted, lessons, posts, hoursRows, prayers] = await Promise.all([
+        sb.from("t3l_impact_settings").select("headline,intro").eq("id", 1).maybeSingle(),
+        sb.from("t3l_impact_metrics").select("id,label,value,unit,icon,published,sort").order("sort", { ascending: true }),
+        sb.from("t3l_impact_stories").select("id,title,summary,body,image_url,published,sort,created_at").order("sort", { ascending: true }),
+        sb.from("t3l_portal_members").select("user_id", { count: "exact", head: true }).eq("status", "active"),
+        sb.from("t3l_events").select("id", { count: "exact", head: true }).eq("published", true).lt("start_date", today),
+        sb.from("t3l_community_lessons").select("id", { count: "exact", head: true }).eq("published", true),
+        sb.from("t3l_community_posts").select("id", { count: "exact", head: true }).eq("hidden", false),
+        sb.from("t3l_volunteer_hours").select("hours").eq("status", "verified"),
+        sb.from("t3l_prayer_prayed").select("id", { count: "exact", head: true }),
+      ]);
+      let vh = 0; (hoursRows.data || []).forEach((r: any) => { vh += Number(r.hours) || 0; });
+      return json({
+        settings: settings.data || { headline: "Our Impact", intro: "" },
+        metrics: metrics.data || [], stories: stories.data || [],
+        auto: {
+          community_members: members.count || 0, events_hosted: eventsHosted.count || 0,
+          classroom_lessons: lessons.count || 0, community_posts: posts.count || 0,
+          volunteer_hours: Math.round(vh), prayers_covered: prayers.count || 0,
+        },
+      });
+    }
+    if (action === "impact_metric_save") {
+      const label = String(payload.label || "").trim(); if (!label) return json({ error: "A metric label is required." }, 400);
+      const value = String(payload.value || "").trim(); if (!value) return json({ error: "A metric value is required." }, 400);
+      const row: Record<string, unknown> = {
+        label, value, unit: String(payload.unit || "").trim() || null, icon: String(payload.icon || "").trim() || null,
+        published: payload.published === false ? false : true, sort: parseInt(String(payload.sort || "0"), 10) || 0,
+        updated_at: new Date().toISOString(),
+      };
+      const id = String(payload.id || "");
+      if (id) { const { error } = await sb.from("t3l_impact_metrics").update(row).eq("id", id); if (error) return json({ error: error.message }, 400); return json({ ok: true }); }
+      const { error } = await sb.from("t3l_impact_metrics").insert(row);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+    if (action === "impact_metric_delete") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_impact_metrics").delete().eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+    if (action === "impact_story_save") {
+      const title = String(payload.title || "").trim(); if (!title) return json({ error: "A story title is required." }, 400);
+      const row: Record<string, unknown> = {
+        title, summary: String(payload.summary || "").trim() || null, body: String(payload.body || "").trim() || null,
+        image_url: String(payload.image_url || "").trim() || null,
+        published: payload.published === false ? false : true, sort: parseInt(String(payload.sort || "0"), 10) || 0,
+        updated_at: new Date().toISOString(),
+      };
+      const id = String(payload.id || "");
+      if (id) { const { error } = await sb.from("t3l_impact_stories").update(row).eq("id", id); if (error) return json({ error: error.message }, 400); return json({ ok: true }); }
+      const { error } = await sb.from("t3l_impact_stories").insert({ ...row, created_by: caller!.user.id });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+    if (action === "impact_story_delete") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_impact_stories").delete().eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+    if (action === "impact_settings_save") {
+      const row = { id: 1, headline: String(payload.headline || "Our Impact").trim() || "Our Impact", intro: String(payload.intro || "").trim() || null, updated_at: new Date().toISOString() };
+      const { error } = await sb.from("t3l_impact_settings").upsert(row, { onConflict: "id" });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    // ================= PRAYER WALL MODERATION =================
+    if (action === "prayer_wall_set") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      if (payload.on_wall !== undefined) patch.on_wall = payload.on_wall === true;
+      if (payload.anonymous !== undefined) patch.anonymous = payload.anonymous === true;
+      if (payload.answered !== undefined) patch.answered = payload.answered === true;
+      if (payload.answered_note !== undefined) patch.answered_note = String(payload.answered_note || "").trim() || null;
+      const { error } = await sb.from("t3l_prayer_requests").update(patch).eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    // ================= EMAIL JOURNEYS ADMIN =================
+    if (action === "email_journeys_admin") {
+      const { data: journeys } = await sb.from("t3l_email_journeys")
+        .select("id,key,name,trigger_type,subject,body,delay_hours,lead_hours,inactive_days,active,updated_at").order("key", { ascending: true });
+      const { data: log } = await sb.from("t3l_email_journey_log")
+        .select("journey_key,status,sent_at").order("sent_at", { ascending: false }).limit(300);
+      const stats: Record<string, { sent: number; failed: number; last: string | null }> = {};
+      (log || []).forEach((r: any) => {
+        const s = stats[r.journey_key] || { sent: 0, failed: 0, last: null };
+        if (r.status === "sent") s.sent++; else if (r.status === "failed") s.failed++;
+        if (!s.last) s.last = r.sent_at;
+        stats[r.journey_key] = s;
+      });
+      const { data: cronCfg } = await sb.from("t3l_portal_config").select("value").eq("key", "cron_secret").maybeSingle();
+      return json({ journeys: journeys || [], stats, cron_configured: !!(cronCfg && cronCfg.value), email_configured: !!RESEND_API_KEY });
+    }
+    if (action === "email_journey_save") {
+      const key = String(payload.key || ""); if (!key) return json({ error: "key is required." }, 400);
+      const subject = String(payload.subject || "").trim(); if (!subject) return json({ error: "A subject is required." }, 400);
+      const body = String(payload.body || "").trim(); if (body.length < 2) return json({ error: "Write the email body." }, 400);
+      const patch: Record<string, unknown> = {
+        name: String(payload.name || "").trim() || undefined,
+        subject, body,
+        delay_hours: payload.delay_hours !== undefined ? (parseInt(String(payload.delay_hours), 10) || 0) : undefined,
+        lead_hours: payload.lead_hours !== undefined ? (parseInt(String(payload.lead_hours), 10) || 0) : undefined,
+        inactive_days: payload.inactive_days !== undefined ? (parseInt(String(payload.inactive_days), 10) || 0) : undefined,
+        updated_at: new Date().toISOString(),
+      };
+      Object.keys(patch).forEach((k) => { if (patch[k] === undefined) delete patch[k]; });
+      const { error } = await sb.from("t3l_email_journeys").update(patch).eq("key", key);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+    if (action === "email_journey_toggle") {
+      const key = String(payload.key || ""); if (!key) return json({ error: "key is required." }, 400);
+      const active = payload.active === true;
+      const { error } = await sb.from("t3l_email_journeys").update({ active, updated_at: new Date().toISOString() }).eq("key", key);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, active });
+    }
+    if (action === "email_journey_test") {
+      const key = String(payload.key || ""); if (!key) return json({ error: "key is required." }, 400);
+      const to = caller!.member.email; if (!to) return json({ error: "Your account has no email address to send a test to." }, 400);
+      if (!RESEND_API_KEY) return json({ error: "Email sending is not configured yet (RESEND_API_KEY not set)." }, 400);
+      const { data: j } = await sb.from("t3l_email_journeys").select("subject,body").eq("key", key).maybeSingle();
+      if (!j) return json({ error: "Journey not found." }, 404);
+      const vars: Record<string, string> = { name: (caller!.member.full_name || "there"), event_title: "Sample Event", event_date: "a future date" };
+      const render = (s: string) => String(s || "").replace(/\{\{(\w+)\}\}/g, (_m: string, k: string) => (vars[k] != null ? vars[k] : ""));
+      const { data: cfg } = await sb.from("t3l_portal_config").select("value").eq("key", "comms_from_email").maybeSingle();
+      const from = (cfg && cfg.value) || "Teach Them to Love <outreach@mail.28footsystems.com>";
+      const text = render(j.body); const subject = "[TEST] " + render(j.subject);
+      const html = '<div style="font-family:Arial,sans-serif;font-size:15px;color:#2b2030;line-height:1.6;white-space:pre-wrap">' + escapeHtml(text) + '</div>';
+      try {
+        const res = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "Authorization": "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ from, to: [to], subject, html, text }) });
+        if (!res.ok) { let e = "HTTP " + res.status; try { const jj = await res.json(); e = (jj && (jj.message || JSON.stringify(jj))) || e; } catch (_x) { /* noop */ } return json({ error: "Test send failed: " + e }, 400); }
+      } catch (e) { return json({ error: "Test send failed: " + String((e as Error).message || e) }, 400); }
+      return json({ ok: true, sent_to: to });
     }
 
     // --- CRM: contacts + activity ---
@@ -1255,7 +1793,7 @@ Deno.serve(async (req) => {
 
     if (action === "list_prayer_requests") {
       const { data } = await sb.from("t3l_prayer_requests")
-        .select("id,name,email,ministry_role,request,status,internal_note,created_at")
+        .select("id,name,email,ministry_role,request,status,internal_note,on_wall,anonymous,answered,answered_note,created_at")
         .order("created_at", { ascending: false });
       return json({ requests: data || [] });
     }

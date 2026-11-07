@@ -58,6 +58,7 @@
           <button class="nav-item" data-target="events" data-module="events"><span class="nav-icon">◷</span>Events</button>
           <button class="nav-item" data-target="community" data-module="community"><span class="nav-icon">◍</span>Community</button>
           <button class="nav-item" data-target="resources" data-module="resources"><span class="nav-icon">▤</span>Resources</button>
+          <button class="nav-item" data-target="serve" data-module="volunteer"><span class="nav-icon">✋</span>Serve</button>
           <button class="nav-item" data-target="prayer"><span class="nav-icon">♡</span>Prayer</button>
           <button class="nav-item" data-target="profile"><span class="nav-icon">◉</span>My profile</button>
         </nav></div>
@@ -74,7 +75,7 @@
               <button class="quick-card" data-target="updates"><span class="quick-icon purple">◈</span><h3>Ministry updates</h3><p>Read the latest ministry news and important notices.</p><span class="arrow">↗</span></button>
               <button class="quick-card" data-target="events" data-module="events"><span class="quick-icon gold">◷</span><h3>Events & programs</h3><p>See upcoming outreach gatherings, services, and programs.</p><span class="arrow">↗</span></button>
               <button class="quick-card" data-target="resources" data-module="resources"><span class="quick-icon green">▤</span><h3>Resource library</h3><p>Access helpful guides and ministry materials.</p><span class="arrow">↗</span></button>
-              <button class="quick-card" data-target="prayer"><span class="quick-icon rose">♡</span><h3>Prayer support</h3><p>Share a private prayer request with the ministry team.</p><span class="arrow">↗</span></button>
+              <button class="quick-card" data-target="prayer"><span class="quick-icon rose">♡</span><h3>Prayer support</h3><p>Share a private prayer request with the ministry team.</p><span class="arrow">↗</span></button><button class="quick-card" data-target="serve" data-module="volunteer"><span class="quick-icon gold">✋</span><h3>Serve &amp; volunteer</h3><p>Find a way to help and log the hours you give.</p><span class="arrow">↗</span></button>
             </div>
             <div class="dashboard-grid"><article class="card card-pad"><p class="eyebrow">At a glance</p><h2 style="margin:5px 0 0;font:600 26px/1.2 'Playfair Display',Georgia,serif;color:#3b1b40">Your ministry space</h2><div class="metric-grid"><div class="metric"><div class="metric-number">—</div><div class="metric-label">Updates shared</div></div><div class="metric"><div class="metric-number">—</div><div class="metric-label">Events listed</div></div><div class="metric"><div class="metric-number">—</div><div class="metric-label">Resources ready</div></div></div></article><article class="card card-pad care-card"><p class="eyebrow">Private & caring</p><h3>Need prayer?</h3><p>Share what is on your heart with a request for the authorized ministry care team.</p><button class="text-link" data-target="prayer">Submit a request&nbsp; →</button></article></div>
           </section>
@@ -87,7 +88,8 @@
             <div id="t3lCommRoot"><article class="card empty"><div class="empty-icon">◍</div><h3>Loading…</h3></article></div>
           </section>
           <section class="view" id="resources" data-module="resources"><p class="eyebrow">Guides & materials</p><h1 class="page-title">Resource library</h1><p class="page-description">A thoughtfully organized collection of ministry materials available for your personal use.</p><div id="t3lResList" style="margin-bottom:16px"></div><article class="card empty"><div class="empty-icon" style="background:#e2efeb;color:#286d63">▤</div><h3>Resources are being prepared</h3><p>Guides, documents, and ministry materials will appear here as the team makes them available.</p></article></section>
-          <section class="view" id="prayer"><p class="eyebrow">Private prayer support</p><h1 class="page-title">Share what is on your heart</h1><p class="page-description">Your request is intended for the authorized ministry care team. Complete the form below and it will post to your configured GoHighLevel Workflow webhook.</p><div class="form-layout"><article class="card privacy-panel"><div class="empty-icon" style="background:rgba(255,255,255,.13);color:#ecd69d">♡</div><h2>A confidential space</h2><p>Share as much or as little as feels right. The ministry can receive requests through the GoHighLevel workflow configured for this portal.</p><div class="privacy-box"><span>⌑</span><span>Do not use this form for emergencies. If you are in immediate danger, call your local emergency number.</span></div></article><article class="card form-card"><h2>Prayer request</h2><p>Fields marked required are used to route your request appropriately.</p><form id="prayerRequestForm" novalidate><div class="fields"><div class="field"><label for="contactName">Your name</label><input id="contactName" name="contactName" type="text" autocomplete="name" placeholder="Enter your name" required></div><div class="field"><label for="contactEmail">Email address</label><input id="contactEmail" name="contactEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div><div class="field"><label for="ministryRole">Ministry role <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="ministryRole" name="ministryRole" type="text" placeholder="e.g., Member or Volunteer"></div><div class="field"><label for="prayerRequest">Your request</label><textarea id="prayerRequest" name="prayerRequest" maxlength="5000" placeholder="Write your prayer request here…" required></textarea></div><label class="consent"><input id="privacyConsent" type="checkbox" required><span>I understand that this request will be sent to Teach Them to Love through its configured ministry workflow.</span></label></div><button class="primary-btn" id="submitPrayerButton" type="submit">Send prayer request</button><div class="form-status" id="formStatus" role="status" aria-live="polite"></div></form></article></div></section>
+          <section class="view" id="serve" data-module="volunteer"><p class="eyebrow">Give your time</p><h1 class="page-title">Serve with us</h1><p class="page-description">Find a way to help, sign up in one tap, and log the hours you give. Your verified hours add to our community impact.</p><div id="t3lServeHours" style="margin:0 0 16px"></div><div id="t3lServeList"><article class="card empty"><div class="empty-icon">✋</div><h3>Loading opportunities…</h3></article></div><article class="card form-card" style="margin-top:18px"><h3 style="margin:0 0 8px">Log volunteer hours</h3><p style="color:#8a7d83;font-size:13px;margin:0 0 10px">Already served? Record it here — the team will verify it.</p><div class="fields"><div style="display:flex;gap:12px;flex-wrap:wrap"><div class="field" style="flex:1 1 120px"><label for="vhHours">Hours</label><input id="vhHours" type="number" min="0.25" step="0.25" placeholder="e.g. 2"></div><div class="field" style="flex:1 1 150px"><label for="vhDate">Date served</label><input id="vhDate" type="date"></div></div><div class="field"><label for="vhDesc">What did you do? <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="vhDesc" type="text" placeholder="e.g. Served at the food drive"></div></div><button class="primary-btn" id="vhSubmit" type="button">Log hours</button> <span class="form-status" id="vhStatus" role="status" aria-live="polite" style="display:inline-block;margin-left:8px"></span></article></section>
+          <section class="view" id="prayer"><p class="eyebrow">Private prayer support</p><h1 class="page-title">Share what is on your heart</h1><p class="page-description">Your request is intended for the authorized ministry care team. Complete the form below and it will be received privately by the authorized ministry care team.</p><div class="form-layout"><article class="card privacy-panel"><div class="empty-icon" style="background:rgba(255,255,255,.13);color:#ecd69d">♡</div><h2>A confidential space</h2><p>Share as much or as little as feels right. Your request is received privately by the authorized ministry care team.</p><div class="privacy-box"><span>⌑</span><span>Do not use this form for emergencies. If you are in immediate danger, call your local emergency number.</span></div></article><article class="card form-card"><h2>Prayer request</h2><p>Fields marked required are used to route your request appropriately.</p><form id="prayerRequestForm" novalidate><div class="fields"><div class="field"><label for="contactName">Your name</label><input id="contactName" name="contactName" type="text" autocomplete="name" placeholder="Enter your name" required></div><div class="field"><label for="contactEmail">Email address</label><input id="contactEmail" name="contactEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div><div class="field"><label for="ministryRole">Ministry role <span style="font-weight:400;color:#8d8086">(optional)</span></label><input id="ministryRole" name="ministryRole" type="text" placeholder="e.g., Member or Volunteer"></div><div class="field"><label for="prayerRequest">Your request</label><textarea id="prayerRequest" name="prayerRequest" maxlength="5000" placeholder="Write your prayer request here…" required></textarea></div><label class="consent"><input id="privacyConsent" type="checkbox" required><span>I understand that this request will be sent privately to the Teach Them to Love care team.</span></label></div><button class="primary-btn" id="submitPrayerButton" type="submit">Send prayer request</button><div class="form-status" id="formStatus" role="status" aria-live="polite"></div></form></article></div><div id="t3lPrayerWallWrap" style="margin-top:26px"><h2 style="font:600 24px/1.2 'Playfair Display',Georgia,serif;color:#3b1b40;margin:0 0 6px">Community prayer wall</h2><p class="page-description" style="margin:0 0 14px">Requests members have chosen to share. Lift one up, then tap &ldquo;I prayed.&rdquo; Shared requests are reviewed by the team before they appear here.</p><article class="card form-card" style="margin-bottom:16px"><h3 style="margin:0 0 8px">Share a request on the wall</h3><div class="fields"><div class="field"><label for="pwText">Your request</label><textarea id="pwText" maxlength="2000" placeholder="What would you like the community to pray over?"></textarea></div><label class="consent"><input id="pwAnon" type="checkbox"><span>Share anonymously (hide my name)</span></label></div><button class="primary-btn" id="pwSubmit" type="button">Share with the wall</button> <span class="form-status" id="pwStatus" role="status" aria-live="polite" style="display:inline-block;margin-left:8px"></span></article><div id="t3lPrayerWall"><article class="card empty"><div class="empty-icon">♡</div><h3>Loading…</h3></article></div></div></section>
           <section class="view" id="profile"><p class="eyebrow">Your account</p><h1 class="page-title">Profile & contact details</h1><p class="page-description">This standalone GoHighLevel portal template is ready to connect to your membership and contact data sources.</p><div class="profile-layout"><article class="card identity-card"><div class="profile-mark">M</div><h2>Portal member</h2><p>Member contact details are connected through your GoHighLevel membership configuration.</p><span class="role-pill">Member access</span><p style="margin-top:23px">Administrative privileges are managed separately and are not exposed in this client template.</p></article><article class="card profile-form"><h2>Personal details</h2><p>These placeholders are designed for GHL custom values or form elements in your member-area implementation.</p><div class="fields"><div class="field"><label>Full name</label><div class="locked">{{contact.name}}</div></div><div class="field"><label>Email address</label><div class="locked">{{contact.email}}</div></div><div class="field"><label>Phone number</label><div class="locked">{{contact.phone}}</div></div><div class="field"><label>Ministry role</label><div class="locked">{{contact.ministry_role}}</div></div></div><p class="notice">Replace the placeholders above with the appropriate GoHighLevel contact custom values available in your account.</p></article></div></section>
           <p class="footer-line">Teach Them to Love Outreach Ministries · Client portal · <a href="https://www.t3loutreach.org/terms.html" style="color:inherit">Terms of Service</a> · <a href="https://www.t3loutreach.org/privacy.html" style="color:inherit">Privacy Policy</a></p>
         </div>
@@ -493,6 +495,88 @@
   }
   function maybeLoad(){ if(loaded)return; loaded=true; load(); }
   document.querySelectorAll('[data-target="resources"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad,30); }); });
+})();
+</script>
+<script>
+/* Member portal — Serve (volunteer opportunities + hour logging). */
+(function(){
+  var sectionEl=document.getElementById('serve'); if(!sectionEl) return;
+  if(typeof T3L_AUTH==='undefined'||!T3L_AUTH.callFn) return;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function call(a,p){ return T3L_AUTH.callFn(a,p||{}); }
+  function fmtWhen(iso){ if(!iso) return 'Flexible / ongoing'; try{ var d=new Date(iso); return new Intl.DateTimeFormat(undefined,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(d);}catch(e){return iso;} }
+  var listRoot=document.getElementById('t3lServeList'), hoursRoot=document.getElementById('t3lServeHours');
+  var loaded=false;
+  async function loadHours(){
+    var r=await call('volunteer_my_hours'); if(!r.ok||!r.data){hoursRoot.innerHTML='';return;}
+    var t=r.data.totals||{verified:0,pending:0};
+    hoursRoot.innerHTML='<article class="card card-pad" style="display:flex;gap:26px;flex-wrap:wrap;align-items:center"><div><div style="font:700 28px/1 \'Playfair Display\',Georgia,serif;color:#4a214f">'+(t.verified||0)+'</div><div style="color:#8a7d83;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Verified hours</div></div><div><div style="font:700 28px/1 \'Playfair Display\',Georgia,serif;color:#967027">'+(t.pending||0)+'</div><div style="color:#8a7d83;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Pending review</div></div></article>';
+  }
+  async function loadList(){
+    var r=await call('volunteer_opportunities'); var list=(r.ok&&r.data)?(r.data.opportunities||[]):[];
+    if(!list.length){ listRoot.innerHTML='<article class="card empty"><div class="empty-icon">✋</div><h3>No opportunities right now</h3><p>Check back soon — new ways to serve are added here.</p></article>'; return; }
+    listRoot.innerHTML=list.map(function(o){
+      var full=o.full&&!o.signed_up;
+      var btn= o.signed_up
+        ? '<button class="primary-btn vol-cancel" data-id="'+esc(o.id)+'" style="background:#8a6d90">You’re signed up · Cancel</button>'
+        : (full ? '<button class="primary-btn" disabled style="opacity:.5">Full</button>'
+                : '<button class="primary-btn vol-join" data-id="'+esc(o.id)+'">Sign up</button>');
+      var slots=(o.slots!=null)?('<span>'+o.taken+' / '+o.slots+' filled</span>'):'';
+      return '<article class="card card-pad" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start"><div style="flex:1 1 220px"><h4 style="margin:0;font:600 20px/1.2 \'Playfair Display\',Georgia,serif;color:#3b1b40">'+esc(o.title)+(o.role_title?(' <span style="font:600 12px/1 \'DM Sans\',Arial;color:#967027;background:#f4ecdf;padding:3px 8px;border-radius:999px;vertical-align:middle">'+esc(o.role_title)+'</span>'):'')+'</h4>'
+        +(o.description?('<p style="white-space:pre-wrap;color:#4b3f50;font-size:14px;margin:8px 0 0">'+esc(o.description)+'</p>'):'')
+        +'<div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;color:#6b5a70;font-size:13px;font-weight:600"><span>◷ '+esc(fmtWhen(o.starts_at))+'</span>'+(o.location?('<span>⌖ '+esc(o.location)+'</span>'):'')+slots+'</div></div><div style="flex:0 0 auto">'+btn+'</div></div></article>';
+    }).join('');
+    listRoot.querySelectorAll('.vol-join').forEach(function(b){ b.addEventListener('click', async function(){ b.disabled=true; var r=await call('volunteer_signup',{opportunity_id:b.getAttribute('data-id')}); if(r.ok&&r.data&&r.data.ok){ loadList(); } else { b.disabled=false; alert((r.data&&r.data.error)||'Could not sign up.'); } }); });
+    listRoot.querySelectorAll('.vol-cancel').forEach(function(b){ b.addEventListener('click', async function(){ if(!confirm('Cancel your sign-up?'))return; b.disabled=true; var r=await call('volunteer_cancel',{opportunity_id:b.getAttribute('data-id')}); if(r.ok){ loadList(); } else { b.disabled=false; alert((r.data&&r.data.error)||'Could not cancel.'); } }); });
+  }
+  var vhBtn=document.getElementById('vhSubmit');
+  if(vhBtn) vhBtn.addEventListener('click', async function(){
+    var st=document.getElementById('vhStatus'); var hours=parseFloat(document.getElementById('vhHours').value);
+    if(!(hours>0)){ st.textContent='Enter hours.'; st.className='form-status error'; return; }
+    vhBtn.disabled=true; st.textContent='Saving…'; st.className='form-status';
+    var r=await call('volunteer_log_hours',{hours:hours,served_on:document.getElementById('vhDate').value,description:document.getElementById('vhDesc').value});
+    vhBtn.disabled=false;
+    if(r.ok&&r.data&&r.data.ok){ document.getElementById('vhHours').value='';document.getElementById('vhDesc').value=''; st.textContent='Logged — pending verification.'; st.className='form-status success'; loadHours(); }
+    else { st.textContent=(r.data&&r.data.error)||'Could not save.'; st.className='form-status error'; }
+  });
+  function maybeLoad(){ if(loaded)return; loaded=true; loadHours(); loadList(); }
+  document.querySelectorAll('[data-target="serve"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad,30); }); });
+})();
+</script>
+<script>
+/* Member portal — Community prayer wall (read + "I prayed" + share). */
+(function(){
+  var sectionEl=document.getElementById('prayer'); if(!sectionEl) return;
+  var root=document.getElementById('t3lPrayerWall'); if(!root) return;
+  if(typeof T3L_AUTH==='undefined'||!T3L_AUTH.callFn) return;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function call(a,p){ return T3L_AUTH.callFn(a,p||{}); }
+  var loaded=false;
+  async function load(){
+    var r=await call('prayer_wall'); var list=(r.ok&&r.data)?(r.data.requests||[]):[];
+    if(!list.length){ root.innerHTML='<article class="card empty"><div class="empty-icon">♡</div><h3>No requests on the wall yet</h3><p>When members share a request, it appears here for the community to pray over.</p></article>'; return; }
+    root.innerHTML=list.map(function(q){
+      var who=q.name?esc(q.name):'Anonymous';
+      var answered=q.answered?'<span style="background:#e2efeb;color:#286d63;font:700 11px/1 \'DM Sans\',Arial;padding:4px 9px;border-radius:999px">Answered 🙌</span>':'';
+      return '<article class="card card-pad" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><strong style="color:#3b1b40">'+who+'</strong>'+answered+'</div>'
+        +'<p style="white-space:pre-wrap;color:#4b3f50;font-size:15px;margin:8px 0 10px">'+esc(q.request)+'</p>'
+        +(q.answered&&q.answered_note?('<p style="color:#286d63;font-size:13px;margin:0 0 10px"><strong>Update:</strong> '+esc(q.answered_note)+'</p>'):'')
+        +'<button class="pw-pray" data-id="'+esc(q.id)+'" '+(q.i_prayed?'disabled':'')+' style="border:1px solid #e0d3c4;background:'+(q.i_prayed?'#4a214f;color:#fff':'#fffdfa;color:#6b4a70')+';border-radius:999px;padding:7px 15px;font:700 13px/1 \'DM Sans\',Arial;cursor:pointer">🙏 '+(q.i_prayed?'You prayed':'I prayed')+' · <span class="pw-count">'+(q.prayed||0)+'</span></button></article>';
+    }).join('');
+    root.querySelectorAll('.pw-pray').forEach(function(b){ b.addEventListener('click', async function(){ if(b.disabled)return; b.disabled=true; var r=await call('prayer_pray',{request_id:b.getAttribute('data-id')}); if(r.ok&&r.data&&r.data.ok){ b.style.background='#4a214f'; b.style.color='#fff'; b.innerHTML='🙏 You prayed · <span class="pw-count">'+r.data.prayed+'</span>'; } else { b.disabled=false; alert((r.data&&r.data.error)||'Could not record.'); } }); });
+  }
+  var sbtn=document.getElementById('pwSubmit');
+  if(sbtn) sbtn.addEventListener('click', async function(){
+    var st=document.getElementById('pwStatus'); var text=(document.getElementById('pwText').value||'').trim();
+    if(text.length<2){ st.textContent='Write your request.'; st.className='form-status error'; return; }
+    sbtn.disabled=true; st.textContent='Sharing…'; st.className='form-status';
+    var r=await call('prayer_wall_submit',{request:text,anonymous:document.getElementById('pwAnon').checked});
+    sbtn.disabled=false;
+    if(r.ok&&r.data&&r.data.ok){ document.getElementById('pwText').value=''; st.textContent='Shared — it will appear after the team reviews it.'; st.className='form-status success'; }
+    else { st.textContent=(r.data&&r.data.error)||'Could not share.'; st.className='form-status error'; }
+  });
+  function maybeLoad(){ if(loaded)return; loaded=true; load(); }
+  document.querySelectorAll('[data-target="prayer"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad,30); }); });
 })();
 </script>
 </body>
