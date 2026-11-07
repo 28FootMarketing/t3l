@@ -350,7 +350,7 @@ Deno.serve(async (req) => {
     }
 
     if (["invite", "list_members", "set_role", "revoke", "get_config", "set_config",
-         "list_prayer_requests", "set_prayer_status", "get_modules", "set_module",
+         "list_prayer_requests", "set_prayer_status", "set_module",
          "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive", "crm_lookup",
          "crm_fields_list", "crm_field_save", "crm_field_delete",
          "crm_stages_list", "crm_stage_save", "crm_stage_set", "crm_households_list", "crm_household_save",
@@ -387,7 +387,10 @@ Deno.serve(async (req) => {
     }
 
     // --- Module on/off registry ---
+    // Readable by any active member: the client portal uses it to hide features
+    // (like Community) that a super admin has switched off. set_module is super-only.
     if (action === "get_modules") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
       const { data } = await sb.from("t3l_portal_modules").select("key,enabled,label,sort").order("sort", { ascending: true });
       return json({ modules: data || [] });
     }

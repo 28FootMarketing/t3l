@@ -56,7 +56,7 @@
           <button class="nav-item active" data-target="home"><span class="nav-icon">⌂</span>Home</button>
           <button class="nav-item" data-target="updates"><span class="nav-icon">◈</span>Updates</button>
           <button class="nav-item" data-target="events"><span class="nav-icon">◷</span>Events</button>
-          <button class="nav-item" data-target="community"><span class="nav-icon">◍</span>Community</button>
+          <button class="nav-item" data-target="community" data-module="community"><span class="nav-icon">◍</span>Community</button>
           <button class="nav-item" data-target="resources"><span class="nav-icon">▤</span>Resources</button>
           <button class="nav-item" data-target="prayer"><span class="nav-icon">♡</span>Prayer</button>
           <button class="nav-item" data-target="profile"><span class="nav-icon">◉</span>My profile</button>
@@ -80,7 +80,7 @@
           </section>
           <section class="view" id="updates"><p class="eyebrow">Stay connected</p><h1 class="page-title">Announcements & updates</h1><p class="page-description">Important ministry news and notices are published here by the authorized ministry team.</p><article class="card empty"><div class="empty-icon">◈</div><h3>No announcements yet</h3><p>When the ministry shares a new notice or update, it will appear here for you.</p></article></section>
           <section class="view" id="events"><p class="eyebrow">Gather together</p><h1 class="page-title">Events & programs</h1><p class="page-description">Browse outreach events, services, and programs on the ministry calendar.</p><article class="card calendar-card"><div class="calendar-toolbar"><button class="icon-btn" id="previousMonth" aria-label="Previous month">‹</button><div class="calendar-month"><h3 id="calendarMonth">Month</h3><p>Ministry calendar</p></div><button class="icon-btn" id="nextMonth" aria-label="Next month">›</button></div><div class="calendar-weekdays"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="calendar-grid" id="calendarGrid"></div></article><p class="no-events">Events are managed by your ministry’s authorized administrators and will appear here when scheduled.</p></section>
-          <section class="view" id="community">
+          <section class="view" id="community" data-module="community">
             <style>.t3l-ctab{border:1px solid #e0d3c4;background:#fffdfa;color:#6b4a70;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer}.t3l-ctab.active{background:#4a214f;color:#fff;border-color:#4a214f}.t3l-ctab:focus-visible{outline:2px solid rgba(183,137,58,.6);outline-offset:2px}</style>
             <p class="eyebrow">Connect & belong</p><h1 class="page-title">Community</h1><p class="page-description">Share encouragement, find a small group, and connect with others walking the same journey — one step at a time.</p>
             <div id="t3lCommTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px"><button class="t3l-ctab active" data-commtab="feed">Feed</button><button class="t3l-ctab" data-commtab="groups">Groups</button><button class="t3l-ctab" data-commtab="directory">Directory</button><button class="t3l-ctab" data-commtab="me">My profile</button></div>
@@ -337,6 +337,19 @@
   var loaded=false;
   function maybeLoad(){ if(loaded)return; loaded=true; feedTab(); }
   document.querySelectorAll('[data-target="community"]').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(maybeLoad,30); }); });
+})();
+</script>
+
+<script>
+/* Respect the super admin's module toggles: hide any feature switched off
+   (e.g. Community). get_modules is readable by any signed-in member. */
+(function () {
+  if (typeof T3L_AUTH === 'undefined' || !T3L_AUTH.callFn) return;
+  T3L_AUTH.callFn('get_modules', {}).then(function (r) {
+    if (!r.ok || !r.data) return;
+    var off = {}; (r.data.modules || []).forEach(function (m) { if (!m.enabled) off[m.key] = 1; });
+    document.querySelectorAll('[data-module]').forEach(function (el) { if (off[el.getAttribute('data-module')]) el.style.display = 'none'; });
+  }).catch(function () {});
 })();
 </script>
 
