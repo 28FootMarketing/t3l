@@ -347,6 +347,26 @@ Deno.serve(async (req) => {
       return json({ announcements: data || [] });
     }
 
+    // Upcoming published events for the member portal (any active member).
+    if (action === "events_list") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const today = new Date().toISOString().slice(0, 10);
+      const { data } = await sb.from("t3l_events")
+        .select("id,title,location,description,start_date,start_time,end_date,end_time")
+        .eq("published", true).gte("start_date", today)
+        .order("start_date", { ascending: true }).order("start_time", { ascending: true, nullsFirst: true }).limit(100);
+      return json({ events: data || [] });
+    }
+
+    // Published resources for the member portal "Resource library" (any active member).
+    if (action === "resources_list") {
+      if (!caller || !caller.member || caller.member.status !== "active") return json({ error: "unauthorized" }, 401);
+      const { data } = await sb.from("t3l_resources")
+        .select("id,title,url,description,created_at")
+        .eq("published", true).order("created_at", { ascending: false }).limit(200);
+      return json({ resources: data || [] });
+    }
+
     if (action === "app") {
       if (!caller) return json({ error: "unauthorized" }, 401);
       if (!isAdmin) return json({ error: "forbidden" }, 403);
@@ -366,6 +386,9 @@ Deno.serve(async (req) => {
          "list_prayer_requests", "set_prayer_status", "set_module",
          "comms_announcement_list", "comms_announcement_save", "comms_announcement_delete",
          "comms_email_send", "comms_email_log",
+         "events_admin_list", "event_save", "event_delete",
+         "resources_admin_list", "resource_save", "resource_delete",
+         "admin_overview",
          "crm_list", "crm_get", "crm_save", "crm_activity", "crm_archive", "crm_lookup",
          "crm_fields_list", "crm_field_save", "crm_field_delete",
          "crm_stages_list", "crm_stage_save", "crm_stage_set", "crm_households_list", "crm_household_save",
@@ -512,6 +535,105 @@ Deno.serve(async (req) => {
       await sb.from("t3l_comms_email_log").insert({ subject, audience: label, recipients: cap.length, sent, failed, status, error: firstErr || null, created_by: caller!.user.id });
       if (status === "failed") return json({ error: "Send failed: " + (firstErr || "unknown error") }, 400);
       return json({ ok: true, recipients: cap.length, sent, failed, status });
+    }
+
+    // --- Events (Supabase-backed; replaces the old GoHighLevel webhook form) ---
+    if (action === "events_admin_list") {
+      const { data } = await sb.from("t3l_events")
+        .select("id,title,location,description,start_date,start_time,end_date,end_time,published")
+        .order("start_date", { ascending: false }).limit(300);
+      return json({ events: data || [] });
+    }
+
+    if (action === "event_save") {
+      const title = String(payload.title || "").trim(); if (!title) return json({ error: "Event title is required." }, 400);
+      const start_date = String(payload.start_date || "").trim(); if (!start_date) return json({ error: "A start date is required." }, 400);
+      const row: Record<string, unknown> = {
+        title,
+        location: String(payload.location || "").trim() || null,
+        description: String(payload.description || "").trim() || null,
+        start_date,
+        start_time: String(payload.start_time || "").trim() || null,  // blank => time to be determined
+        end_date: String(payload.end_date || "").trim() || null,
+        end_time: String(payload.end_time || "").trim() || null,
+        published: payload.published === false ? false : true,
+        updated_at: new Date().toISOString(),
+      };
+      const id = String(payload.id || "");
+      if (id) {
+        const { error } = await sb.from("t3l_events").update(row).eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+      const { data, error } = await sb.from("t3l_events").insert({ ...row, created_by: caller!.user.id }).select().maybeSingle();
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, event: data });
+    }
+
+    if (action === "event_delete") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_events").delete().eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    // --- Resources (Supabase-backed; replaces the old GoHighLevel webhook form) ---
+    if (action === "resources_admin_list") {
+      const { data } = await sb.from("t3l_resources")
+        .select("id,title,url,description,published,created_at")
+        .order("created_at", { ascending: false }).limit(300);
+      return json({ resources: data || [] });
+    }
+
+    if (action === "resource_save") {
+      const title = String(payload.title || "").trim(); if (!title) return json({ error: "A resource title is required." }, 400);
+      const url = String(payload.url || "").trim(); if (!url) return json({ error: "A resource URL is required." }, 400);
+      const row: Record<string, unknown> = {
+        title,
+        url,
+        description: String(payload.description || "").trim() || null,
+        published: payload.published === false ? false : true,
+        updated_at: new Date().toISOString(),
+      };
+      const id = String(payload.id || "");
+      if (id) {
+        const { error } = await sb.from("t3l_resources").update(row).eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+      const { data, error } = await sb.from("t3l_resources").insert({ ...row, created_by: caller!.user.id }).select().maybeSingle();
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, resource: data });
+    }
+
+    if (action === "resource_delete") {
+      const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+      const { error } = await sb.from("t3l_resources").delete().eq("id", id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
+    // --- Admin dashboard overview: live counts + the next few upcoming events ---
+    if (action === "admin_overview") {
+      const today = new Date().toISOString().slice(0, 10);
+      const [prayer, events, upcoming, anns, resources] = await Promise.all([
+        sb.from("t3l_prayer_requests").select("id", { count: "exact", head: true }).neq("status", "closed"),
+        sb.from("t3l_events").select("id", { count: "exact", head: true }).eq("published", true).gte("start_date", today),
+        sb.from("t3l_events").select("id,title,location,start_date,start_time,published")
+          .eq("published", true).gte("start_date", today)
+          .order("start_date", { ascending: true }).order("start_time", { ascending: true, nullsFirst: true }).limit(5),
+        sb.from("t3l_announcements").select("id", { count: "exact", head: true }).eq("published", true),
+        sb.from("t3l_resources").select("id", { count: "exact", head: true }).eq("published", true),
+      ]);
+      return json({
+        counts: {
+          prayer_pending: prayer.count || 0,
+          upcoming_events: events.count || 0,
+          announcements: anns.count || 0,
+          resources: resources.count || 0,
+        },
+        upcoming_events: upcoming.data || [],
+      });
     }
 
     // --- CRM: contacts + activity ---
