@@ -271,6 +271,42 @@ Deno.serve(async (req) => {
         return json({ ok: true });
       }
 
+      // Admin-only: full group list (incl. inactive) with member counts.
+      if (action === "community_admin_groups") {
+        if (!isAdmin) return json({ error: "Only an administrator can manage the community." }, 403);
+        const { data: groups } = await sb.from("t3l_community_groups")
+          .select("id,name,description,meeting_time,location,active,sort").order("sort", { ascending: true });
+        const { data: all } = await sb.from("t3l_community_group_members").select("group_id");
+        const counts: Record<string, number> = {}; (all || []).forEach((m: any) => { counts[m.group_id] = (counts[m.group_id] || 0) + 1; });
+        return json({ groups: (groups || []).map((g: any) => ({ ...g, member_count: counts[g.id] || 0 })) });
+      }
+
+      // Admin-only: full feed (incl. hidden) for moderation.
+      if (action === "community_admin_feed") {
+        if (!isAdmin) return json({ error: "Only an administrator can moderate the feed." }, 403);
+        const { data } = await sb.from("t3l_community_posts")
+          .select("id,author_name,body,pinned,hidden,created_at").order("created_at", { ascending: false }).limit(200);
+        return json({ posts: data || [] });
+      }
+
+      // Admin-only: pin / unpin a post.
+      if (action === "community_post_pin") {
+        if (!isAdmin) return json({ error: "Only an administrator can pin posts." }, 403);
+        const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+        const { error } = await sb.from("t3l_community_posts").update({ pinned: !!payload.pinned }).eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+
+      // Admin-only: hide / unhide a post (soft moderation; keeps the record).
+      if (action === "community_post_hide") {
+        if (!isAdmin) return json({ error: "Only an administrator can hide posts." }, 403);
+        const id = String(payload.id || ""); if (!id) return json({ error: "id is required." }, 400);
+        const { error } = await sb.from("t3l_community_posts").update({ hidden: !!payload.hidden }).eq("id", id);
+        if (error) return json({ error: error.message }, 400);
+        return json({ ok: true });
+      }
+
       if (action === "community_directory") {
         const { data } = await sb.from("t3l_community_profiles")
           .select("display_name,about").eq("show_in_directory", true).order("display_name", { ascending: true }).limit(500);
