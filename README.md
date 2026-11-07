@@ -91,6 +91,15 @@ and its inline `<script>`. To use it inside GoHighLevel:
   structured data, a skip link, and responsive/mobile navigation.
 - Verify hours, event details, venue, and ticketing before each publish.
 
+## Member & admin portals
+
+The signed-in member and administrator portals run entirely on Supabase via the
+`t3l-portal` edge function (announcements, events, resources, CRM, giving,
+prayer care, community, communications, people, feature flags). They are
+intentionally built so an **AI chief of staff** can operate them later — see
+[`docs/ai-chief-of-staff.md`](docs/ai-chief-of-staff.md) for that design intent
+and what remains to wire it.
+
 ## Organization details
 
 - **Founder:** Dr. Lolita R. Gilmore-Randall
